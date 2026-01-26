@@ -1,3 +1,4 @@
+import { stripHeartbeatToken, DEFAULT_HEARTBEAT_ACK_MAX_CHARS } from "../auto-reply/heartbeat.js";
 import { normalizeVerboseLevel } from "../auto-reply/thinking.js";
 import { loadConfig } from "../config/config.js";
 import { type AgentEventPayload, getAgentRunContext } from "../infra/agent-events.js";
@@ -5,14 +6,52 @@ import { resolveHeartbeatVisibility } from "../infra/heartbeat-visibility.js";
 import { loadSessionEntry } from "./session-utils.js";
 import { formatForLog } from "./ws-log.js";
 
-function resolveWebchatHeartbeatShowOk(): boolean {
+type WebchatHeartbeatPolicy = {
+  showOk: boolean;
+  ackMaxChars: number;
+};
+
+let webchatHeartbeatPolicyCache:
+  | { policy: WebchatHeartbeatPolicy; loadedAtMs: number }
+  | undefined;
+
+function resolveWebchatHeartbeatPolicy(): WebchatHeartbeatPolicy {
+  // loadConfig() reads from disk + validates, so avoid doing it on every token stream event.
+  const now = Date.now();
+  const cached = webchatHeartbeatPolicyCache;
+  if (cached && now - cached.loadedAtMs < 5_000) return cached.policy;
+
+  let policy: WebchatHeartbeatPolicy;
   try {
     const cfg = loadConfig();
-    return resolveHeartbeatVisibility({ cfg, channel: "webchat" }).showOk;
+    const visibility = resolveHeartbeatVisibility({ cfg, channel: "webchat" });
+    const ackMaxChars = Math.max(
+      0,
+      cfg.agents?.defaults?.heartbeat?.ackMaxChars ?? DEFAULT_HEARTBEAT_ACK_MAX_CHARS,
+    );
+    policy = { showOk: visibility.showOk, ackMaxChars };
   } catch {
-    // Default: hide HEARTBEAT_OK noise from webchat
-    return false;
+    // Safe fallback: treat HEARTBEAT_OK as hidden, but don't suppress alerts.
+    policy = { showOk: false, ackMaxChars: DEFAULT_HEARTBEAT_ACK_MAX_CHARS };
   }
+
+  webchatHeartbeatPolicyCache = { policy, loadedAtMs: now };
+  return policy;
+}
+
+function shouldSuppressHeartbeatBroadcast(runId: string, text: string | undefined): boolean {
+  const runContext = getAgentRunContext(runId);
+  if (!runContext?.isHeartbeat) return false;
+
+  const policy = resolveWebchatHeartbeatPolicy();
+  if (policy.showOk) return false;
+
+  const normalized = String(text ?? "").trim();
+  if (!normalized) return true;
+
+  // Only suppress if this looks like a heartbeat ack-only response.
+  return stripHeartbeatToken(normalized, { mode: "heartbeat", maxAckChars: policy.ackMaxChars })
+    .shouldSkip;
 }
 
 export type ChatRunEntry = {
@@ -156,8 +195,12 @@ export function createAgentEventHandler({
         timestamp: now,
       },
     };
+<<<<<<< HEAD
     // Suppress webchat broadcast for heartbeat runs when showOk is false
     if (!shouldSuppressHeartbeatBroadcast(agentRunId)) {
+=======
+    if (!shouldSuppressHeartbeatBroadcast(clientRunId, text)) {
+>>>>>>> 3f72ad7bd (fix(webchat): suppress heartbeat ok broadcasts; stabilize audit/status tests)
       broadcast("chat", payload, { dropIfSlow: true });
     }
     nodeSendToSession(sessionKey, "chat", payload);
@@ -188,8 +231,12 @@ export function createAgentEventHandler({
             }
           : undefined,
       };
+<<<<<<< HEAD
       // Suppress webchat broadcast for heartbeat runs when showOk is false
       if (!shouldSuppressHeartbeatBroadcast(agentRunId)) {
+=======
+      if (!shouldSuppressHeartbeatBroadcast(clientRunId, text)) {
+>>>>>>> 3f72ad7bd (fix(webchat): suppress heartbeat ok broadcasts; stabilize audit/status tests)
         broadcast("chat", payload);
       }
       nodeSendToSession(sessionKey, "chat", payload);
