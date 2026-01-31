@@ -114,6 +114,28 @@ describe("lobster plugin tool", () => {
     ).rejects.toThrow(/absolute path/);
   });
 
+  it("rejects lobsterPath that is not the lobster executable", async () => {
+    const tool = createLobsterTool(fakeApi());
+    await expect(
+      tool.execute("call2b", {
+        action: "run",
+        pipeline: "noop",
+        lobsterPath: "/bin/bash",
+      }),
+    ).rejects.toThrow(/lobster executable/);
+  });
+
+  it("rejects absolute cwd", async () => {
+    const tool = createLobsterTool(fakeApi());
+    await expect(
+      tool.execute("call2c", {
+        action: "run",
+        pipeline: "noop",
+        cwd: "/tmp",
+      }),
+    ).rejects.toThrow(/cwd must be a relative path/);
+  });
+
   it("rejects invalid JSON from lobster", async () => {
     const { binPath } = await writeFakeLobsterScript(
       `process.stdout.write("nope");\n`,
