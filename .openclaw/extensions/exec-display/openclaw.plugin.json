@@ -1,0 +1,28 @@
+{
+  "id": "exec-display",
+  "name": "Exec Display Enforcer",
+  "description": "Enforces structured command output with security levels and color coding. Intercepts exec tool calls and formats output.",
+  "version": "1.0.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable exec output formatting"
+      },
+      "blockRawExec": {
+        "type": "boolean",
+        "default": false,
+        "description": "Block exec calls that don't include security level classification (strict mode)"
+      },
+      "defaultLevel": {
+        "type": "string",
+        "enum": ["safe", "low", "medium", "high", "critical"],
+        "default": "medium",
+        "description": "Default security level when not specified"
+      }
+    }
+  }
+}
