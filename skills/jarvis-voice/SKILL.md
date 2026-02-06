@@ -1,7 +1,9 @@
 ---
 name: jarvis-voice
+version: 1.0.0
 description: Metallic AI voice persona with TTS and visual transcript styling. Speak responses aloud with a JARVIS-like robotic voice and display transcripts in purple italics.
 homepage: https://github.com/openclaw/openclaw
+repository: https://github.com/openclaw/openclaw
 metadata:
   openclaw:
     emoji: "🎙️"

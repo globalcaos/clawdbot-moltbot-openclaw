@@ -9,6 +9,15 @@
 - [ ] **Group management testing** — Need Zeneida as test subject
 - **Status:** Core features done, group mgmt untested
 
+### WhatsApp History Storage ✅ IMPLEMENTED (2026-02-06)
+- [x] SQLite + FTS5 database (`~/.openclaw/data/whatsapp-history.db`)
+- [x] Live capture bound to Baileys events
+- [x] JSON store migration (358 messages imported)
+- [x] `whatsapp_history` agent tool (search/stats/import)
+- [x] WhatsApp export importer (.txt files)
+- [ ] **Import historical exports from phone** — Need Oscar to export chats
+- **Status:** Fully operational, awaiting historical data
+
 ### WhatsApp triggerPrefix ✅ CONFIGURED
 - [x] Configure to read ALL incoming messages (`groupPolicy: "open"`)
 - [x] Only respond when message starts with "Jarvis" (`triggerPrefix: "Jarvis"`)

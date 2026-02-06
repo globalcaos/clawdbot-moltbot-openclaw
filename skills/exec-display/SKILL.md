@@ -1,7 +1,9 @@
 ---
 name: exec-display
+version: 1.0.0
 description: Structured command execution with security levels, color-coded output, and 4-line max summaries. Enforces transparency and visibility for all shell commands. Use when running any exec/shell commands to ensure consistent, auditable output.
-homepage: https://github.com/openclaw/openclaw/tree/main/skills/exec-display
+homepage: https://github.com/openclaw/openclaw
+repository: https://github.com/openclaw/openclaw
 metadata:
   {
     "openclaw":

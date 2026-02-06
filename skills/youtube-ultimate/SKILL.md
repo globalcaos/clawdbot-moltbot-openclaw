@@ -1,8 +1,10 @@
 ---
 name: youtube
+version: 1.0.1
 description: |
   The most comprehensive YouTube skill for AI agents. Extract transcripts for FREE (zero API quota!), search with filters, batch video details, read comments, download videos/audio. We analyzed 15+ YouTube tools and built the one that does everything.
-homepage: https://github.com/openclaw/openclaw/tree/main/skills/youtube
+homepage: https://github.com/openclaw/openclaw
+repository: https://github.com/openclaw/openclaw
 metadata:
   {
     "openclaw":

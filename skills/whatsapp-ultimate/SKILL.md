@@ -1,8 +1,9 @@
 ---
 name: whatsapp-ultimate
-version: 1.1.0
-description: "The most comprehensive WhatsApp skill for AI agents. Full messaging (text, media, polls, stickers, voice), reactions, replies, edits, unsend, and complete group management. Native Baileys integration - no external services required."
+version: 1.2.0
+description: "The most comprehensive WhatsApp skill for AI agents. Full messaging (text, media, polls, stickers, voice), reactions, replies, edits, unsend, complete group management, AND persistent searchable message history with SQLite + FTS5. Native Baileys integration - no external services required."
 homepage: https://github.com/openclaw/openclaw
+repository: https://github.com/openclaw/openclaw
 metadata:
   openclaw:
     emoji: "📱"
@@ -32,8 +33,9 @@ This skill documents all WhatsApp capabilities available through OpenClaw's nati
 | **Messaging** | Text, media, polls, stickers, voice notes, GIFs |
 | **Interactions** | Reactions, replies/quotes, edit, unsend |
 | **Groups** | Create, rename, icon, description, participants, admin, invite links |
+| **History** | Persistent SQLite storage, FTS5 full-text search, import historical exports |
 
-**Total: 22 distinct actions**
+**Total: 22 distinct actions + searchable history**
 
 ---
 
@@ -302,6 +304,81 @@ To react/edit/unsend, you need the message ID. Incoming messages include this in
 | Receive messages | ✅ | ✅ | ✅ | ❌ |
 | Two-way chat | ✅ | ❌ | ❌ | ❌ |
 | External deps | None | Go binary | Docker + WAHA | ffmpeg |
+
+---
+
+## Message History & Search (v1.2.0+)
+
+OpenClaw now stores **all WhatsApp messages** in a local SQLite database with full-text search (FTS5). Never lose a conversation again.
+
+### How It Works
+
+```
+Live Messages (Baileys) ──┐
+                          ├──→ SQLite + FTS5 ──→ whatsapp_history tool
+WhatsApp Exports (.txt) ──┘
+```
+
+- **Live capture:** Every new message automatically saved
+- **Historical import:** Bulk import from WhatsApp chat exports
+- **Full-text search:** Find any message by content, sender, or chat
+
+### Searching History
+
+Use the `whatsapp_history` tool (available to your agent automatically):
+
+```
+# Search by keyword
+whatsapp_history action=search query="meeting tomorrow"
+
+# Filter by chat
+whatsapp_history action=search chat="Family Group" limit=50
+
+# Find what you said
+whatsapp_history action=search fromMe=true query="I promised"
+
+# Filter by sender
+whatsapp_history action=search sender="Oscar" limit=20
+
+# Date range
+whatsapp_history action=search since="2026-01-01" until="2026-02-01"
+
+# Database stats
+whatsapp_history action=stats
+```
+
+### Importing Historical Messages
+
+WhatsApp doesn't expose infinite history via API. To get older messages:
+
+1. **Export from phone:** Settings → Chats → Chat history → Export chat → Without media
+2. **Save the .txt files** somewhere accessible
+3. **Import:**
+```
+whatsapp_history action=import path="/path/to/exports"
+```
+
+Or import a single chat:
+```
+whatsapp_history action=import path="/path/to/chat.txt" chatName="Family Group"
+```
+
+### Database Location
+
+```
+~/.openclaw/data/whatsapp-history.db
+```
+
+SQLite file with WAL mode for concurrent access.
+
+### Use Cases
+
+- *"What did I tell Sarah about the meeting?"*
+- *"Find all messages mentioning 'deadline'"*
+- *"Show my recent messages to the work group"*
+- *"When did Oscar mention the fusion reactor project?"*
+
+The agent can now answer these questions by searching your complete WhatsApp history.
 
 ---
 

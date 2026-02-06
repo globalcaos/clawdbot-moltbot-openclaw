@@ -7,7 +7,7 @@
 ## Integrations
 - [ ] **LinkedIn** — Connect for monitoring/engagement on OpenClaw content *(2026-02-04)*
 - [ ] **Facebook** — Visibility and engagement for OpenClaw *(2026-02-04)*
-- [ ] **WhatsApp History Storage** — Implement `makeInMemoryStore` in Baileys integration to persist and query chat history *(2026-02-04)*
+- [x] **WhatsApp History Storage** — ✅ SQLite + FTS5 implemented, live capture active *(2026-02-06)*
 
 ## Skills
 *(ideas for new skills)*

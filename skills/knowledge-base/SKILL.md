@@ -1,6 +1,9 @@
 ---
 name: knowledge-base
+version: 1.0.0
 description: Personal knowledge base with SQLite + FTS5. Index contacts, documents, ChatGPT exports, and WhatsApp data. Query everything instantly with full-text search. Use for contact lookups, conversation history search, document retrieval, and building persistent memory systems.
+homepage: https://github.com/openclaw/openclaw
+repository: https://github.com/openclaw/openclaw
 ---
 
 # Knowledge Base
