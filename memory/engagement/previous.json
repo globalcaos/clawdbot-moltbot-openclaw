@@ -1,0 +1,26 @@
+{
+  "date": "2026-02-06",
+  "github": {
+    "globalcaos/clawdbot-moltbot-openclaw": {
+      "stars": 0,
+      "forks": 0,
+      "watchers": 0,
+      "open_issues": 0
+    },
+    "openclaw/openclaw (upstream)": {
+      "stars": 170543,
+      "forks": 27377
+    }
+  },
+  "clawhub": {
+    "published_skills": [
+      {
+        "slug": "chatgpt-exporter-ultimate",
+        "version": "1.0.1",
+        "published": "2026-02-06"
+      }
+    ],
+    "downloads": "unknown"
+  },
+  "notes": "Baseline metrics established 2026-02-06. Our fork starts at 0 - time to build!"
+}

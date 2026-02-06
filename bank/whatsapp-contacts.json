@@ -1,0 +1,43 @@
+{
+  "extracted": "2026-02-05T22:47:51.682364",
+  "source": "whatsapp",
+  "count": 5,
+  "contacts": {
+    "+34659418102": {
+      "name": "Tristany Serra",
+      "groups": [
+        "34609572036-1370260813@g.us"
+      ],
+      "source": "whatsapp"
+    },
+    "+34630941820": {
+      "name": "Josep \ud83d\ude97",
+      "groups": [
+        "34687775277-1584864244@g.us"
+      ],
+      "source": "whatsapp"
+    },
+    "+34696162325": {
+      "name": "lola",
+      "groups": [
+        "120363419724251822@g.us",
+        "120363400251266289@g.us"
+      ],
+      "source": "whatsapp"
+    },
+    "+34600857253": {
+      "name": "Beluca / Isabel Navarrina",
+      "groups": [
+        "34606403225-1443871711@g.us"
+      ],
+      "source": "whatsapp"
+    },
+    "+34697337347": {
+      "name": "Pau",
+      "groups": [
+        "34606403225-1443871711@g.us"
+      ],
+      "source": "whatsapp"
+    }
+  }
+}

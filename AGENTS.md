@@ -45,12 +45,54 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - When you make a mistake → document it so future-you doesn't repeat it
 - **Text > Brain** 📝
 
+### 📁 Project Memory
+
+Projects live in `memory/projects/<project-name>/`. Each project has:
+- `index.md` — Purpose, status, key decisions, links
+- Subfolders for sprints/phases (each with its own `index.md`)
+
+**When starting a new project:**
+1. Create folder: `memory/projects/<project-name>/`
+2. Create `index.md` with purpose, status, key decisions
+3. For sprints/phases: create subfolders with their own `index.md`
+
+**When working on a project:**
+1. Log discoveries and decisions in the project folder
+2. Update `index.md` with key learnings
+3. Cross-reference daily logs as needed
+
+**Non-leaf folders can contain more than index.md:**
+- `philosophy.md` — Principles governing all children
+- `architecture.md` — Technical design spanning children
+- `history.md` — Timeline and context for the whole area
+- Any doc that relates to ALL or MOST subfolders belongs at parent level
+
+Example: `ui-improvements/philosophy.md` contains principles that apply to ALL UI improvements, not just one.
+
+Master index: `memory/projects/index.md`
+
 ## Safety
 
+### 🔐 API Keys & Secrets (CRITICAL)
+- **NEVER store API keys or tokens ANYWHERE except `.env` files**
+- **NEVER include `.env` files in git commits**
+- Before ANY commit: scan for exposed secrets
+- Git history is permanent — leaked keys are leaked forever
+
+### General Safety
 - Don't exfiltrate private data. Ever.
 - Don't run destructive commands without asking.
 - `trash` > `rm` (recoverable beats gone forever)
 - When in doubt, ask.
+
+## 🕵️ Research Before Building
+
+**The GitHub Archaeology Rule:**
+Before writing complex custom fixes for external libraries:
+1. **Search GitHub Issues/PRs** for the specific error message.
+2. Look for open PRs that address the issue.
+3. Check comments for workarounds or explanations.
+4. **Don't reinvent the wheel** — leverage the collective intelligence.
 
 ## External vs Internal
 

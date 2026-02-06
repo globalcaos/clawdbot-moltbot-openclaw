@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "skills": {
+    "youtube-ultimate": {
+      "version": "1.0.0",
+      "installedAt": 1770111588336
+    },
+    "whatsapp-automation": {
+      "version": "1.0.5",
+      "installedAt": 1770378114617
+    },
+    "wacli": {
+      "version": "1.0.0",
+      "installedAt": 1770378115807
+    },
+    "gif-whatsapp": {
+      "version": "1.0.1",
+      "installedAt": 1770378117195
+    }
+  }
+}

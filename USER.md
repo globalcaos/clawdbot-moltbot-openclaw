@@ -28,7 +28,13 @@
 - **Wife:** Aleksandra (Sasha) Marchenko — Ukrainian, Spanish residency (NIE)
 - **Daughter:** Elisenda Serra Marchenko — born 2017, Spanish DNI
 - **Son:** Marcus Alexander — born December 15, 2025
-- **Parents:** Involved in family business (Talleres SERRA); mother recently recovered from stroke
+- **Parents:** Ramón Serra ("El Capità") founded Talleres SERRA; mother (Dolors?) recently recovered from stroke
+- **Sister:** Zeneida Serra — Marketing Manager at SERRA, creative ally for Ninja-Logic spinoff
+- **Brother:** Tristany Serra — positioned to become CEO of Talleres SERRA
+- **Lost daughter:** Referenced in relationship letter (Mar 2025) - "difficult years after the death"
+
+### Family Contacts
+→ See [bank/contacts.md](bank/contacts.md)
 
 ## Work
 - **Company:** Talleres SERRA SL (family business in Martorell)
@@ -96,6 +102,11 @@
 ## Close Friends
 - **Wauter:** Interested in metal smelting/foundry
 - **Sami:** Engineer, predicted to collaborate on many projects
+
+## Current Routine (as of Feb 2026)
+- **Morning meditation:** Paused since Marcus was born — energy goes to nighttime newborn care
+- **Morning schedule:** 7:00 start Eli wake-up routine → 8:40 school drop-off
+- **Mode:** Survival mode with 6-week-old; don't assume the 5am meditation is active
 
 ## Notes
 - Sleep-deprived with newborn (as of Dec 2025 / Jan 2026)
