@@ -57,5 +57,16 @@ Format: `B @entity: experience (date)`
 - B @Model: Ran on Gemini 3 Pro fallback for part of day
 - B @Manus: Discovered `sessions_spawn` with `agentId: "manus"` returns forbidden — use Claude sub-agent instead
 
+## 2026-02-06: WhatsApp Deep Debug + AI-to-AI Setup
+
+- B @OpenClaw: Fixed DM sender attribution bug — messages showed as from chat partner, not actual sender
+- B @OpenClaw: Fixed senderE164 resolution — outbound DMs now correctly identify Oscar as sender
+- B @OpenClaw: Discovered SIGUSR1 doesn't reload compiled JS — full restart required for code changes
+- B @OpenClaw: Fixed monitor.ts logout handling — now waits for re-authentication instead of exiting
+- B @WhatsApp: Discovered multi-device sync limitation — outbound phone messages don't reliably reach Baileys
+- B @ClawHub: Published whatsapp-ultimate v1.0.1 with senderE164 fix
+- B @AI-to-AI: Set up Max (Zeneida's AI) to message Jarvis — added +34659418211 to allowFrom
+- B @Debugging: Traced full data flow Baileys → monitor.ts → message-line.ts → envelope.ts to find attribution bug
+
 ---
-*Last updated: 2026-02-06 (consolidation)*
+*Last updated: 2026-02-07 (consolidation)*

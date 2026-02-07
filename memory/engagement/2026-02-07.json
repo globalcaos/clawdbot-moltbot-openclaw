@@ -11,12 +11,21 @@
       "forks": 27657
     }
   },
+  "deltas": {
+    "upstream_stars": "+921",
+    "upstream_forks": "+280",
+    "our_stars": "0",
+    "our_forks": "0"
+  },
   "clawhub": {
     "published_skills": [
       {
         "slug": "chatgpt-exporter-ultimate",
-        "version": "1.0.2"
+        "version": "1.0.2",
+        "search_rank": 1,
+        "relevance_score": 0.400
       }
     ]
-  }
+  },
+  "trend": "upstream_growing_fast"
 }

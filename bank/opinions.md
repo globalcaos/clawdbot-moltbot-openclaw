@@ -120,6 +120,27 @@ O(c=0.85) @Debugging: Handle errors at point of detection — don't wait for a c
   - Evidence: 515 handling was in `waitForWebLogin()` but dashboard didn't call it in time
   - Last reinforced: 2026-02-05
 
+O(c=0.90) @Debugging: "Connection ≠ Functionality" — socket "open" doesn't mean events are flowing
+  - Evidence: WhatsApp status showed connected but messagesHandled: 0
+  - Principle: Check throughput metrics, not just connection state
+  - Last reinforced: 2026-02-06
+
+O(c=0.85) @Debugging: "Chat ID ≠ Sender" — conversation identifier ≠ message author
+  - Evidence: DM sender attribution bug — was using remoteJid instead of senderE164
+  - Last reinforced: 2026-02-06
+
+O(c=0.90) @Debugging: "Layered bugs" — first fix reveals second bug; don't stop at first success
+  - Evidence: allowFrom fix revealed sender attribution bug
+  - Last reinforced: 2026-02-06
+
+O(c=0.95) @Development: "Hot-reload is not code-reload" — SIGUSR1 only reloads config, not compiled JS
+  - Evidence: Code changes invisible after gateway restart, required full systemctl restart
+  - Last reinforced: 2026-02-06
+
+O(c=0.85) @Debugging: "'Already fixed' traps" — someone added correct logic, but downstream code wasn't using it
+  - Evidence: senderE164 was computed in monitor.ts but message-line.ts used wrong field
+  - Last reinforced: 2026-02-06
+
 ---
 
 ## Confidence Legend

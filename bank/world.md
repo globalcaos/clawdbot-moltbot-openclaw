@@ -55,6 +55,15 @@ Format: `W @entity: fact (source, date)`
 - W @Baileys: Error 515 means "Stream Errored (restart required)" — WebSocket terminates after pairing (2026-02-05)
 - W @Baileys: Error status nested at `err.error.output.statusCode`, not `err.output.statusCode` (code analysis, 2026-02-05)
 - W @Baileys: Multiple rapid connection attempts trigger rate limiting at IP level (2026-02-05)
+- W @WhatsApp: Multi-device protocol uses client-fanout — outbound messages from phone don't reliably sync to companion devices in real-time (2026-02-06)
+- W @WhatsApp: Self-chat messages work because sender is also recipient — 100% reliable for triggering agents (2026-02-06)
+- W @WhatsApp: Sent messages may arrive via async `messaging-history.set` rather than real-time `messages.upsert` (2026-02-06)
+- W @Baileys: `fromMe: true` messages in DMs have sender as self, not the chat's remoteJid (2026-02-06)
+
+### OpenClaw Internal
+- W @OpenClaw: SIGUSR1 hot-reload does NOT reload compiled JavaScript — only config changes (2026-02-06)
+- W @OpenClaw: For code changes: `npm run build` then `systemctl --user restart openclaw-gateway` (2026-02-06)
+- W @OpenClaw: senderE164 in monitor.ts must check `msg.key?.fromMe` to correctly identify outbound DM senders (2026-02-06)
 
 ## People
 

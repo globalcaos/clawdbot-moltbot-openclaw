@@ -32,6 +32,9 @@ Continuous improvement of the OpenClaw system — my own capabilities, interface
 - **2026-02-04:** AURORA protocol imported (full technical output, never NO_REPLY)
 - **2026-02-04:** Attention optimization research — "distant instructions decay"
 - **2026-02-04:** Custom WhatsApp store created to replace removed `makeInMemoryStore` (Baileys v7)
+- **2026-02-06:** Fixed DM sender attribution + senderE164 resolution
+- **2026-02-06:** Discovered SIGUSR1 hot-reload limitation (config only, not compiled JS)
+- **2026-02-06:** Documented WhatsApp multi-device sync limitation (outbound phone messages async)
 
 ## Related Files
 

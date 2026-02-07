@@ -11,7 +11,7 @@
 | Ramón Serra | +34 609 572 036 | "Ramon Serra" | Father ("El Capità") |
 | Dolors Ruiz | +34 659 418 111 | "Dolors Ruiz" | Mother |
 | Tristany Serra | +34 659 418 102 | "Tristany Serra" | Brother |
-| Zeneida Serra | +34 659 418 211 | "Zen" | Sister |
+| Zeneida Serra | +34 659 418 211 | "Zen" | Sister (Max = her AI agent) |
 | Carla Venis Serra | +34 622 050 081 | — | Family member (TBD) |
 
 *Serra family pattern: 659 418 xxx (company numbers)*
