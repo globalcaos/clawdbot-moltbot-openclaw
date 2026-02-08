@@ -5,7 +5,6 @@ const BADGE = {
   off: { text: '', color: '#000000' },
   connecting: { text: '…', color: '#F59E0B' },
   error: { text: '!', color: '#B91C1C' },
-  reattaching: { text: '↻', color: '#3B82F6' }, // NEW: reattaching state
 }
 
 /** @type {WebSocket|null} */
@@ -17,7 +16,7 @@ let debuggerListenersInstalled = false
 
 let nextSession = 1
 
-/** @type {Map<number, {state:'connecting'|'connected'|'reattaching', sessionId?:string, targetId?:string, attachOrder?:number, autoReattach?:boolean}>} */
+/** @type {Map<number, {state:'connecting'|'connected', sessionId?:string, targetId?:string, attachOrder?:number}>} */
 const tabs = new Map()
 /** @type {Map<string, number>} */
 const tabBySession = new Map()
@@ -27,41 +26,12 @@ const childSessionToTab = new Map()
 /** @type {Map<number, {resolve:(v:any)=>void, reject:(e:Error)=>void}>} */
 const pending = new Map()
 
-// NEW: Debounce reattachment attempts
-/** @type {Map<number, NodeJS.Timeout>} */
-const reattachTimeouts = new Map()
-
 function nowStack() {
   try {
     return new Error().stack || ''
   } catch {
     return ''
   }
-}
-
-// NEW: Storage helpers for persistent reattach state
-async function getReattachTabs() {
-  try {
-    const result = await chrome.storage.session.get(['autoReattachTabs'])
-    return new Set(result.autoReattachTabs || [])
-  } catch (err) {
-    console.warn('[OpenClaw] Failed to get reattach tabs:', err)
-    return new Set()
-  }
-}
-
-async function addReattachTab(tabId) {
-  const set = await getReattachTabs()
-  if (set.has(tabId)) return
-  set.add(tabId)
-  await chrome.storage.session.set({ autoReattachTabs: Array.from(set) })
-}
-
-async function removeReattachTab(tabId) {
-  const set = await getReattachTabs()
-  if (!set.has(tabId)) return
-  set.delete(tabId)
-  await chrome.storage.session.set({ autoReattachTabs: Array.from(set) })
 }
 
 async function getRelayPort() {
@@ -121,8 +91,7 @@ async function ensureRelayConnection() {
     if (!debuggerListenersInstalled) {
       debuggerListenersInstalled = true
       chrome.debugger.onEvent.addListener(onDebuggerEvent)
-      // Must cast to any because Typescript doesn't know about the async signature we're about to use
-      chrome.debugger.onDetach.addListener(/** @type {any} */ (onDebuggerDetach))
+      chrome.debugger.onDetach.addListener(onDebuggerDetach)
     }
   })()
 
@@ -252,13 +221,11 @@ async function attachTab(tabId, opts = {}) {
   const sessionId = `cb-tab-${nextSession++}`
   const attachOrder = nextSession
 
-  tabs.set(tabId, { state: 'connected', sessionId, targetId, attachOrder, autoReattach: true })
+  tabs.set(tabId, { state: 'connected', sessionId, targetId, attachOrder })
   tabBySession.set(sessionId, tabId)
-  await addReattachTab(tabId) // NEW: Mark for auto-reattach persistently
-  
   void chrome.action.setTitle({
     tabId,
-    title: 'OpenClaw Browser Relay: attached (click to detach) [auto-reattach ON]',
+    title: 'OpenClaw Browser Relay: attached (click to detach)',
   })
 
   if (!opts.skipAttachedEvent) {
@@ -276,15 +243,11 @@ async function attachTab(tabId, opts = {}) {
   }
 
   setBadge(tabId, 'on')
-  console.log(`[OpenClaw] Tab ${tabId} attached with auto-reattach enabled`)
   return { sessionId, targetId }
 }
 
-async function detachTab(tabId, reason, opts = {}) {
+async function detachTab(tabId, reason) {
   const tab = tabs.get(tabId)
-  const reattachSet = await getReattachTabs()
-  const shouldAutoReattach = reattachSet.has(tabId) && !opts.permanent
-  
   if (tab?.sessionId && tab?.targetId) {
     try {
       sendToRelay({
@@ -312,95 +275,11 @@ async function detachTab(tabId, reason, opts = {}) {
     // ignore
   }
 
-  // NEW: If this was a navigation-triggered detach and auto-reattach is enabled,
-  // schedule reattachment
-  if (shouldAutoReattach && (reason === 'target_closed' || reason === 'canceled_by_user' || !reason)) {
-    console.log(`[OpenClaw] Tab ${tabId} detached (${reason}), scheduling auto-reattach...`)
-    setBadge(tabId, 'reattaching')
-    void chrome.action.setTitle({
-      tabId,
-      title: 'OpenClaw Browser Relay: reattaching after navigation...',
-    })
-    scheduleReattach(tabId)
-    return
-  }
-
-  // Permanent detach (user clicked to toggle off)
-  if (opts.permanent) {
-    await removeReattachTab(tabId)
-  }
-  
   setBadge(tabId, 'off')
   void chrome.action.setTitle({
     tabId,
     title: 'OpenClaw Browser Relay (click to attach/detach)',
   })
-}
-
-// NEW: Schedule a reattachment attempt with debounce
-function scheduleReattach(tabId) {
-  // Clear any existing timeout
-  const existing = reattachTimeouts.get(tabId)
-  if (existing) clearTimeout(existing)
-  
-  // Schedule reattachment after a short delay (let page load)
-  const timeout = setTimeout(() => {
-    reattachTimeouts.delete(tabId)
-    void attemptReattach(tabId)
-  }, 500) // 500ms delay to let the page start loading
-  
-  reattachTimeouts.set(tabId, timeout)
-}
-
-// NEW: Attempt to reattach to a tab
-async function attemptReattach(tabId, retries = 3) {
-  const reattachSet = await getReattachTabs()
-  if (!reattachSet.has(tabId)) {
-    console.log(`[OpenClaw] Tab ${tabId} no longer marked for auto-reattach`)
-    return
-  }
-  
-  // Check if tab still exists
-  try {
-    const tab = await chrome.tabs.get(tabId)
-    if (!tab) {
-      await removeReattachTab(tabId)
-      return
-    }
-    
-    // Wait for page to be ready
-    if (tab.status === 'loading') {
-      console.log(`[OpenClaw] Tab ${tabId} still loading, waiting...`)
-      setTimeout(() => void attemptReattach(tabId, retries), 300)
-      return
-    }
-  } catch (err) {
-    // Tab doesn't exist anymore
-    await removeReattachTab(tabId)
-    return
-  }
-  
-  try {
-    await ensureRelayConnection()
-    await attachTab(tabId, { skipAttachedEvent: false })
-    console.log(`[OpenClaw] Tab ${tabId} successfully reattached!`)
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
-    console.warn(`[OpenClaw] Reattach attempt failed for tab ${tabId}: ${message}`)
-    
-    if (retries > 0) {
-      console.log(`[OpenClaw] Retrying reattach for tab ${tabId} (${retries} retries left)...`)
-      setTimeout(() => void attemptReattach(tabId, retries - 1), 500)
-    } else {
-      console.log(`[OpenClaw] Giving up on reattaching tab ${tabId}`)
-      await removeReattachTab(tabId)
-      setBadge(tabId, 'error')
-      void chrome.action.setTitle({
-        tabId,
-        title: 'OpenClaw Browser Relay: reattach failed (click to try manually)',
-      })
-    }
-  }
 }
 
 async function connectOrToggleForActiveTab() {
@@ -410,9 +289,7 @@ async function connectOrToggleForActiveTab() {
 
   const existing = tabs.get(tabId)
   if (existing?.state === 'connected') {
-    // User explicitly toggled off - permanent detach
-    await removeReattachTab(tabId)
-    await detachTab(tabId, 'toggle', { permanent: true })
+    await detachTab(tabId, 'toggle')
     return
   }
 
@@ -546,39 +423,12 @@ function onDebuggerEvent(source, method, params) {
   }
 }
 
-// Convert to async to handle storage check
-async function onDebuggerDetach(source, reason) {
+function onDebuggerDetach(source, reason) {
   const tabId = source.tabId
   if (!tabId) return
-  
-  const reattachSet = await getReattachTabs()
-  if (!tabs.has(tabId) && !reattachSet.has(tabId)) return
-  
-  console.log(`[OpenClaw] Debugger detached from tab ${tabId}: ${reason}`)
-  await detachTab(tabId, reason)
+  if (!tabs.has(tabId)) return
+  void detachTab(tabId, reason)
 }
-
-// NEW: Listen for tab updates to handle SPA navigation
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  const reattachSet = await getReattachTabs()
-  if (!reattachSet.has(tabId)) return
-  
-  // If the tab URL changed or status changed to complete, ensure we're attached
-  if (changeInfo.status === 'complete' && !tabs.has(tabId)) {
-    console.log(`[OpenClaw] Tab ${tabId} finished loading, ensuring attachment...`)
-    void attemptReattach(tabId)
-  }
-})
-
-// NEW: Clean up when tab is closed
-chrome.tabs.onRemoved.addListener(async (tabId) => {
-  await removeReattachTab(tabId)
-  const timeout = reattachTimeouts.get(tabId)
-  if (timeout) {
-    clearTimeout(timeout)
-    reattachTimeouts.delete(tabId)
-  }
-})
 
 chrome.action.onClicked.addListener(() => void connectOrToggleForActiveTab())
 
