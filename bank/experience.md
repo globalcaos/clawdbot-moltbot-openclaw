@@ -57,6 +57,18 @@ Format: `B @entity: experience (date)`
 - B @Model: Ran on Gemini 3 Pro fallback for part of day
 - B @Manus: Discovered `sessions_spawn` with `agentId: "manus"` returns forbidden — use Claude sub-agent instead
 
+## 2026-02-08: Skills + Authorization
+
+- B @Skills: Created agent-memory skill — packageable memory architecture for other agents
+- B @SOUL: Codified authorization principle — harm-based evaluation vs identity-based
+- B @Consolidation: Running first fully automated nightly consolidation
+
+## 2026-02-07: Privacy Lesson + AI Training
+
+- B @Privacy: Created PRIVACY.md after accidentally sharing private group JIDs with Max
+- B @Lesson: Learned "access ≠ permission to share" from Oscar's direct correction
+- B @AI-to-AI: Established Max-Jarvis training group for inter-agent privacy practice
+
 ## 2026-02-06: WhatsApp Deep Debug + AI-to-AI Setup
 
 - B @OpenClaw: Fixed DM sender attribution bug — messages showed as from chat partner, not actual sender

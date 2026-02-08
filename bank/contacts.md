@@ -30,5 +30,12 @@
 - Wife details: [Sasha.md](entities/Sasha.md)
 - Owner profile: [Oscar.md](entities/Oscar.md)
 
+## 🤖 AI Agents & Groups
+
+| Name | JID/Phone | Type | Notes |
+|------|-----------|------|-------|
+| Max | via +34 659 418 211 | AI Agent | Zeneida's AI assistant |
+| Max-Jarvis | 120363409030785922@g.us | WhatsApp Group | AI privacy training group |
+
 ---
-*Last updated: 2026-02-06*
+*Last updated: 2026-02-08*

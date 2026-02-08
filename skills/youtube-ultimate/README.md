@@ -250,4 +250,4 @@ MIT — use it, fork it, improve it.
 
 ---
 
-*Built by [Oscar Serra](https://github.com/globalcaos) for the OpenClaw community.*
+*Built for the [OpenClaw](https://github.com/openclaw/openclaw) community.*

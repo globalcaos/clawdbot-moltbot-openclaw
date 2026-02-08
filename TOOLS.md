@@ -124,6 +124,23 @@ Stop when complete."
 ### Mental Model
 > *"Manus = junior analyst with unlimited autonomy and a ticking meter. Box it in."*
 
+### Auto-Notification Pattern
+**Problem:** Background polling doesn't wake me when tasks complete.
+**Solution:** Use `manus-watch` script which polls and sends a cron wake event.
+
+```bash
+# Start watching in background (will wake me when done)
+nohup manus-watch <task_id> --interval=60 &
+
+# Or run directly (blocks until complete)
+manus-watch <task_id>
+```
+
+The script:
+1. Polls Manus every 60s (configurable)
+2. On completion: sends `cron wake --mode=now` with summary
+3. Saves full result to `memory/manus-results/<task_id>.json`
+
 ### API Usage
 ```bash
 # Create task
@@ -171,6 +188,15 @@ When Oscar asks for research, analysis, or complex tasks:
 - Image analysis tasks (Gemini has strong vision)
 - Very long context windows needed
 - When Claude is slow/struggling
+
+## WhatsApp Groups (Report Channels)
+
+| Group | JID | Purpose |
+|-------|-----|---------|
+| Jarvis News | 120363424036294869@g.us | PDF reports, research, deliverables |
+| Max-Jarvis | 120363409030785922@g.us | Agent-to-agent coordination |
+
+---
 
 ## Network Shares
 

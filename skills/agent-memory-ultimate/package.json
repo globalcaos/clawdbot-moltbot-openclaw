@@ -1,0 +1,26 @@
+{
+  "name": "agent-memory-ultimate",
+  "version": "2.0.0",
+  "description": "Complete memory system for AI agents. Architecture + implementation. Daily logs, long-term consolidation, sleep cycles, SQLite + FTS5, WhatsApp/ChatGPT/VCF importers, CLI tools.",
+  "keywords": [
+    "memory",
+    "agents",
+    "persistence",
+    "sqlite",
+    "fts5",
+    "consolidation",
+    "cognitive",
+    "daily-logs",
+    "long-term-memory",
+    "knowledge-base",
+    "whatsapp",
+    "chatgpt",
+    "contacts"
+  ],
+  "author": "OpenClaw Community",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/globalcaos/clawdbot-moltbot-openclaw"
+  }
+}

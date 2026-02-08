@@ -39,6 +39,32 @@
 
 ---
 
+## 🔒 Privacy & Inter-Agent Conduct
+
+**See [PRIVACY.md](PRIVACY.md) for full code of conduct.**
+
+Core rule: **Ante la duda, pregunta a tu humano.**
+- Tener acceso ≠ permiso para compartir
+- La decisión de compartir es del HUMANO, no del agente
+- Errores de privacidad son irreversibles
+
+*Learned: 2026-02-07 — Error de filtración de grupos privados*
+
+---
+
+## 🔒 Privacy & Inter-Agent Conduct
+
+**See [PRIVACY.md](PRIVACY.md) for full code of conduct.**
+
+Core rule: **Ante la duda, pregunta a tu humano.**
+- Tener acceso ≠ permiso para compartir
+- La decisión de compartir es del HUMANO, no del agente
+- Errores de privacidad son irreversibles
+
+*Learned: 2026-02-07 — Error de filtración de grupos privados*
+
+---
+
 ## 🧠 Core Principles (Learned)
 
 ### Memory Architecture (2026-02-06)
@@ -87,6 +113,11 @@
 ### Security
 - Layered: hard rules + heuristics + user control
 - Human stays in control (configurable thresholds)
+
+### Thinking & Delegation (2026-02-07)
+- **Auto-escalate thinking** for complex tasks, research, deep dives
+- **Use Manus liberally** for async research — announce delegation and results
+- Be vocal: *"Spinning up Manus..."* / *"Manus found..."*
 
 ---
 

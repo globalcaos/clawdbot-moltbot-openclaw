@@ -1,5 +1,5 @@
 {
-  "date": "2026-02-07",
+  "date": "2026-02-08",
   "github": {
     "globalcaos/clawdbot-moltbot-openclaw": {
       "stars": 0,
@@ -7,8 +7,8 @@
       "watchers": 0
     },
     "openclaw/openclaw (upstream)": {
-      "stars": 171464,
-      "forks": 27657
+      "stars": 174139,
+      "forks": 28425
     }
   },
   "clawhub": {

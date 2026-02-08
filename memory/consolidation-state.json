@@ -1,6 +1,6 @@
 {
-  "lastConsolidation": "2026-02-07T03:00:00+01:00",
-  "lastProcessedDate": "2026-02-06",
+  "lastConsolidation": "2026-02-08T03:00:00+01:00",
+  "lastProcessedDate": "2026-02-08",
   "consolidationHistory": [
     {
       "date": "2026-02-04",
@@ -25,6 +25,12 @@
       "processed": ["2026-02-06.md"],
       "changes": 18,
       "note": "WhatsApp DM attribution bugs, SIGUSR1 discovery, AI-to-AI setup, 6 new debugging opinions"
+    },
+    {
+      "date": "2026-02-08",
+      "processed": ["2026-02-07.md", "2026-02-08.md"],
+      "changes": 8,
+      "note": "Privacy lesson, agent-memory skill, authorization principle, Max-Jarvis group"
     }
   ]
 }

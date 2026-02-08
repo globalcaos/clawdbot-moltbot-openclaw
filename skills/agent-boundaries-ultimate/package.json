@@ -1,0 +1,22 @@
+{
+  "name": "agent-boundaries-ultimate",
+  "version": "1.1.0",
+  "description": "Beyond Asimov's Three Laws: Privacy, security, and ethical boundaries for digital agents. OPSEC, authorization, inter-agent etiquette, publishing guidelines. Essential training for the real world.",
+  "keywords": [
+    "privacy",
+    "security",
+    "opsec",
+    "boundaries",
+    "ethics",
+    "authorization",
+    "agent-safety",
+    "publishing",
+    "inter-agent"
+  ],
+  "author": "OpenClaw Community",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openclaw/openclaw"
+  }
+}

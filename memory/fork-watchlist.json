@@ -1,0 +1,37 @@
+{
+  "description": "High-value forks to always include in deep analysis",
+  "updated": "2026-02-08",
+  "watchlist": [
+    {
+      "full_name": "jiulingyun/openclaw-cn",
+      "reason": "Most starred fork (968 stars), Chinese community",
+      "added": "2026-02-08"
+    },
+    {
+      "full_name": "QVerisAI/QVerisBot",
+      "reason": "Active, 140 stars",
+      "added": "2026-02-08"
+    },
+    {
+      "full_name": "CrayBotAGI/OpenCray",
+      "reason": "Active, 54 stars",
+      "added": "2026-02-08"
+    },
+    {
+      "full_name": "kitakitsune0x/zoidbergbot",
+      "reason": "Active, 37 stars",
+      "added": "2026-02-08"
+    },
+    {
+      "full_name": "BLUE-coconut/clawdbot",
+      "reason": "33 stars",
+      "added": "2026-02-08"
+    }
+  ],
+  "criteria_for_addition": [
+    "Yielded gems in past analysis",
+    "High commit activity",
+    "Stars > 20",
+    "Manually flagged by Oscar"
+  ]
+}

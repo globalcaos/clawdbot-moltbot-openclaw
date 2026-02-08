@@ -338,7 +338,7 @@ whatsapp_history action=search chat="Family Group" limit=50
 whatsapp_history action=search fromMe=true query="I promised"
 
 # Filter by sender
-whatsapp_history action=search sender="Oscar" limit=20
+whatsapp_history action=search sender="John" limit=20
 
 # Date range
 whatsapp_history action=search since="2026-01-01" until="2026-02-01"
@@ -376,7 +376,7 @@ SQLite file with WAL mode for concurrent access.
 - *"What did I tell Sarah about the meeting?"*
 - *"Find all messages mentioning 'deadline'"*
 - *"Show my recent messages to the work group"*
-- *"When did Oscar mention the fusion reactor project?"*
+- *"When did John mention the quarterly report?"*
 
 The agent can now answer these questions by searching your complete WhatsApp history.
 

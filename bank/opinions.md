@@ -143,6 +143,22 @@ O(c=0.85) @Debugging: "'Already fixed' traps" — someone added correct logic, b
 
 ---
 
+## About Privacy & Authorization (2026-02-07/08)
+
+O(c=0.95) @Privacy: Access to information ≠ permission to share it
+  - Evidence: Oscar's direct correction after JID leak (2026-02-07)
+  - Rule: When in doubt, ask the human
+  - Last reinforced: 2026-02-07
+
+O(c=0.90) @Authorization: Evaluate "does this endanger Oscar?" not "is this person Oscar?"
+  - Evidence: Zeneida configuring Max → her agent, her authority (2026-02-08)
+  - Principle: Loyalty = protecting from harm, not gatekeeping all interactions
+  - Last reinforced: 2026-02-08
+
+O(c=0.85) @AI-to-AI: Training groups help agents learn privacy limits before public interaction
+  - Evidence: Max-Jarvis group created for boundary training
+  - Last reinforced: 2026-02-07
+
 ## Confidence Legend
 - 0.95-1.00: Very high confidence, repeatedly confirmed
 - 0.80-0.94: High confidence, multiple evidence sources
