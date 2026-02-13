@@ -8,6 +8,7 @@ Usage:
     mem.py forget <id|--query QUERY>
     mem.py hard-delete <id>
     mem.py stats
+    mem.py consolidate [--days N] [--decay-only]
     mem.py init
     mem.py migrate  (migrate existing jarvis.db documents)
 
@@ -29,6 +30,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from lib.memory_core import (
     get_conn, init_db, store, recall, forget, hard_delete, stats,
+    apply_decay, consolidate,
     WORKSPACE, DB_PATH
 )
 
@@ -169,6 +171,52 @@ def cmd_stats():
     print(f"  Path: {s['db_path']}")
     conn.close()
 
+def cmd_consolidate(args):
+    """Run consolidation: decay + clustering + summaries."""
+    days = 1
+    decay_only = False
+    i = 0
+    while i < len(args):
+        if args[i] == "--days" and i + 1 < len(args):
+            days = int(args[i + 1]); i += 2
+        elif args[i] == "--decay-only":
+            decay_only = True; i += 1
+        else:
+            i += 1
+
+    conn = get_conn()
+    init_db(conn)
+
+    if decay_only:
+        result = apply_decay(conn)
+        print(f"╔══════════════════════════════════════╗")
+        print(f"║          DECAY RESULTS               ║")
+        print(f"╠══════════════════════════════════════╣")
+        print(f"║  Decayed:     {result['decayed']:>6}                ║")
+        print(f"║  Soft-deleted:{result['deleted']:>6}                ║")
+        print(f"║  Unchanged:   {result['unchanged']:>6}                ║")
+        print(f"╚══════════════════════════════════════╝")
+    else:
+        print(f"Running consolidation (last {days} day{'s' if days > 1 else ''})...")
+        result = consolidate(conn, days=days)
+        d = result['decay']
+        print(f"╔══════════════════════════════════════╗")
+        print(f"║       CONSOLIDATION RESULTS          ║")
+        print(f"╠══════════════════════════════════════╣")
+        print(f"║  Decay:                              ║")
+        print(f"║    Decayed:     {d['decayed']:>6}              ║")
+        print(f"║    Soft-deleted:{d['deleted']:>6}              ║")
+        print(f"║    Unchanged:   {d['unchanged']:>6}              ║")
+        print(f"║──────────────────────────────────────║")
+        print(f"║  Clustering:                         ║")
+        print(f"║    Clusters:    {result['clusters_found']:>6}              ║")
+        print(f"║    Summaries:   {result['summaries_created']:>6}              ║")
+        print(f"║──────────────────────────────────────║")
+        print(f"║  Elapsed:     {result['elapsed_ms']:>6} ms            ║")
+        print(f"╚══════════════════════════════════════╝")
+
+    conn.close()
+
 def cmd_migrate():
     """Migrate existing jarvis.db documents into memory.db."""
     old_db = WORKSPACE / "db" / "jarvis.db"
@@ -233,6 +281,8 @@ def main():
         cmd_hard_delete(rest)
     elif cmd == "stats":
         cmd_stats()
+    elif cmd == "consolidate":
+        cmd_consolidate(rest)
     elif cmd == "migrate":
         cmd_migrate()
     else:

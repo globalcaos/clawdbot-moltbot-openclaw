@@ -8,7 +8,7 @@ import struct
 import time
 import logging
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 import numpy as np
@@ -282,4 +282,172 @@ def stats(conn: sqlite3.Connection) -> dict:
         "with_embeddings": vec_count,
         "db_size_kb": db_size_kb,
         "db_path": str(DB_PATH),
+    }
+
+# ---------- consolidation (Phase 2) ----------
+
+# Decay rates per memory type (per day)
+DECAY_RATES = {
+    "episodic": 0.92,    # Fast decay — episodes fade
+    "semantic": 0.98,    # Slow decay — facts persist
+    "procedural": 0.99,  # Very slow — skills are sticky
+}
+
+def apply_decay(conn: sqlite3.Connection) -> dict:
+    """
+    Apply Ebbinghaus-inspired strength decay based on memory type and time since last access.
+    Soft-deletes memories that fall below threshold (0.1).
+    Returns dict with counts: {decayed, deleted, unchanged}.
+    """
+    now = datetime.utcnow()
+    rows = conn.execute(
+        "SELECT id, memory_type, strength, last_accessed, access_count FROM memories WHERE is_deleted = 0"
+    ).fetchall()
+
+    decayed = 0
+    deleted = 0
+    unchanged = 0
+
+    for row in rows:
+        mid = row['id']
+        mtype = row['memory_type']
+        strength = row['strength']
+        last_acc = datetime.fromisoformat(row['last_accessed'].replace('Z', ''))
+        access_count = row['access_count']
+
+        days_since = max((now - last_acc).total_seconds() / 86400, 0)
+        if days_since < 0.01:  # Accessed very recently
+            unchanged += 1
+            continue
+
+        base_rate = DECAY_RATES.get(mtype, 0.95)
+        # Access count provides resistance to decay (rehearsal effect)
+        rehearsal_bonus = min(access_count * 0.005, 0.04)  # max +0.04
+        effective_rate = min(base_rate + rehearsal_bonus, 0.999)
+
+        new_strength = strength * (effective_rate ** days_since)
+        new_strength = round(new_strength, 6)
+
+        if new_strength < 0.1:
+            # Soft-delete faded memories
+            conn.execute("UPDATE memories SET is_deleted = 1, strength = ? WHERE id = ?",
+                        (new_strength, mid))
+            deleted += 1
+        elif abs(new_strength - strength) > 0.001:
+            conn.execute("UPDATE memories SET strength = ? WHERE id = ?",
+                        (new_strength, mid))
+            decayed += 1
+        else:
+            unchanged += 1
+
+    conn.commit()
+    return {"decayed": decayed, "deleted": deleted, "unchanged": unchanged}
+
+
+def cluster_memories(conn: sqlite3.Connection, days: int = 1, threshold: float = 0.5) -> list[list[int]]:
+    """
+    Cluster recent memories by semantic similarity using agglomerative clustering.
+    Returns list of clusters (each cluster = list of memory IDs).
+    Only clusters with 2+ members are returned.
+    """
+    from scipy.cluster.hierarchy import fcluster, linkage
+    from scipy.spatial.distance import pdist
+
+    cutoff = (datetime.utcnow() - timedelta(days=days)).isoformat() + "Z"
+    rows = conn.execute(
+        """SELECT m.id, v.embedding FROM memories m
+           JOIN memories_vec v ON v.memory_id = m.id
+           WHERE m.is_deleted = 0 AND m.created_at >= ?""",
+        (cutoff,)
+    ).fetchall()
+
+    if len(rows) < 2:
+        return []
+
+    ids = [r['id'] for r in rows]
+    vecs = np.array([blob_to_vec(r['embedding']) for r in rows])
+
+    # Cosine distance matrix
+    dists = pdist(vecs, metric='cosine')
+    # Agglomerative clustering
+    Z = linkage(dists, method='average')
+    labels = fcluster(Z, t=threshold, criterion='distance')
+
+    # Group by cluster label
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for mid, label in zip(ids, labels):
+        groups[label].append(mid)
+
+    # Only return clusters with 2+ members
+    return [mids for mids in groups.values() if len(mids) >= 2]
+
+
+def get_memories_by_ids(conn: sqlite3.Connection, ids: list[int]) -> list[dict]:
+    """Fetch full memory records by IDs."""
+    if not ids:
+        return []
+    placeholders = ",".join("?" * len(ids))
+    rows = conn.execute(
+        f"SELECT * FROM memories WHERE id IN ({placeholders})", ids
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def consolidate(conn: sqlite3.Connection, days: int = 1) -> dict:
+    """
+    Full consolidation pass:
+    1. Apply decay
+    2. Cluster recent memories
+    3. Generate cluster summaries (stored as new semantic memories)
+    Returns stats dict.
+    """
+    t0 = time.time()
+
+    # Step 1: Decay
+    decay_stats = apply_decay(conn)
+
+    # Step 2: Cluster
+    clusters = cluster_memories(conn, days=days)
+
+    # Step 3: Summarize clusters
+    summaries_created = 0
+    for cluster_ids in clusters:
+        memories = get_memories_by_ids(conn, cluster_ids)
+        if not memories:
+            continue
+
+        # Build summary from cluster contents
+        contents = [m['content'] for m in memories]
+
+        # Simple extractive summary: take the most important memory as representative
+        # + combine key content. (LLM summary would be Phase 2.5 upgrade)
+        best = max(memories, key=lambda m: m.get('importance', 0.5))
+        if len(contents) > 1:
+            # Create a consolidated summary
+            summary_parts = []
+            for c in contents:
+                # Take first 100 chars of each
+                short = c[:100].strip()
+                if short and short not in summary_parts:
+                    summary_parts.append(short)
+            summary = f"[Cluster of {len(contents)} related memories] " + " | ".join(summary_parts[:5])
+
+            # Calculate cluster importance (max of members)
+            cluster_importance = max(m.get('importance', 0.5) for m in memories)
+
+            # Store as new level-1 summary memory
+            mid = store(conn, summary,
+                       memory_type="semantic",
+                       source="consolidation",
+                       importance=min(cluster_importance + 0.1, 1.0),
+                       metadata={"cluster_members": cluster_ids, "level": 1})
+            summaries_created += 1
+
+    elapsed = (time.time() - t0) * 1000
+    return {
+        "decay": decay_stats,
+        "clusters_found": len(clusters),
+        "summaries_created": summaries_created,
+        "elapsed_ms": round(elapsed),
     }
