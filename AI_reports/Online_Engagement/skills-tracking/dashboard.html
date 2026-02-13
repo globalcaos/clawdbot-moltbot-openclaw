@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClawHub Skills Dashboard — globalcaos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background: #0d1117;
+        color: #c9d1d9;
+        margin: 0;
+        padding: 20px;
+      }
+      h1 {
+        color: #58a6ff;
+      }
+      .stats {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+      }
+      .stat-card {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 16px 24px;
+        min-width: 150px;
+      }
+      .stat-card .label {
+        color: #8b949e;
+        font-size: 0.85em;
+      }
+      .stat-card .value {
+        font-size: 2em;
+        font-weight: bold;
+        color: #58a6ff;
+      }
+      .chart-container {
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        padding: 10px 14px;
+        text-align: left;
+        border-bottom: 1px solid #30363d;
+      }
+      th {
+        color: #8b949e;
+        font-weight: 600;
+      }
+      .suspicious {
+        color: #f85149;
+      }
+      .clean {
+        color: #3fb950;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🐾 ClawHub Skills Dashboard</h1>
+    <p>Owner: <strong>globalcaos</strong> | Auto-updated daily</p>
+
+    <div class="stats" id="summary"></div>
+
+    <div class="chart-container">
+      <canvas id="downloadsChart" height="100"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="starsChart" height="80"></canvas>
+    </div>
+
+    <table id="skillsTable">
+      <thead>
+        <tr>
+          <th>Skill</th>
+          <th>Version</th>
+          <th>Downloads</th>
+          <th>Stars</th>
+          <th>Versions</th>
+          <th>Moderation</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      const COLORS = [
+        "#58a6ff",
+        "#3fb950",
+        "#d29922",
+        "#f85149",
+        "#bc8cff",
+        "#39d353",
+        "#f0883e",
+        "#a5d6ff",
+      ];
+      const DATA_DIR = "./";
+
+      async function loadData() {
+        // Load all JSON files - for now discover by trying dates
+        const files = [];
+        const today = new Date();
+        for (let i = 0; i < 365; i++) {
+          const d = new Date(today);
+          d.setDate(d.getDate() - i);
+          const ds = d.toISOString().split("T")[0];
+          files.push(ds);
+        }
+
+        const data = [];
+        for (const ds of files) {
+          try {
+            const resp = await fetch(`${DATA_DIR}${ds}.json`);
+            if (resp.ok) data.push(await resp.json());
+          } catch (e) {}
+        }
+        return data.reverse();
+      }
+
+      loadData().then((data) => {
+        if (!data.length) return;
+        const latest = data[data.length - 1];
+        const skills = Object.keys(latest.skills);
+        const dates = data.map((d) => d.date);
+
+        // Summary cards
+        const totalDl = Object.values(latest.skills).reduce((a, s) => a + s.downloads, 0);
+        const totalStars = Object.values(latest.skills).reduce((a, s) => a + s.stars, 0);
+        document.getElementById("summary").innerHTML = `
+    <div class="stat-card"><div class="label">Total Downloads</div><div class="value">${totalDl.toLocaleString()}</div></div>
+    <div class="stat-card"><div class="label">Total Stars</div><div class="value">${totalStars}</div></div>
+    <div class="stat-card"><div class="label">Skills</div><div class="value">${skills.length}</div></div>
+    <div class="stat-card"><div class="label">Data Points</div><div class="value">${data.length}</div></div>
+  `;
+
+        // Downloads chart
+        new Chart(document.getElementById("downloadsChart"), {
+          type: "line",
+          data: {
+            labels: dates,
+            datasets: skills.map((s, i) => ({
+              label: s,
+              data: data.map((d) => d.skills[s]?.downloads ?? 0),
+              borderColor: COLORS[i % COLORS.length],
+              backgroundColor: COLORS[i % COLORS.length] + "20",
+              tension: 0.3,
+              fill: false,
+              pointRadius: data.length < 10 ? 4 : 1,
+            })),
+          },
+          options: {
+            responsive: true,
+            plugins: { title: { display: true, text: "Downloads Over Time", color: "#c9d1d9" } },
+            scales: {
+              x: { ticks: { color: "#8b949e" } },
+              y: { ticks: { color: "#8b949e" }, beginAtZero: true },
+            },
+          },
+        });
+
+        // Stars chart
+        new Chart(document.getElementById("starsChart"), {
+          type: "line",
+          data: {
+            labels: dates,
+            datasets: skills.map((s, i) => ({
+              label: s,
+              data: data.map((d) => d.skills[s]?.stars ?? 0),
+              borderColor: COLORS[i % COLORS.length],
+              tension: 0.3,
+              fill: false,
+              pointRadius: data.length < 10 ? 4 : 1,
+            })),
+          },
+          options: {
+            responsive: true,
+            plugins: { title: { display: true, text: "Stars Over Time", color: "#c9d1d9" } },
+            scales: {
+              x: { ticks: { color: "#8b949e" } },
+              y: { ticks: { color: "#8b949e" }, beginAtZero: true },
+            },
+          },
+        });
+
+        // Table
+        const tbody = document.querySelector("#skillsTable tbody");
+        skills
+          .sort((a, b) => latest.skills[b].downloads - latest.skills[a].downloads)
+          .forEach((s) => {
+            const sk = latest.skills[s];
+            const mod = sk.isSuspicious
+              ? '<span class="suspicious">⚠️ Suspicious</span>'
+              : '<span class="clean">✅ Clean</span>';
+            tbody.innerHTML += `<tr><td><strong>${s}</strong></td><td>${sk.version}</td><td>${sk.downloads}</td><td>${sk.stars}</td><td>${sk.versions}</td><td>${mod}</td></tr>`;
+          });
+      });
+    </script>
+  </body>
+</html>
