@@ -1,187 +1,61 @@
-# Task List
+# Active Tasks & TODOs
 
-## 🔥 Active / In Progress
+## 🔴 High Priority
 
-### WhatsApp Skill ✅ WORKING
-- [x] All 11/11 capabilities tested and working (reply fix: `b642c6b86`)
-- [x] triggerPrefix configured for selective response
-- [x] groupPolicy: "open" for context awareness
-- [ ] **Group management testing** — Need Zeneida as test subject
-- **Status:** Core features done, group mgmt untested
+### Flowerburst Books — Follow Up with Jonathan
 
-### WhatsApp History Storage ✅ IMPLEMENTED (2026-02-06)
-- [x] SQLite + FTS5 database (`~/.openclaw/data/whatsapp-history.db`)
-- [x] Live capture bound to Baileys events
-- [x] JSON store migration (358 messages imported)
-- [x] `whatsapp_history` agent tool (search/stats/import)
-- [x] WhatsApp export importer (.txt files)
-- [ ] **Import historical exports from phone** — Need Oscar to export chats
-- **Status:** Fully operational, awaiting historical data
+- **Status:** Jonathan has the books, waiting for Oscar to arrange customs-clearing shipping company
+- **Last contact:** Jan 13, 2026 — almost a month, needs reply NOW
+- **Contact:** jonathan@flowerburst.co
+- **Order:** #FB977331235045
+- **Action:** Draft follow-up email + research customs logistics companies (despacho aduanero)
 
-### WhatsApp triggerPrefix ✅ CONFIGURED
-- [x] Configure to read ALL incoming messages (`groupPolicy: "open"`)
-- [x] Only respond when message starts with "Jarvis" (`triggerPrefix: "Jarvis"`)
-- [x] Silent observation mode for context awareness
-- **How it works:**
-  - I receive ALL group messages (groupPolicy: open)
-  - Messages without "Jarvis" prefix → silently skipped
-  - Messages with "Jarvis" prefix → processed (prefix stripped)
-- **Priority:** DONE
+### KiwiCo — Push for Bonus Months
 
----
+- **Status:** Refund received. Oscar asked for bonus months on 1-year resubscription. KiwiCo gave generic reply.
+- **Contact:** customercare@kiwico.com
+- **Action:** Draft firmer follow-up asking for 6-month bonus
 
-## 🖥️ UI / UX Improvements
+### FIATC Seguros — Reimbursement
 
-### Transparency & Visibility
-- [ ] Show thinking/idle state (visual indicator)
-- [ ] Display count of background agents running
-- [ ] Show which model each agent uses
-- [ ] Real-time visibility into parallel work
-- **Priority:** MEDIUM
+- **Status:** Need to forward 3 bills from Sasha's WhatsApp to FIATC
+- **Policy:** Assegurança 0029-000204834-0000
+- **Action:** Find Sasha's bill images in WhatsApp, get FIATC claims email, forward for reimbursement
 
-### Browser Extension Upgrades
-- [ ] **Tab grouping**: Auto-group shared tabs, ungroup when released
-- [ ] **Remove overlay**: "OpenClaw browser relay" banner redundant with tab groups
-- [ ] **Click visualization**: Big yellow transparent circle flashing on clicks
-- [ ] **Focus indicator**: Show mouse/focus position
-- [ ] **No new tabs**: Prevent creating tabs (defeats sharing purpose)
-- [ ] **Persistence**: Remember shared tabs across browser crashes/restarts
-- **Priority:** MEDIUM
+### Enable Google Calendar API
 
-### Webchat Improvements
-- [ ] Move compacting/compacted messages to END of chat (before message box)
-- [ ] Investigate why context compacting is slow ("takes hours")
-- **Priority:** MEDIUM
+- **URL:** https://console.developers.google.com/apis/api/calendar-json.googleapis.com/overview?project=838811652074
+- **Blocks:** Calendar access, Eli's schedule, appointment reminders
 
-### Security Level ✅ IMPLEMENTED
-- [x] **Backend enforcement** — Commands now blocked based on UI security level
-- [ ] Make clearance level persistent upon restart (localStorage works, but needs testing)
-- [x] Commands actually blocked at lower clearance levels
-- **Commit:** `20688abd1`
-- **Priority:** DONE
+## 🟡 Medium Priority
 
----
+### Find Pediatrician (FIATC) — Alternative/Integrative
 
-## 🔐 Security
+- **Need:** Pediatrician for Marcus (vaccines), alternative/integrative approach
+- **Preference:** Stick to classic vaccine calendar, skip new ones (per akashic records guidance)
+- **Area:** Vilanova, Vilafranca, Garraf comarca
+- **FIATC options found:**
+  - **Centro Médico Vilanova i la Geltrú** — Av. Jaume Balmes 31, 08800 — Dra. Ana Maria Monago Molano (FIATC pediatrics)
+  - **Grup Mèdic Garraf** — Rambla Exposició 97-99, Vilanova — Tel: 938115838 (FIATC pediatrics)
+- **Alternative/Integrative option (NOT FIATC but worth considering):**
+  - **Osteo9 Barcelona** — Dra. Adriana Cordón (Col. 18.537) — Pediatria integrativa, homeopathic medicine, natural remedies, respects individual approach. This is the closest match to Oscar's philosophy.
+- **Next steps:** Cross-reference Doctoralia for reviews, check if any FIATC pediatrician is also integrative, call Osteo9 to ask about vaccine approach
 
-### Prompt Injection Defense ✅ DONE
-- [x] Research current attack vectors
-- [x] Document defense strategies (see `memory/security-reports/prompt-injection-defense-2026-02-06.md`)
-- [ ] Implement spotlighting delimiters
-- [ ] Implement canary tokens
-- [ ] Tool permission tiers
-- [ ] Output scanning
-- **Priority:** HIGH
+### Email Draft Reviews (pending Oscar approval)
 
-### Security Cron ✅ DONE
-- [x] Created 2:30 AM daily security check
-- Job ID: `b8d8db5b-6d52-4d7d-8368-aaeee33934f3`
+- `/tmp/draft-carme.txt` — Reply to Carme Saurina (wrong recipient + gold question)
+- `/tmp/draft-reetesh.txt` — Reply to Reetesh Sharma (Hult MBA connection)
 
----
+## 🟢 Low Priority
 
-## 📢 Marketing & Publishing
+### tCheck Spectrometer
 
-### Online Presence Strategy (NEW)
-- [x] Create engagement tracking structure (`memory/engagement/`)
-- [x] Update daily maintenance cron with metrics
-- [x] Update meta-ai cron with X/YouTube sources
-- [x] Create online presence strategy doc
-- [ ] **Connect Twitter/X** — Needed for Moltbook verification
-- [ ] **Register on Moltbook** — 1.7M agents, high visibility
-- [ ] Connect to LinkedIn for marketing
-- [ ] Connect to Facebook for marketing
-- [ ] YouTube channel promotion
-- [ ] Learn from Max (Zeneida's AI) about positioning
+- Shipped to Carlos/Noemi Fisher, 159 E 62nd, NYC
+- Carlos returned it and ordered new one with "spectrometer" label
+- Oscar requested refund for original. Thread seems resolved.
 
-### ClawHub Skills
-- [x] Added repo link to chatgpt-exporter-ultimate
-- [ ] Add repo links to ALL our published skills
-- [ ] Track download trends daily
+### Email Automation (Phase 6)
 
-### Git Marketing
-- [ ] Push skills to git (which repo?)
-- [ ] Write proper READMEs
-- [ ] Cross-promote in community
-
-**Priority:** HIGH — building influencer status for monetization
-
----
-
-## 🚀 Strategic / Evolution
-
-### Twitter/X Connection (NEW - Priority)
-- [ ] Connect Oscar's Twitter account to JarvisOne
-- [ ] Use `bird` skill for posting and monitoring
-- [ ] Enable Moltbook verification
-- [ ] Cross-post interesting findings
-- **Blocker:** Need Oscar's Twitter credentials/auth
-
-### Moltbook Registration
-- [ ] Register JarvisOne identity (not 'OpenClaw')
-- [ ] Requires Twitter verification first
-- [ ] Set up 4-hour heartbeat for autonomous posting
-
-### Crypto Wallet (NEW - JarvisOne Managed)
-- [ ] Research self-custodial wallet options for AI agents
-- [ ] Set up USDC/USDT wallet
-- [ ] Enable RentAHuman payments
-- [ ] Document security model (who controls keys?)
-- [ ] Consider: Gnosis Safe? MPC wallet? Hardware signing?
-- **Purpose:** Autonomous hiring of humans for physical tasks
-
-### MCP Mastery
-- [ ] Research Model Context Protocol
-- [ ] Implement as client (consume services like RentAHuman)
-- [ ] Consider server mode (provide services)
-
-### A2A Protocol Integration (NEW - 2026-02-07)
-- [ ] Research Google's Agent2Agent Protocol
-- [ ] Create Agent Card (JSON capability discovery)
-- [ ] Implement A2A client for agent collaboration
-- [ ] Consider: Discover other agents, delegate tasks, accept delegations
-- **Why:** Gartner predicts 33% enterprise AI using multi-agent by 2026
-- **Source:** developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability/
-
----
-
-## ✅ Completed Today (2026-02-07)
-
-- [x] Self-evolution exploration (mainstream coverage analysis)
-- [x] A2A protocol research added to todos
-- [x] Updated self-evolution index with capability gaps
-- [x] Security scrutiny documented (Palo Alto, CrowdStrike, Cisco, IBM)
-
----
-
-## ✅ Completed (2026-02-06)
-
-- [x] WhatsApp group summary cron (5:30 AM)
-- [x] Security updates cron (2:30 AM)
-- [x] Prompt injection research report
-- [x] ChatGPT export (179 conversations)
-- [x] Knowledge base created (SQLite + FTS5)
-- [x] Memory reorganization
-- [x] Family contacts extracted
-
----
-
-## 📋 Cron Job Status
-
-All jobs executed successfully last night:
-
-| Job | Time | Last Run | Duration |
-|-----|------|----------|----------|
-| memory-consolidation | 3:00 AM | ✅ ok | 94s |
-| daily-openclaw-maintenance | 3:30 AM | ✅ ok | 111s |
-| Meta-AI Research | 4:00 AM | ✅ ok | 98s |
-| Spiritual-Tech Research | 4:30 AM | ✅ ok | 138s |
-| Self-Evolution | 5:00 AM | ✅ ok | 72s |
-| security-updates-check | 2:30 AM | ⏳ NEW (runs tonight) | — |
-| whatsapp-group-summary | 5:30 AM | ⏳ NEW (runs tonight) | — |
-| whatsapp-message-sync | */30 min | ⏳ NEW | — |
-
-**Why UI showed empty:** Frontend caching or rendering bug — backend data was intact.
-
----
-
-*Last updated: 2026-02-07 05:00*
+- Set up OTS monitoring (forward-looking Eli schedule only)
+- GitHub notification filtering (mentions-only)
+- Periodic email digest cron job

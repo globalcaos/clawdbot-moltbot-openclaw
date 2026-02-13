@@ -256,10 +256,30 @@ export const whatsappPlugin: ChannelPlugin<ResolvedWhatsAppAccount> = {
       if (gate("polls")) {
         actions.add("poll");
       }
+      actions.add("fetchHistory");
       return Array.from(actions);
     },
-    supportsAction: ({ action }) => action === "react",
+    supportsAction: ({ action }) => action === "react" || action === "fetchHistory",
     handleAction: async ({ action, params, cfg, accountId }) => {
+      if (action === "fetchHistory") {
+        return await getWhatsAppRuntime().channel.whatsapp.handleWhatsAppAction(
+          {
+            action: "fetchHistory",
+            chatJid:
+              readStringParam(params, "chatJid") ??
+              readStringParam(params, "to") ??
+              readStringParam(params, "target", { required: true }),
+            count: typeof params.count === "number" ? params.count : 50,
+            oldestMsgId: readStringParam(params, "oldestMsgId"),
+            oldestMsgFromMe:
+              typeof params.oldestMsgFromMe === "boolean" ? params.oldestMsgFromMe : false,
+            oldestMsgTimestamp:
+              typeof params.oldestMsgTimestamp === "number" ? params.oldestMsgTimestamp : undefined,
+            accountId: accountId ?? undefined,
+          },
+          cfg,
+        );
+      }
       if (action !== "react") {
         throw new Error(`Action ${action} is not supported for provider ${meta.id}.`);
       }

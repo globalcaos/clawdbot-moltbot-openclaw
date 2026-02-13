@@ -305,6 +305,9 @@ type MessageToolOptions = {
 
 function buildMessageToolSchema(cfg: OpenClawConfig) {
   const actions = listChannelMessageActions(cfg);
+  if (!actions.includes("fetchHistory")) {
+    actions.push("fetchHistory");
+  }
   const includeButtons = supportsChannelMessageButtons(cfg);
   const includeCards = supportsChannelMessageCards(cfg);
   return buildMessageToolSchemaFromActions(actions.length > 0 ? actions : ["send"], {
@@ -376,6 +379,9 @@ function buildMessageToolDescription(options?: {
   // Fallback to generic description with all configured actions
   if (options?.config) {
     const actions = listChannelMessageActions(options.config);
+    if (!actions.includes("fetchHistory")) {
+      actions.push("fetchHistory");
+    }
     if (actions.length > 0) {
       return `${baseDescription} Supports actions: ${actions.join(", ")}.`;
     }

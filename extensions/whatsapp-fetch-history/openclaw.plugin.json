@@ -1,0 +1,11 @@
+{
+  "id": "whatsapp-fetch-history",
+  "name": "WhatsApp Fetch History",
+  "description": "HTTP endpoint to fetch older WhatsApp messages via Baileys fetchMessageHistory",
+  "version": "1.0.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

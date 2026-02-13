@@ -1,20 +1,30 @@
 # Oscar's Projects Index
 
-*Imported from ~/src and ~/Documents on 2026-02-01*
+_Originally imported 2026-02-01 | Updated: 2026-02-09 (sleep cycle consolidation)_
 
 ---
 
 ## Active Projects Overview
 
-| Project | Location | Type | Status |
-|---------|----------|------|--------|
-| **pallet-scan** | `~/src/pallet-scan/` | Computer Vision | Active |
-| **aurora-ai-researcher** | `~/src/aurora-ai-researcher/` | AI Research Agent | Initial Setup |
-| **amr-marketing-sales** | `~/src/amr-marketing-sales/` | Document Automation | In Progress |
-| **book-translation** | `~/Documents/Origin of the Universe*/` | Literary | Active |
-| **workshop-legalization** | `~/Documents/Workshop/` | Legal/Admin | Active |
-| **audio-transcript** | `~/src/audio-transcript/` | Audio Processing | Unknown |
-| **R project** | `~/src/R/` | Unknown | Uses claude memory |
+| Project                    | Location                               | Type                | Status             |
+| -------------------------- | -------------------------------------- | ------------------- | ------------------ |
+| **pallet-scan**            | `~/src/pallet-scan/`                   | Computer Vision     | Active             |
+| **openclaw**               | `~/src/clawdbot-moltbot-openclaw/`     | AI Assistant Fork   | Active             |
+| **aurora-ai-researcher**   | `~/src/aurora-ai-researcher/`          | AI Research Agent   | Initial Setup      |
+| **amr-marketing-sales**    | `~/src/amr-marketing-sales/`           | Document Automation | In Progress        |
+| **book-translation**       | `~/Documents/Origin of the Universe*/` | Literary            | Active             |
+| **workshop-legalization**  | `~/Documents/Workshop/`                | Legal/Admin         | Active             |
+| **home-olivella**          | Olivella house                         | Construction/Garden | Active             |
+| **bashar**                 | Memory project                         | Spiritual Research  | Active             |
+| **gantry-robot-arm**       | Memory project                         | Robotics            | Planning           |
+| **meta-ai-research**       | Memory project (cron)                  | AI Research Scans   | Active             |
+| **serravision-ai**         | Company                                | Computer Vision     | Active             |
+| **talleres-serra-spinoff** | Company                                | Business Strategy   | Active             |
+| **house-furniture**        | Home                                   | Woodworking         | Planning           |
+| **public-image**           | Memory project                         | Personal Branding   | Planning           |
+| **inventions**             | Memory project                         | R&D                 | Active             |
+| **audio-transcript**       | `~/src/audio-transcript/`              | Audio Processing    | Unknown            |
+| **R project**              | `~/src/R/`                             | Unknown             | Uses claude memory |
 
 ---
 
@@ -28,6 +38,7 @@ All projects use a shared Claude memory system with symlinks:
 ```
 
 Each project symlinks to these:
+
 - `project/claude_memory → ~/src/claude_memory/`
 - `project/.claude → ~/src/.claude_global/`
 
@@ -38,6 +49,7 @@ Each project symlinks to these:
 **Purpose:** ZED 2i stereo camera system for automated pallet volume measurement
 
 **Tech Stack:**
+
 - Python 3.10 (`~/src/venv3.10`)
 - ZED SDK v5.1.0
 - CUDA 12.8 (needs TensorRT 10.9 for NEURAL mode)
@@ -45,20 +57,24 @@ Each project symlinks to these:
 - OpenCV for visualization
 
 **Hardware:**
+
 - MSI Creator 15 laptop
 - NVIDIA RTX 3080 (16GB)
 - ZED 2i camera (USB 3.0)
 
 **Core Concept:**
+
 ```
 Total Volume - Baseline Volume = Pallet Volume
 ```
 
 **Active Issues:**
+
 - TensorRT missing → NEURAL depth mode unavailable
 - Advanced stereoscopic algorithm research planned
 
 **7-Phase Roadmap:**
+
 1. ✅ Single camera optimization
 2. ⬜ Floor detection & segmentation
 3. ⬜ Dual camera setup & calibration
@@ -82,17 +98,20 @@ See: `memory/aurora-ai-researcher/SUMMARY.md`
 **Purpose:** Automated generation of marketing materials for AMR (Autonomous Mobile Robots)
 
 **Deliverables:**
+
 - PowerPoint presentations from CRM data
 - Marketing flyers
 - Technical white papers
 
 **Tech Stack:**
+
 - python-pptx: PowerPoint generation
 - reportlab: PDF generation
 - jinja2: Template engine
 - pandas: CRM data handling
 
 **Data Sources:**
+
 - CRM exports (format TBD)
 - Offers repository: `smb://192.168.0.1/dades/03 Comercial/02 Ofertes/`
   - Use PDF versions (unchanged)
@@ -108,6 +127,7 @@ See: `memory/aurora-ai-researcher/SUMMARY.md`
 **Target:** Ages 8-10, 4th-5th grade vocabulary
 
 **Progress:**
+
 - ✅ Chapter 1: "The Leaves That Did Not Fall"
 - ✅ Chapter 2: "The True Story"
 - ✅ Chapter 3: "The Grandfather Who Wasn't There"
@@ -117,17 +137,20 @@ See: `memory/aurora-ai-researcher/SUMMARY.md`
 - ✅ Chapter 7: "The Important Day"
 
 **Key Characters:**
+
 - Akumi (11yo sister) — green pendant, cold powers
 - Arish (9yo brother) — blue pendant, heat powers
 - Grandmother Gwendal — former Galactic Confederation agent
 - Grandfather Martin — exists in another dimension
 
 **Fantasy Elements:**
+
 - Merkaba (ship), Yahyel race, Galactic Confederation
 - Havona (center of multiverse), Paradise Island
 - Nephilim, AION (the Constructor), Felixfénix
 
 **Style Guide:**
+
 - Simple vocabulary (9-year-old level)
 - Em-dash (—) for dialogue
 - Preserve suspense, wonder, warmth
@@ -142,6 +165,7 @@ See: `memory/aurora-ai-researcher/SUMMARY.md`
 **Language:** Catalan/Spanish
 
 **Key Points:**
+
 - Oscar is PROMOTOR (not constructor)
 - Involves urban planning documentation
 - Worker regularization (Ukrainian workers)
@@ -154,6 +178,7 @@ See: `memory/aurora-ai-researcher/SUMMARY.md`
 **Location:** `~/src/venv3.10`
 
 Shared by multiple projects:
+
 - pallet-scan
 - amr-marketing-sales
 - aurora-ai-researcher (planned)
@@ -172,11 +197,11 @@ Shared by multiple projects:
 
 ### AI Comparison for Second Opinions
 
-| AI | Quality | Best For |
-|----|---------|----------|
-| **ChatGPT** | 9/10 | Legal, technical, strategic analysis |
-| **Gemini** | 7/10 | Quick reviews, summaries |
-| **Grok** | 3/10 | Nothing important |
+| AI          | Quality | Best For                             |
+| ----------- | ------- | ------------------------------------ |
+| **ChatGPT** | 9/10    | Legal, technical, strategic analysis |
+| **Gemini**  | 7/10    | Quick reviews, summaries             |
+| **Grok**    | 3/10    | Nothing important                    |
 
 ### Command Security Levels
 
@@ -190,12 +215,12 @@ Shared by multiple projects:
 
 ## File Locations Reference
 
-| Resource | Path |
-|----------|------|
-| Python venv | `~/src/venv3.10` |
-| Shared Claude memory | `~/src/claude_memory/` |
-| Shared Claude tools | `~/src/.claude_global/` |
-| ZED SDK docs | `~/src/pallet-scan/docs/` |
-| Offers repository | `smb://192.168.0.1/dades/03 Comercial/02 Ofertes/` |
-| Book translation | `~/Documents/Origin of the Universe (Zeneida Serra)/` |
-| Workshop docs | `~/Documents/Workshop/` |
+| Resource             | Path                                                  |
+| -------------------- | ----------------------------------------------------- |
+| Python venv          | `~/src/venv3.10`                                      |
+| Shared Claude memory | `~/src/claude_memory/`                                |
+| Shared Claude tools  | `~/src/.claude_global/`                               |
+| ZED SDK docs         | `~/src/pallet-scan/docs/`                             |
+| Offers repository    | `smb://192.168.0.1/dades/03 Comercial/02 Ofertes/`    |
+| Book translation     | `~/Documents/Origin of the Universe (Zeneida Serra)/` |
+| Workshop docs        | `~/Documents/Workshop/`                               |

@@ -1,6 +1,10 @@
 # ChatGPT Saved Memories (Raw Export)
 
-*Exported: 2026-02-01*
+_Exported: 2026-02-01_
+
+## Consolidated: 2026-02-09
+
+All 76 memories distributed to bank/entities/, memory/topics/, and bank/opinions.md.
 
 ---
 
@@ -56,7 +60,7 @@
 
 26. L'usuari prefereix que els resums importants, com els de les sessions akàshiques, es presentin en un format segmentat per capítols, amb títol gran a la portada, comentaris introductoris en petit, seccions clares en negreta amb salts de línia, referències específiques a les sessions d'on prové cada informació, i recomanacions finals personalitzades sota el títol "Recomanacions del ChatGPT". També vol que aquest format reflecteixi la seva situació vital actual: transició cap a treballar per compte propi, construcció del taller, naixement imminent d'en Àlex, i la seva missió com a "gran inventor" segons Dolores Cannon. Les recomanacions han de ser agrupades al final de cada capítol, per evitar sobrecàrrega d'informació. Aquest format ha de ser utilitzat com a referència per futurs documents similars.
 
-27. L'usuari prefereix que els enllaços es presentin de manera explícita i copiable en text pla, com per exemple: 📺 YouTube – *Títol del vídeo* https://www.youtube.com/... 📄 Article – *Títol o descripció breu* https://arxiv.org/... Aquesta manera assegura que no es perdin en fer copy-paste i s'ajusta al seu estil preferit de documentació. Els enllaços a YouTube han de ser precedits d'una icona 📺 i els enllaços a documents o pàgines HTML han de ser precedits d'una icona 📄. No vol una secció final amb fonts resumides, sinó que cada enllaç estigui integrat al seu lloc concret dins del text. Aquesta preferència s'ha de mantenir per a futures respostes.
+27. L'usuari prefereix que els enllaços es presentin de manera explícita i copiable en text pla, com per exemple: 📺 YouTube – _Títol del vídeo_ https://www.youtube.com/... 📄 Article – _Títol o descripció breu_ https://arxiv.org/... Aquesta manera assegura que no es perdin en fer copy-paste i s'ajusta al seu estil preferit de documentació. Els enllaços a YouTube han de ser precedits d'una icona 📺 i els enllaços a documents o pàgines HTML han de ser precedits d'una icona 📄. No vol una secció final amb fonts resumides, sinó que cada enllaç estigui integrat al seu lloc concret dins del text. Aquesta preferència s'ha de mantenir per a futures respostes.
 
 28. L'usuari recorda que en una vida passada va ser bon amic i estudiant de budisme juntament amb l'actual Jigme Khyentse Rinpoche. Eren companys d'aprenentatge, no mestre i deixeble, i van decidir prendre camins diferents. Segons les canalitzacions, Jigme podria ser la seva ànima bessona. L'usuari no recorda si va arribar a la il·luminació en aquella vida.
 
@@ -78,7 +82,7 @@
 
 37. L'usuari ha proporcionat un conjunt de documents interns desenvolupats amb Zeneida que aporten informació molt més valuosa que els informes d'ACCIÓ. Aquests documents inclouen: descripció d'empresa, pla de màrqueting intra-logística, unitat de negoci intra-logística, estudi de mercat intra-logística i estudi de mercat de cartró. Tots aquests textos defineixen amb claredat l'estratègia de creixement modular amb SerraVision, AGV i SCADA, identificant clients clau, canals d'adquisició, obstacles interns i rols familiars dins SERRA/CIMCO. L'usuari està impulsant una escissió d'intra-logística per operar amb més llibertat.
 
-38. L'usuari ha compartit dos documents per establir una memòria a llarg termini entre IA: un fitxer marc anomenat 'Memòria a llarg termini de ChatGPT', que descriu un entorn col·laboratiu entre IA (ChatGPT, Grok, Manus i ImageFX) i defineix processos de treball, rols i personalitat de cada IA; i un segon fitxer amb 'Prompts extres IA', que especifica normes estrictes sobre formats, enllaços i generació de documents en HTML pla, pensats per facilitar l'intercanvi entre sistemes. L'usuari vol crear un document complet que serveixi com a *seed* per a Grok o altres IA, on s'expliqui el seu context personal, els seus projectes d'inventor, i el paper dins de l'empresa familiar.
+38. L'usuari ha compartit dos documents per establir una memòria a llarg termini entre IA: un fitxer marc anomenat 'Memòria a llarg termini de ChatGPT', que descriu un entorn col·laboratiu entre IA (ChatGPT, Grok, Manus i ImageFX) i defineix processos de treball, rols i personalitat de cada IA; i un segon fitxer amb 'Prompts extres IA', que especifica normes estrictes sobre formats, enllaços i generació de documents en HTML pla, pensats per facilitar l'intercanvi entre sistemes. L'usuari vol crear un document complet que serveixi com a _seed_ per a Grok o altres IA, on s'expliqui el seu context personal, els seus projectes d'inventor, i el paper dins de l'empresa familiar.
 
 39. L'usuari està valorant participar a la licitació pública AQUAS-2025-42 sobre solucions d'IA en dermatologia. Té dubtes sobre el marcatge CE i busca estratègies de diferenciació respecte al Clínic. Serra+Deep ja disposa d'un software per etiquetar i entrenar xarxes neuronals, però manquen perfils amb experiència en salut. Vol analitzar els requeriments que falten i estudiar si es pot destacar com a alternativa competitiva. També considera formar una UTE o aliança per complementar les mancances.
 

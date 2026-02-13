@@ -341,6 +341,30 @@ export async function monitorWebInbox(options: {
   };
   sock.ev.on("messages.upsert", handleMessagesUpsert);
 
+  // Handle history sync messages (from fetchMessageHistory / on-demand sync)
+  const handleHistorySet = (data: {
+    chats: unknown[];
+    contacts: unknown[];
+    messages: import("@whiskeysockets/baileys").WAMessage[];
+    isLatest?: boolean;
+    progress?: number | null;
+    syncType?: number | null;
+    peerDataRequestSessionId?: string | null;
+  }) => {
+    const msgCount = data.messages?.length ?? 0;
+    logVerbose(
+      `[history-sync] Received ${msgCount} messages (syncType=${data.syncType}, progress=${data.progress}, sessionId=${data.peerDataRequestSessionId})`,
+    );
+    if (msgCount > 0) {
+      // Process history messages through the normal upsert handler
+      handleMessagesUpsert({
+        messages: data.messages,
+        type: "append",
+      } as any);
+    }
+  };
+  sock.ev.on("messaging-history.set", handleHistorySet);
+
   const handleConnectionUpdate = (
     update: Partial<import("@whiskeysockets/baileys").ConnectionState>,
   ) => {
@@ -399,5 +423,39 @@ export async function monitorWebInbox(options: {
     },
     // IPC surface (sendMessage/sendPoll/sendReaction/sendComposingTo)
     ...sendApi,
+    // History fetching
+    fetchMessageHistory: async (
+      chatJid: string,
+      count: number,
+      oldestMsgId?: string,
+      oldestMsgFromMe?: boolean,
+      oldestMsgTimestamp?: number,
+    ) => {
+      if (typeof (sock as any).fetchMessageHistory !== "function") {
+        throw new Error("fetchMessageHistory not available on this Baileys socket version");
+      }
+      const oldestMsgKey = {
+        remoteJid: chatJid,
+        fromMe: oldestMsgFromMe ?? false,
+        id: oldestMsgId ?? "",
+      };
+      const result = await (sock as any).fetchMessageHistory(
+        count,
+        oldestMsgKey,
+        oldestMsgTimestamp ? oldestMsgTimestamp * 1000 : Date.now(),
+      );
+      return { ok: true, requestId: result };
+    },
+    requestPlaceholderResend: async (chatJid: string, msgId: string, fromMe?: boolean) => {
+      if (typeof (sock as any).requestPlaceholderResend !== "function") {
+        throw new Error("requestPlaceholderResend not available on this Baileys socket version");
+      }
+      await (sock as any).requestPlaceholderResend({
+        remoteJid: chatJid,
+        fromMe: fromMe ?? false,
+        id: msgId,
+      });
+      return { ok: true };
+    },
   } as const;
 }

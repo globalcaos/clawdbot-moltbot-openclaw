@@ -24,6 +24,18 @@ export type ActiveWebListener = {
     participant?: string,
   ) => Promise<void>;
   sendComposingTo: (to: string) => Promise<void>;
+  fetchMessageHistory?: (
+    chatJid: string,
+    count: number,
+    oldestMsgId?: string,
+    oldestMsgFromMe?: boolean,
+    oldestMsgTimestamp?: number,
+  ) => Promise<{ ok: boolean; requestId?: string; error?: string }>;
+  requestPlaceholderResend?: (
+    chatJid: string,
+    msgId: string,
+    fromMe?: boolean,
+  ) => Promise<{ ok: boolean; requestId?: string; error?: string }>;
   close?: () => Promise<void>;
 };
 

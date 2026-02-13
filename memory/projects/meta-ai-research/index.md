@@ -1,130 +1,113 @@
-# 🔬 Project: Meta-AI Research Agent
+# Meta-AI Research Consolidated Index
 
-**Status:** Active (Cron Job)  
-**Created:** 2026-02-05  
-**Schedule:** Daily at 04:00  
-**Inspired by:** AURORA AI Researcher  
+_Last updated: 2026-02-09_
 
----
+## Purpose
 
-## 🎯 Mission
+Daily automated scan (04:00 CET) for performant AI models suitable for self-hosting, algorithm tracking, and project-relevant discoveries. Inspired by AURORA AI Researcher.
 
-Stay on top of AI developments to maximize time and resources. Primary focus:
+## Key Findings (Feb 5-9, 2026)
 
-1. **Best Open-Source Models** — Find the most performant self-hosted AI we can install
-2. **Algorithm Tracking** — Monitor SOTA for specific applications
-3. **Project Connections** — Link discoveries to Oscar's active projects
+### Object Detection -- The Big Story
 
----
+- **YOLO26** (Ultralytics, Sept 2025): NMS-free detection, no DFL, ProgLoss, STAL for small targets, MuSGD optimizer. 43% faster on CPU vs YOLOv11/12. Sub-2ms on T4 (nano). Clean INT8/FP16 export. YOLOE-26 enables open-vocabulary detection at runtime. Recommended for all projects (SerraVision, Pallet Scan, Gantry).
+- **RF-DETR** (Roboflow): First real-time detector to surpass 60 AP on COCO. NMS-free with deterministic latency (4.52ms on T4). Apache 2.0 for Nano-Large. Outperforms YOLO26 on segmentation. New SOTA.
+- **DMS-YOLO**: YOLOv11 variant for aerial/drone small target detection (+7% mAP50).
 
-## 🔍 Research Domains
+### Self-Hostable LLMs
 
-### Open-Source LLMs (Priority 1)
-| Model | Parameters | Context | License | Local Feasibility |
-|-------|------------|---------|---------|-------------------|
-| Llama 3.x | 8B-405B | 128k | Meta | ✅ (8B-70B) |
-| Mistral/Mixtral | 7B-8x22B | 32k | Apache | ✅ |
-| Qwen 2.5 | 0.5B-72B | 128k | Apache | ✅ |
-| DeepSeek | 7B-67B | 32k | MIT | ✅ |
+- **Qwen3-Coder-Next** (Alibaba): 80B MoE, 3B active. 70.6% SWE-Bench Verified, matches Claude Sonnet 4.5 on coding. Apache 2.0. Runs on RTX 4090/5090.
+- **DeepSeek-R1/V3**: 671B MoE. Matches GPT-4o, 96% cheaper per token. Needs multi-GPU.
+- **GLM-4.7-Flash** (ZhipuAI): 30B MoE, 3B active. SOTA at size on SWE-bench. "Preserved Thinking" mode for agentic tasks. GGUF available for CPU via Ollama.
+- **Step-3.5-Flash-Int4**: New local LLM contender for 128GB+ RAM devices.
+- **GLM-5**: Confirmed for February 2026 release.
+- **Phi-4-Mini** (Microsoft): 3.8B, edge/embedded deployment.
+- **MiniMax-M2.1**: 229B MoE, 10B active. Beats Claude 4.5 on multilingual.
 
-*Track: New releases, benchmark scores, fine-tunes, quantization advances*
+### Vision & Segmentation
 
-### Image/Video Generation
-- Stable Diffusion 3.x, SDXL
-- AnimateDiff, SVD
-- ComfyUI workflows
-- ControlNet advances
+- **SAM3** (Meta): Promptable Concept Segmentation -- text-prompt object tracking across video. 0.9B params. Major upgrade from SAM2.
+- **Meta SAM2**: Unified image+video segmentation foundation model. Trending on HuggingFace.
+- **Apple SHARP**: Single image to 3D Gaussian splat in sub-second. Open source.
+- **DeepSeek OCR 2**: 80% fewer visual tokens, beats Gemini 3 Pro on document parsing.
+- **GLM-OCR**: 0.9B lightweight multimodal OCR, runs on consumer hardware.
 
-**Application:** Marketing materials, documentation visuals
+### Robotics & VLA
 
-### 3D Reconstruction (Pallet Scan Project)
-- NeRF variants (Instant-NGP, Gaussian Splatting)
-- Stereo depth estimation (RAFT-Stereo, CREStereo)
-- Monocular depth (Depth Anything, MiDaS)
-- Point cloud processing (Open3D, PCL)
+- **Microsoft Rho-alpha**: VLA+ with tactile sensing. Based on Phi VLM. Bimanual manipulation from natural language. Primary relevance for Gantry Robot Arm.
+- **IMLE Policy**: 10x faster than Diffusion Policy for visuomotor learning.
+- **MoveIt (ROS)**: Gold standard for manipulation planning.
 
-**Application:** Pallet dimension scanning, damage detection
+### Video Generation
 
-### Object Recognition + Optical Flow (SerraVision)
-- YOLO variants (v8, v9, v10)
-- RT-DETR for real-time transformers
-- Optical flow (RAFT, FlowFormer)
-- LSTM/Transformer fusion for temporal understanding
-- Video object segmentation (SAM 2)
+- **LTX-2** (Lightricks): First open-source video model with native audio sync. "Stable Diffusion moment" for video.
+- **StreamDiffusion**: 91 FPS on RTX 4090.
+- **LingBot-World** (Ant Group): 28B open-source world model, alternative to Genie 3.
 
-**Application:** Forklift/AGV perception, tracking, prediction
+### 3D Reconstruction
 
-### Audio/Speech
-- Whisper variants (faster-whisper, distil-whisper)
-- Local TTS (Coqui, Bark, XTTS)
-- Voice cloning advances
+- **PLANING Framework**: Loosely coupled Triangle-Gaussian for streaming 3D. UAV navigation, mesh/NeRF.
+- **3D Gaussian Ray Tracing** (arXiv:2602.01057): Improved pallet/object 3D reconstruction from multi-view.
 
----
+### Image Generation
 
-## 📊 Evaluation Criteria (AURORA-style)
+- **FLUX 2 Pro** (Black Forest Labs): Dominates professional image gen. 16-channel latent space.
 
-For each discovery, evaluate:
-- 🔬 **Scientific Novelty** — Is this genuinely new?
-- 💰 **Commercial Potential** — Can we monetize or save costs?
-- ⚙️ **Automation Feasibility** — Can agents use this?
-- 🔗 **Project Relevance** — Links to Oscar's work?
+### Key Benchmarks (Feb 2026)
 
-Tags: `#opensource` `#paid` `#breakthrough` `#incremental`
+| Model            | SWE-Bench     | Notes            |
+| ---------------- | ------------- | ---------------- |
+| Qwen3-Coder-Next | 70.6%         | 3B active params |
+| Claude Opus 4.5  | ~68%          | Reference        |
+| DeepSeek-R1      | ~65%          | MIT license      |
+| GLM-4.7-Flash    | SOTA for size | 3B active        |
 
----
+### Strategic Observations
 
-## 🔄 Cron Job Spec
+1. MoE efficiency revolution: 3B active params match 70B dense on specialized tasks
+2. Chinese labs shipping faster (Qwen, DeepSeek, GLM releasing weekly)
+3. Multimodal is table stakes -- every new model handles vision+language
+4. Tactile/force sensing emerging in robotics foundation models
+5. NMS-free detection is the new standard (YOLO26, RF-DETR)
 
-```yaml
-schedule:
-  kind: cron
-  expr: "0 4 * * *"  # 04:00 daily
-  tz: Europe/Madrid
+## YOLO Architecture Comparison Summary
 
-payload:
-  kind: agentTurn
-  message: |
-    META-AI RESEARCH SCAN
-    
-    1. Check arXiv cs.AI, cs.CV, cs.LG for last 24h
-    2. Check HuggingFace trending models
-    3. Check GitHub trending (AI/ML topics)
-    4. Check r/LocalLLaMA, r/StableDiffusion for community discoveries
-    
-    For notable findings:
-    - Assess novelty, commercial potential, automation feasibility
-    - Link to Oscar's projects (SerraVision, Pallet Scan, Gantry)
-    - Note if it could replace/upgrade current tools
-    
-    Output: Markdown digest to memory/meta-ai/YYYY-MM-DD.md
-    
-    If breakthrough discovered: Flag for immediate notification
+YOLO26 key innovations over predecessors:
 
-sessionTarget: isolated
-```
+- **NMS-Free**: Learned suppression replaces handcrafted post-processing
+- **No DFL**: Cleaner ONNX/TensorRT/CoreML/TFLite exports
+- **ProgLoss**: Progressive loss balancing (classify first, localize later)
+- **STAL**: Small-Target-Aware Label Assignment
+- **MuSGD**: LLM-inspired optimizer
 
----
+| Model            | mAP@50 | Latency (T4) | Edge Ready |
+| ---------------- | ------ | ------------ | ---------- |
+| YOLO26n          | 37.3%  | 1.2ms        | Excellent  |
+| YOLO26s          | 44.9%  | 2.0ms        | Excellent  |
+| YOLO26m          | 50.0%  | 4.3ms        | Good       |
+| RF-DETR 2x-large | 60+ AP | 4.52ms       | Good       |
 
-## 📁 Output Structure
+Recommended per project:
 
-```
-memory/meta-ai/
-├── 2026-02-05.md  # Daily digests
-├── 2026-02-06.md
-├── breakthroughs.md  # Notable discoveries
-└── models-inventory.md  # Current SOTA reference
-```
+- **SerraVision**: YOLO26m/l for multi-task (detect+segment), Jetson-optimized
+- **Pallet Scan**: YOLO26s + SAM3 for detection + segmentation by description
+- **Gantry Robot Arm**: YOLO26n (speed) + pose estimation, feed to MoveIt/VLA
+
+## Immediate Action Items
+
+1. Evaluate YOLO26 and RF-DETR on existing pallet dataset
+2. Test SAM3 for open-vocabulary segmentation ("wooden pallet", "cardboard box")
+3. Set up Qwen3-Coder-Next via Ollama for local code assistance
+4. Test GLM-4.7-Flash GGUF on available hardware
+5. Watch GLM-5 release (February 2026)
+6. Evaluate Meta SAM2 for Pallet Scan segmentation pipeline
+7. Review Rho-alpha papers for Gantry integration patterns
+
+## Source Files
+
+- Daily scans: `../meta-ai/2026-02-05.md` through `2026-02-09.md`
+- YOLO comparison: `../meta-ai/yolo-comparison.md`
 
 ---
 
-## 🎯 Future Evolution
-
-Phase 2: Auto-upgrade agent
-- Monitor for models that outperform current stack
-- Test in sandbox environment
-- Propose upgrades with evidence
-- Execute with approval (or auto if low-risk)
-
----
-
-*"An AI that studies intelligence to enhance intelligence itself."* — AURORA Manifest
+_Consolidated from 5 daily scans + 1 comparison document by Phase 5-6 processing._

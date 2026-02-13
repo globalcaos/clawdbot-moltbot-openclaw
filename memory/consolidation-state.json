@@ -1,6 +1,6 @@
 {
-  "lastConsolidation": "2026-02-08T03:00:00+01:00",
-  "lastProcessedDate": "2026-02-08",
+  "lastConsolidation": "2026-02-12T03:00:00+01:00",
+  "lastProcessedDate": "2026-02-11",
   "consolidationHistory": [
     {
       "date": "2026-02-04",
@@ -31,6 +31,24 @@
       "processed": ["2026-02-07.md", "2026-02-08.md"],
       "changes": 8,
       "note": "Privacy lesson, agent-memory skill, authorization principle, Max-Jarvis group"
+    },
+    {
+      "date": "2026-02-09",
+      "processed": ["2026-02-08.md (post-3AM delta)", "2026-02-09.md"],
+      "changes": 22,
+      "note": "Fork sync, plugin crashes, Claude Max API, budget panel, /new button fix, race conditions"
+    },
+    {
+      "date": "2026-02-11",
+      "processed": ["2026-02-10.md"],
+      "changes": 10,
+      "note": "Budget pressure removal, jarvis-voice CSS, WhatsApp ingestion issue, voice prompt fix"
+    },
+    {
+      "date": "2026-02-12",
+      "processed": ["2026-02-11.md"],
+      "changes": 16,
+      "note": "Online engagement (PR closures, ClawHub metrics baseline, SEO republish), Agent Memory v3.0 spec, humor research (embedding space theory, 11 relationships), community engagement lessons"
     }
   ]
 }
