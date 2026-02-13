@@ -1,10 +1,10 @@
 ---
 name: youtube
-version: 1.0.1
+version: 1.0.4
 description: |
-  The most comprehensive YouTube skill for AI agents. Extract transcripts for FREE (zero API quota!), search with filters, batch video details, read comments, download videos/audio. We analyzed 15+ YouTube tools and built the one that does everything.
-homepage: https://github.com/openclaw/openclaw
-repository: https://github.com/openclaw/openclaw
+  YouTube for OpenClaw — extract transcripts FREE (zero API quota), download 4K video & FLAC audio via yt-dlp, read comments, search with filters, batch video details. No API key needed for transcripts. The most comprehensive YouTube skill — we analyzed 15+ tools and built the one that does everything.
+homepage: https://github.com/globalcaos/clawdbot-moltbot-openclaw
+repository: https://github.com/globalcaos/clawdbot-moltbot-openclaw
 metadata:
   {
     "openclaw":
@@ -40,13 +40,13 @@ We analyzed 15+ YouTube MCP servers and found each does one thing well, but none
 
 ## Why This Skill?
 
-| What Others Do | What We Do |
-|----------------|------------|
-| Transcripts OR search OR downloads | **All three, unified** |
-| Burn API quota on transcripts | **FREE transcripts** (zero quota) |
-| Single video at a time | **Batch operations** (50 videos) |
-| Basic search | **Filtered search** (date, duration, order) |
-| Text output only | **JSON export** for pipelines |
+| What Others Do                     | What We Do                                  |
+| ---------------------------------- | ------------------------------------------- |
+| Transcripts OR search OR downloads | **All three, unified**                      |
+| Burn API quota on transcripts      | **FREE transcripts** (zero quota)           |
+| Single video at a time             | **Batch operations** (50 videos)            |
+| Basic search                       | **Filtered search** (date, duration, order) |
+| Text output only                   | **JSON export** for pipelines               |
 
 ### The Killer Feature: FREE Transcripts
 
@@ -56,16 +56,16 @@ Most tools use the YouTube Data API for transcripts = **100 quota units per requ
 
 ## Quick Reference
 
-| Command | Quota | What it does |
-|---------|-------|--------------|
-| `transcript VIDEO` | **FREE** | Get video transcript |
+| Command                 | Quota    | What it does             |
+| ----------------------- | -------- | ------------------------ |
+| `transcript VIDEO`      | **FREE** | Get video transcript     |
 | `transcript-list VIDEO` | **FREE** | List available languages |
-| `download VIDEO` | **FREE** | Download video (yt-dlp) |
-| `download-audio VIDEO` | **FREE** | Extract audio only |
-| `search QUERY` | 100 | Search videos |
-| `video ID [ID...]` | 1/video | Get details (batch!) |
-| `comments VIDEO` | 1 | Get comments + replies |
-| `channel [ID]` | 1-3 | Channel statistics |
+| `download VIDEO`        | **FREE** | Download video (yt-dlp)  |
+| `download-audio VIDEO`  | **FREE** | Extract audio only       |
+| `search QUERY`          | 100      | Search videos            |
+| `video ID [ID...]`      | 1/video  | Get details (batch!)     |
+| `comments VIDEO`        | 1        | Get comments + replies   |
+| `channel [ID]`          | 1-3      | Channel statistics       |
 
 ## Setup (One Time)
 
@@ -102,6 +102,7 @@ uv run {baseDir}/scripts/youtube.py transcript VIDEO_ID --json
 ```
 
 Works with URLs too:
+
 ```bash
 uv run {baseDir}/scripts/youtube.py transcript "https://youtube.com/watch?v=dQw4w9WgXcQ"
 ```
@@ -175,13 +176,13 @@ uv run {baseDir}/scripts/youtube.py channel
 
 ## Command Aliases
 
-| Full | Alias |
-|------|-------|
-| `transcript` | `tr` |
-| `search` | `s` |
-| `video` | `v` |
-| `comments` | `c` |
-| `download` | `dl` |
+| Full             | Alias |
+| ---------------- | ----- |
+| `transcript`     | `tr`  |
+| `search`         | `s`   |
+| `video`          | `v`   |
+| `comments`       | `c`   |
+| `download`       | `dl`  |
 | `download-audio` | `dla` |
 
 ## Use Cases
@@ -206,6 +207,7 @@ uv run {baseDir}/scripts/youtube.py -a personal liked
 ## Why We Built This
 
 We surveyed the landscape:
+
 - **kimtaeyoon83/mcp-server-youtube-transcript** (463⭐) — Great transcripts, no search
 - **kevinwatt/yt-dlp-mcp** (211⭐) — Great downloads, no transcripts
 - **dannySubsense/youtube-mcp-server** (9⭐) — Most functions, but uses paid API for transcripts
@@ -214,3 +216,11 @@ We surveyed the landscape:
 **None combined free transcripts + search + downloads + batch ops.**
 
 Now one does.
+
+---
+
+## Credits
+
+Created by **Oscar Serra** with the help of **Claude** (Anthropic).
+
+_We analyzed 15+ YouTube tools and built the one that does everything._

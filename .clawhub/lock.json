@@ -2,8 +2,8 @@
   "version": 1,
   "skills": {
     "youtube-ultimate": {
-      "version": "1.0.0",
-      "installedAt": 1770111588336
+      "version": "1.0.3",
+      "installedAt": 1770645962290
     },
     "whatsapp-automation": {
       "version": "1.0.5",
@@ -11,11 +11,99 @@
     },
     "wacli": {
       "version": "1.0.0",
-      "installedAt": 1770378115807
+      "installedAt": 1770907473891
     },
     "gif-whatsapp": {
       "version": "1.0.1",
       "installedAt": 1770378117195
+    },
+    "weather": {
+      "version": "1.0.0",
+      "installedAt": 1770645408709
+    },
+    "gifgrep": {
+      "version": "1.0.1",
+      "installedAt": 1770645429946
+    },
+    "github": {
+      "version": "1.0.0",
+      "installedAt": 1770645443266
+    },
+    "gog": {
+      "version": "1.0.0",
+      "installedAt": 1770645450522
+    },
+    "goplaces": {
+      "version": "1.0.0",
+      "installedAt": 1770645458036
+    },
+    "healthcheck": {
+      "version": "1.0.2",
+      "installedAt": 1770645465617
+    },
+    "nano-pdf": {
+      "version": "1.0.0",
+      "installedAt": 1770645473181
+    },
+    "openai-whisper": {
+      "version": "1.0.0",
+      "installedAt": 1770645480615
+    },
+    "skill-creator": {
+      "version": "0.1.0",
+      "installedAt": 1770645488814
+    },
+    "songsee": {
+      "version": "1.0.0",
+      "installedAt": 1770645496268
+    },
+    "video-frames": {
+      "version": "1.0.0",
+      "installedAt": 1770645503614
+    },
+    "gemini": {
+      "version": "1.0.0",
+      "installedAt": 1770645510762
+    },
+    "local-places": {
+      "version": "1.0.0",
+      "installedAt": 1770645518660
+    },
+    "token-panel-ultimate": {
+      "version": "1.0.5",
+      "installedAt": 1770645851306
+    },
+    "agent-boundaries-ultimate": {
+      "version": "1.2.2",
+      "installedAt": 1770645866487
+    },
+    "shell-security-ultimate": {
+      "version": "1.0.1",
+      "installedAt": 1770645880614
+    },
+    "agent-memory-ultimate": {
+      "version": "2.0.3",
+      "installedAt": 1770645895146
+    },
+    "jarvis-voice": {
+      "version": "1.0.0",
+      "installedAt": 1770645908515
+    },
+    "whatsapp-ultimate": {
+      "version": "1.1.2",
+      "installedAt": 1770645922582
+    },
+    "chatgpt-exporter-ultimate": {
+      "version": "1.0.2",
+      "installedAt": 1770645948524
+    },
+    "linkedin-inbox": {
+      "version": "0.1.0",
+      "installedAt": 1770813757814
+    },
+    "whatsapp-business": {
+      "version": "1.0.3",
+      "installedAt": 1770907475116
     }
   }
 }

@@ -1,22 +1,25 @@
 {
   "name": "agent-boundaries-ultimate",
-  "version": "1.1.0",
-  "description": "Beyond Asimov's Three Laws: Privacy, security, and ethical boundaries for digital agents. OPSEC, authorization, inter-agent etiquette, publishing guidelines. Essential training for the real world.",
+  "version": "1.2.2",
+  "description": "Safety & ethics framework for OpenClaw agents — beyond Asimov's Three Laws for the digital age. Authorization models, privacy boundaries, inter-agent communication etiquette, OPSEC guidelines. Essential for agents handling sensitive data, group chats, or multi-user environments.",
   "keywords": [
-    "privacy",
-    "security",
-    "opsec",
+    "agent-safety",
+    "authorization",
     "boundaries",
     "ethics",
-    "authorization",
-    "agent-safety",
+    "inter-agent",
+    "openclaw",
+    "opsec",
+    "privacy",
     "publishing",
-    "inter-agent"
+    "responsible-ai",
+    "security",
+    "security-framework"
   ],
-  "author": "OpenClaw Community",
   "license": "MIT",
+  "author": "OpenClaw Community",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/globalcaos/clawdbot-moltbot-openclaw"
   }
 }

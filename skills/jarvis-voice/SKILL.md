@@ -1,9 +1,9 @@
 ---
 name: jarvis-voice
 version: 1.0.0
-description: Metallic AI voice persona with TTS and visual transcript styling. Speak responses aloud with a JARVIS-like robotic voice and display transcripts in purple italics.
-homepage: https://github.com/openclaw/openclaw
-repository: https://github.com/openclaw/openclaw
+description: "Give your OpenClaw agent a voice — JARVIS-inspired metallic TTS with sherpa-onnx (fully offline, no cloud). Purple italic transcripts in webchat. Customizable voice effects: flanger, echo, pitch shift. Local-first, zero API costs, zero latency."
+homepage: https://github.com/globalcaos/clawdbot-moltbot-openclaw
+repository: https://github.com/globalcaos/clawdbot-moltbot-openclaw
 metadata:
   openclaw:
     emoji: "🎙️"
@@ -80,7 +80,7 @@ Add to your webchat CSS:
 
 ```css
 .jarvis-voice {
-  color: #9B59B6;
+  color: #9b59b6;
   font-style: italic;
 }
 ```
@@ -91,27 +91,30 @@ And allow `span` in markdown sanitization.
 
 Edit `~/.local/bin/jarvis` to adjust:
 
-| Parameter | Effect |
-|-----------|--------|
+| Parameter                 | Effect                 |
+| ------------------------- | ---------------------- |
 | `--vits-length-scale=0.5` | Speed (lower = faster) |
-| `aecho` delays | Metallic resonance |
-| `chorus` | Thickness/detuning |
-| `highpass/lowpass` | Frequency range |
-| `treble=g=3` | Metallic sheen |
+| `aecho` delays            | Metallic resonance     |
+| `chorus`                  | Thickness/detuning     |
+| `highpass/lowpass`        | Frequency range        |
+| `treble=g=3`              | Metallic sheen         |
 
 ### Presets
 
 **More robotic:**
+
 ```
 aecho=0.7:0.7:5|10|15:0.4|0.35|0.3
 ```
 
 **More human:**
+
 ```
 aecho=0.4:0.4:20:0.2
 ```
 
 **Deeper:**
+
 ```
 highpass=f=200,lowpass=f=3000
 ```
@@ -119,13 +122,16 @@ highpass=f=200,lowpass=f=3000
 ## Troubleshooting
 
 ### No audio output
+
 - Check `aplay -l` for available devices
 - Update the `-D plughw:X,Y` parameter
 
 ### Voice too fast/slow
+
 - Adjust `--vits-length-scale` (0.3=very fast, 1.0=normal)
 
 ### Metallic effect too strong
+
 - Reduce echo delays and chorus depth
 
 ## Files
@@ -135,4 +141,4 @@ highpass=f=200,lowpass=f=3000
 
 ---
 
-*A voice persona for assistants who prefer to be heard as well as read.*
+_A voice persona for assistants who prefer to be heard as well as read._

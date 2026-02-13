@@ -1,7 +1,7 @@
 ---
 name: shell-security-ultimate
-version: 1.0.0
-description: Security-first command execution for AI agents. Classifies commands by risk level (SAFE→CRITICAL), enforces transparency, prevents dangerous operations. Includes enforcement scripts and agent integration patterns.
+version: 1.0.2
+description: "Classify shell commands by risk level (SAFE to CRITICAL) before your OpenClaw agent executes them. Color-coded output, transparency enforcement, audit logging. Prevent dangerous operations, credential exposure, or unauthorized network access. Enforcement scripts and integration patterns included."
 homepage: https://github.com/globalcaos/clawdbot-moltbot-openclaw
 repository: https://github.com/globalcaos/clawdbot-moltbot-openclaw
 ---
@@ -15,6 +15,7 @@ Security-first command execution for AI agents. Classify, audit, and control eve
 ## The Problem
 
 AI agents with shell access can:
+
 - Run destructive commands (`rm -rf /`)
 - Leak sensitive data (`cat ~/.ssh/id_rsa`)
 - Modify system state without oversight
@@ -28,10 +29,10 @@ AI agents with shell access can:
 
 There are two ways to control agent behavior:
 
-| Approach | Enforcement | Reliability | Example |
-|----------|-------------|-------------|---------|
-| **Prompted** | Instructions in MD files | ~80% | "Don't run dangerous commands" in SOUL.md |
-| **Coded** | Actual code/hooks | ~100% | Plugin that blocks `rm -rf` before execution |
+| Approach     | Enforcement              | Reliability | Example                                      |
+| ------------ | ------------------------ | ----------- | -------------------------------------------- |
+| **Prompted** | Instructions in MD files | ~80%        | "Don't run dangerous commands" in SOUL.md    |
+| **Coded**    | Actual code/hooks        | ~100%       | Plugin that blocks `rm -rf` before execution |
 
 ### Why This Matters
 
@@ -41,15 +42,15 @@ There are two ways to control agent behavior:
 
 ### Current State of This Skill
 
-| Component | Type | Status |
-|-----------|------|--------|
-| Classification guide | Prompted | ✅ In SKILL.md |
-| Display script | Coded | ✅ `scripts/cmd_display.py` |
-| SOUL.md integration | Prompted | ✅ Template provided |
-| OpenClaw plugin hook | Coded | ❌ Not yet — requires `before_tool_call` hook |
-| Blocklist enforcement | Coded | ❌ Planned — would reject commands matching patterns |
+| Component             | Type     | Status                                               |
+| --------------------- | -------- | ---------------------------------------------------- |
+| Classification guide  | Prompted | ✅ In SKILL.md                                       |
+| Display script        | Coded    | ✅ `scripts/cmd_display.py`                          |
+| SOUL.md integration   | Prompted | ✅ Template provided                                 |
+| OpenClaw plugin hook  | Coded    | ❌ Not yet — requires `before_tool_call` hook        |
+| Blocklist enforcement | Coded    | ❌ Planned — would reject commands matching patterns |
 
-**Where we are:** Mixed approach. The display script provides structure, but true enforcement (blocking dangerous commands before execution) requires an OpenClaw plugin. The current implementation relies on the agent *choosing* to use the wrapper.
+**Where we are:** Mixed approach. The display script provides structure, but true enforcement (blocking dangerous commands before execution) requires an OpenClaw plugin. The current implementation relies on the agent _choosing_ to use the wrapper.
 
 **Where we're going:** Full coded enforcement via plugin that intercepts `exec` tool calls and applies security policy before execution.
 
@@ -57,12 +58,12 @@ There are two ways to control agent behavior:
 
 ## Security Levels
 
-| Level | Emoji | Risk | Examples |
-|-------|-------|------|----------|
-| 🟢 SAFE | None | `ls`, `cat`, `git status`, `pwd` |
-| 🔵 LOW | Reversible | `touch`, `mkdir`, `git commit` |
-| 🟡 MEDIUM | Moderate | `npm install`, `git push`, config edits |
-| 🟠 HIGH | Significant | `sudo`, service restarts, global installs |
+| Level       | Emoji       | Risk                                        | Examples |
+| ----------- | ----------- | ------------------------------------------- | -------- |
+| 🟢 SAFE     | None        | `ls`, `cat`, `git status`, `pwd`            |
+| 🔵 LOW      | Reversible  | `touch`, `mkdir`, `git commit`              |
+| 🟡 MEDIUM   | Moderate    | `npm install`, `git push`, config edits     |
+| 🟠 HIGH     | Significant | `sudo`, service restarts, global installs   |
 | 🔴 CRITICAL | Destructive | `rm -rf`, database drops, credential access |
 
 ---
@@ -78,26 +79,31 @@ python3 scripts/cmd_display.py <level> "<command>" "<purpose>" "$(<command>)"
 ### Examples
 
 **🟢 SAFE — Read-only:**
+
 ```bash
 python3 scripts/cmd_display.py safe "git status" "Check repo state" "$(git status --short)"
 ```
 
 **🔵 LOW — File changes:**
+
 ```bash
 python3 scripts/cmd_display.py low "touch notes.md" "Create file" "$(touch notes.md && echo '✓')"
 ```
 
 **🟡 MEDIUM — Dependencies:**
+
 ```bash
 python3 scripts/cmd_display.py medium "npm install axios" "Add HTTP client" "$(npm install axios 2>&1 | tail -1)"
 ```
 
 **🟠 HIGH — Show only, don't execute:**
+
 ```bash
 python3 scripts/cmd_display.py high "sudo systemctl restart nginx" "Restart server" "⚠️ Manual execution required"
 ```
 
 **🔴 CRITICAL — Never auto-execute:**
+
 ```bash
 python3 scripts/cmd_display.py critical "rm -rf node_modules" "Clean deps" "🛑 Blocked - requires human confirmation"
 ```
@@ -164,10 +170,14 @@ Add to your `SOUL.md` or `AGENTS.md`:
 
 ## Philosophy
 
-> *"If you can enforce it with code, don't rely on documentation."*
+> _"If you can enforce it with code, don't rely on documentation."_
 
 Prompted behaviors are suggestions. Coded behaviors are laws. This skill provides both — use the prompts now, upgrade to coded enforcement when the plugin is ready.
 
 ---
 
-*Security is not optional. Every command an agent runs should be classified, justified, and auditable.*
+## Credits
+
+Created by **Oscar Serra** with the help of **Claude** (Anthropic).
+
+_Security is not optional. Every command an agent runs should be classified, justified, and auditable._
