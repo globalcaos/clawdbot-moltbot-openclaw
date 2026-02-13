@@ -1,6 +1,6 @@
 """
-Cognitive Memory Core — Phase 1: Store, Embed, Recall
-SQLite + FTS5 + numpy vector search
+Cognitive Memory Core — Phases 1-3: Store, Embed, Recall, Consolidate, Associate
+SQLite + FTS5 + numpy vector search + association graph
 """
 import sqlite3
 import json
@@ -83,6 +83,20 @@ CREATE TABLE IF NOT EXISTS memories_vec (
     embedding   BLOB NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS associations (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_id   INTEGER NOT NULL REFERENCES memories(id) ON DELETE CASCADE,
+    target_id   INTEGER NOT NULL REFERENCES memories(id) ON DELETE CASCADE,
+    edge_type   TEXT NOT NULL DEFAULT 'semantic',
+    weight      REAL NOT NULL DEFAULT 0.5,
+    created_at  TEXT NOT NULL,
+    metadata    TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_assoc_source ON associations(source_id);
+CREATE INDEX IF NOT EXISTS idx_assoc_target ON associations(target_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_assoc_pair ON associations(source_id, target_id, edge_type);
+
 CREATE TABLE IF NOT EXISTS schema_version (
     version INTEGER NOT NULL
 );
@@ -98,15 +112,19 @@ def get_conn() -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys=ON")
     return conn
 
+CURRENT_SCHEMA_VERSION = 2
+
 def init_db(conn: sqlite3.Connection):
-    """Create schema if not exists."""
+    """Create schema if not exists. Migrates if needed."""
     conn.executescript(SCHEMA)
-    # Set version
     existing = conn.execute("SELECT version FROM schema_version").fetchone()
     if not existing:
-        conn.execute("INSERT INTO schema_version VALUES (1)")
+        conn.execute(f"INSERT INTO schema_version VALUES ({CURRENT_SCHEMA_VERSION})")
+    elif existing['version'] < CURRENT_SCHEMA_VERSION:
+        # Migration: v1 → v2 adds associations table (already in SCHEMA via IF NOT EXISTS)
+        conn.execute(f"UPDATE schema_version SET version = {CURRENT_SCHEMA_VERSION}")
     conn.commit()
-    log.info(f"Database initialized at {DB_PATH}")
+    log.info(f"Database initialized at {DB_PATH} (v{CURRENT_SCHEMA_VERSION})")
 
 # ---------- store ----------
 
@@ -444,10 +462,184 @@ def consolidate(conn: sqlite3.Connection, days: int = 1) -> dict:
                        metadata={"cluster_members": cluster_ids, "level": 1})
             summaries_created += 1
 
+    # Step 4: Build associations within clusters
+    associations_created = 0
+    for cluster_ids in clusters:
+        associations_created += build_cluster_associations(conn, cluster_ids)
+
     elapsed = (time.time() - t0) * 1000
     return {
         "decay": decay_stats,
         "clusters_found": len(clusters),
         "summaries_created": summaries_created,
+        "associations_created": associations_created,
         "elapsed_ms": round(elapsed),
+    }
+
+# ---------- associations (Phase 3) ----------
+
+def associate(conn: sqlite3.Connection, source_id: int, target_id: int,
+              edge_type: str = "semantic", weight: float = 0.5,
+              metadata: dict = None) -> Optional[int]:
+    """Create or update an association between two memories. Returns assoc id."""
+    now = datetime.utcnow().isoformat() + "Z"
+    meta_str = json.dumps(metadata) if metadata else None
+    try:
+        cur = conn.execute(
+            """INSERT INTO associations (source_id, target_id, edge_type, weight, created_at, metadata)
+               VALUES (?, ?, ?, ?, ?, ?)
+               ON CONFLICT(source_id, target_id, edge_type)
+               DO UPDATE SET weight = MAX(weight, excluded.weight)""",
+            (source_id, target_id, edge_type, weight, now, meta_str)
+        )
+        conn.commit()
+        return cur.lastrowid
+    except Exception as e:
+        log.warning(f"Failed to create association {source_id}->{target_id}: {e}")
+        return None
+
+
+def build_cluster_associations(conn: sqlite3.Connection, cluster_ids: list[int]) -> int:
+    """Create semantic associations between all memories in a cluster."""
+    if len(cluster_ids) < 2:
+        return 0
+
+    # Load embeddings for similarity-based weight
+    rows = conn.execute(
+        f"SELECT memory_id, embedding FROM memories_vec WHERE memory_id IN ({','.join('?' * len(cluster_ids))})",
+        cluster_ids
+    ).fetchall()
+
+    vecs = {r['memory_id']: blob_to_vec(r['embedding']) for r in rows}
+    created = 0
+
+    for i, id_a in enumerate(cluster_ids):
+        for id_b in cluster_ids[i+1:]:
+            if id_a in vecs and id_b in vecs:
+                sim = float(np.dot(vecs[id_a], vecs[id_b]) /
+                           (np.linalg.norm(vecs[id_a]) * np.linalg.norm(vecs[id_b]) + 1e-8))
+                weight = max(sim, 0.1)  # Floor at 0.1
+            else:
+                weight = 0.3  # Default if no embedding
+
+            if associate(conn, id_a, id_b, "semantic", weight):
+                created += 1
+            # Bidirectional
+            if associate(conn, id_b, id_a, "semantic", weight):
+                created += 1
+
+    return created
+
+
+def build_temporal_associations(conn: sqlite3.Connection, window_minutes: int = 30) -> int:
+    """Create temporal associations between memories created close in time."""
+    rows = conn.execute(
+        "SELECT id, created_at FROM memories WHERE is_deleted = 0 ORDER BY created_at"
+    ).fetchall()
+
+    created = 0
+    for i in range(len(rows)):
+        t_i = datetime.fromisoformat(rows[i]['created_at'].replace('Z', ''))
+        for j in range(i + 1, len(rows)):
+            t_j = datetime.fromisoformat(rows[j]['created_at'].replace('Z', ''))
+            diff_min = abs((t_j - t_i).total_seconds()) / 60
+            if diff_min > window_minutes:
+                break
+            # Weight inversely proportional to time gap
+            weight = round(1.0 - (diff_min / window_minutes), 3)
+            if associate(conn, rows[i]['id'], rows[j]['id'], "temporal", weight):
+                created += 1
+            if associate(conn, rows[j]['id'], rows[i]['id'], "temporal", weight):
+                created += 1
+
+    return created
+
+
+def get_associations(conn: sqlite3.Connection, memory_id: int,
+                     edge_type: str = None, direction: str = "both") -> list[dict]:
+    """Get all associations for a memory. direction: 'out', 'in', or 'both'."""
+    results = []
+
+    if direction in ("out", "both"):
+        q = "SELECT a.*, m.content as target_content FROM associations a JOIN memories m ON m.id = a.target_id WHERE a.source_id = ?"
+        params = [memory_id]
+        if edge_type:
+            q += " AND a.edge_type = ?"
+            params.append(edge_type)
+        results.extend([dict(r) for r in conn.execute(q, params).fetchall()])
+
+    if direction in ("in", "both"):
+        q = "SELECT a.*, m.content as source_content FROM associations a JOIN memories m ON m.id = a.source_id WHERE a.target_id = ?"
+        params = [memory_id]
+        if edge_type:
+            q += " AND a.edge_type = ?"
+            params.append(edge_type)
+        results.extend([dict(r) for r in conn.execute(q, params).fetchall()])
+
+    return sorted(results, key=lambda x: x.get('weight', 0), reverse=True)
+
+
+def recall_associated(conn: sqlite3.Connection, query: str, hops: int = 1,
+                      limit: int = 10) -> list[dict]:
+    """
+    Multi-hop retrieval: recall matching memories, then follow associations.
+    Returns direct matches + associated memories with hop distance.
+    """
+    # Get direct matches
+    direct = recall(conn, query, strategy="hybrid", limit=limit)
+    if not direct or hops < 1:
+        return direct
+
+    seen = {m['id'] for m in direct}
+    for m in direct:
+        m['hop'] = 0
+
+    # Follow associations for each hop
+    frontier = [m['id'] for m in direct]
+    all_results = list(direct)
+
+    for hop in range(1, hops + 1):
+        next_frontier = []
+        for mid in frontier:
+            assocs = get_associations(conn, mid)
+            for a in assocs:
+                # Get the OTHER end
+                other_id = a['target_id'] if a['source_id'] == mid else a['source_id']
+                if other_id in seen:
+                    continue
+                seen.add(other_id)
+                row = conn.execute("SELECT * FROM memories WHERE id = ? AND is_deleted = 0",
+                                  (other_id,)).fetchone()
+                if row:
+                    d = dict(row)
+                    d['score'] = round(a['weight'] * (0.7 ** hop), 4)  # Decay score by hop
+                    d['hop'] = hop
+                    d['via_edge'] = a['edge_type']
+                    all_results.append(d)
+                    next_frontier.append(other_id)
+
+        frontier = next_frontier
+        if not frontier:
+            break
+
+    # Sort: direct matches first (hop=0), then by score descending
+    all_results.sort(key=lambda x: (x.get('hop', 0), -x.get('score', 0)))
+    return all_results[:limit]
+
+
+def association_stats(conn: sqlite3.Connection) -> dict:
+    """Get association graph statistics."""
+    total = conn.execute("SELECT COUNT(*) FROM associations").fetchone()[0]
+    by_type = dict(conn.execute(
+        "SELECT edge_type, COUNT(*) FROM associations GROUP BY edge_type"
+    ).fetchall())
+    avg_weight = conn.execute("SELECT AVG(weight) FROM associations").fetchone()[0] or 0
+    unique_memories = conn.execute(
+        "SELECT COUNT(DISTINCT id) FROM (SELECT source_id as id FROM associations UNION SELECT target_id FROM associations)"
+    ).fetchone()[0]
+    return {
+        "total_edges": total,
+        "by_type": by_type,
+        "avg_weight": round(avg_weight, 3),
+        "connected_memories": unique_memories,
     }

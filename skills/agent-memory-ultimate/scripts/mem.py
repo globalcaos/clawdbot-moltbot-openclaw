@@ -8,6 +8,10 @@ Usage:
     mem.py forget <id|--query QUERY>
     mem.py hard-delete <id>
     mem.py stats
+    mem.py associate <source_id> <target_id> [--type TYPE] [--weight N]
+    mem.py links <memory_id>
+    mem.py recall-assoc <query> [--hops N] [--limit N]
+    mem.py graph-stats
     mem.py consolidate [--days N] [--decay-only]
     mem.py init
     mem.py migrate  (migrate existing jarvis.db documents)
@@ -31,6 +35,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 from lib.memory_core import (
     get_conn, init_db, store, recall, forget, hard_delete, stats,
     apply_decay, consolidate,
+    associate, get_associations, recall_associated, association_stats,
+    build_temporal_associations,
     WORKSPACE, DB_PATH
 )
 
@@ -171,6 +177,113 @@ def cmd_stats():
     print(f"  Path: {s['db_path']}")
     conn.close()
 
+def cmd_associate(args):
+    """Manually create an association between two memories."""
+    if len(args) < 2:
+        print("Usage: mem.py associate <source_id> <target_id> [--type TYPE] [--weight N]")
+        sys.exit(1)
+    source_id = int(args[0])
+    target_id = int(args[1])
+    edge_type = "explicit"
+    weight = 0.7
+    i = 2
+    while i < len(args):
+        if args[i] == "--type" and i + 1 < len(args):
+            edge_type = args[i + 1]; i += 2
+        elif args[i] == "--weight" and i + 1 < len(args):
+            weight = float(args[i + 1]); i += 2
+        else:
+            i += 1
+
+    conn = get_conn()
+    init_db(conn)
+    aid = associate(conn, source_id, target_id, edge_type, weight)
+    if aid:
+        print(f"✓ Associated #{source_id} → #{target_id} ({edge_type}, weight={weight})")
+    else:
+        print(f"✗ Failed to create association")
+    conn.close()
+
+def cmd_links(args):
+    """Show associations for a memory."""
+    if not args or not args[0].isdigit():
+        print("Usage: mem.py links <memory_id>")
+        sys.exit(1)
+    mid = int(args[0])
+    conn = get_conn()
+    init_db(conn)
+    assocs = get_associations(conn, mid)
+    if not assocs:
+        print(f"No associations for memory #{mid}")
+    else:
+        print(f"Associations for memory #{mid} ({len(assocs)} edges):\n")
+        for a in assocs:
+            direction = "→" if a['source_id'] == mid else "←"
+            other_id = a['target_id'] if a['source_id'] == mid else a['source_id']
+            content = a.get('target_content') or a.get('source_content', '?')
+            if len(content) > 80:
+                content = content[:77] + "..."
+            print(f"  {direction} #{other_id:>4}  [{a['edge_type']:10s}]  w={a['weight']:.3f}")
+            print(f"           {content}\n")
+    conn.close()
+
+def cmd_graph_stats():
+    """Show association graph statistics."""
+    conn = get_conn()
+    init_db(conn)
+    s = association_stats(conn)
+    mem_s = stats(conn)
+    print(f"╔══════════════════════════════════════╗")
+    print(f"║       ASSOCIATION GRAPH STATS         ║")
+    print(f"╠══════════════════════════════════════╣")
+    print(f"║  Total edges:     {s['total_edges']:>6}             ║")
+    print(f"║  Connected nodes: {s['connected_memories']:>6} / {mem_s['total_active']:<6}     ║")
+    print(f"║  Avg weight:      {s['avg_weight']:>6.3f}             ║")
+    print(f"║──────────────────────────────────────║")
+    for etype, count in sorted(s.get('by_type', {}).items()):
+        print(f"║  {etype:<18} {count:>6}             ║")
+    print(f"╚══════════════════════════════════════╝")
+    conn.close()
+
+def cmd_recall_assoc(args):
+    """Recall with multi-hop association traversal."""
+    if not args:
+        print("Usage: mem.py recall-assoc <query> [--hops N] [--limit N]")
+        sys.exit(1)
+    query_parts = []
+    hops = 1
+    limit = 10
+    i = 0
+    while i < len(args):
+        if args[i] == "--hops" and i + 1 < len(args):
+            hops = int(args[i + 1]); i += 2
+        elif args[i] == "--limit" and i + 1 < len(args):
+            limit = int(args[i + 1]); i += 2
+        else:
+            query_parts.append(args[i]); i += 1
+
+    query = " ".join(query_parts)
+    conn = get_conn()
+    init_db(conn)
+    t0 = time.time()
+    results = recall_associated(conn, query, hops=hops, limit=limit)
+    elapsed = (time.time() - t0) * 1000
+
+    if not results:
+        print(f"No memories found for '{query}' [{elapsed:.0f}ms]")
+    else:
+        print(f"Found {len(results)} memories (multi-hop, {hops} hops) [{elapsed:.0f}ms]:\n")
+        for r in results:
+            hop = r.get('hop', 0)
+            via = r.get('via_edge', 'direct')
+            content = r.get('content', '')[:120]
+            hop_label = f"hop={hop}" if hop > 0 else "direct"
+            via_label = f" via={via}" if hop > 0 else ""
+            print(f"  #{r['id']:>4}  [{r.get('memory_type','?'):10s}]  score={r.get('score',0):.3f}  {hop_label}{via_label}")
+            print(f"        {content}")
+            print()
+    conn.close()
+
 def cmd_consolidate(args):
     """Run consolidation: decay + clustering + summaries."""
     days = 1
@@ -211,6 +324,9 @@ def cmd_consolidate(args):
         print(f"║  Clustering:                         ║")
         print(f"║    Clusters:    {result['clusters_found']:>6}              ║")
         print(f"║    Summaries:   {result['summaries_created']:>6}              ║")
+        print(f"║──────────────────────────────────────║")
+        print(f"║  Associations:                       ║")
+        print(f"║    Created:     {result.get('associations_created', 0):>6}              ║")
         print(f"║──────────────────────────────────────║")
         print(f"║  Elapsed:     {result['elapsed_ms']:>6} ms            ║")
         print(f"╚══════════════════════════════════════╝")
@@ -281,6 +397,14 @@ def main():
         cmd_hard_delete(rest)
     elif cmd == "stats":
         cmd_stats()
+    elif cmd == "associate":
+        cmd_associate(rest)
+    elif cmd == "links":
+        cmd_links(rest)
+    elif cmd == "recall-assoc":
+        cmd_recall_assoc(rest)
+    elif cmd == "graph-stats":
+        cmd_graph_stats()
     elif cmd == "consolidate":
         cmd_consolidate(rest)
     elif cmd == "migrate":
