@@ -1,5 +1,10 @@
 # HEARTBEAT.md
 
+## Embedding Server Check
+
+- Ensure embedding server is running: `bash /home/globalcaos/.openclaw/workspace/skills/agent-memory-ultimate/scripts/start-memory.sh`
+- If not running, start it (needed for fast memory recall)
+
 ## Sleep Cycle (DIARIO - 23:00)
 
 - Consolidar daily log del día

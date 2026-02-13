@@ -17,7 +17,24 @@ Before doing anything else:
 
 Don't ask permission. Just do it.
 
-## Memory
+5. **Start embedding server** if not running: `bash skills/agent-memory-ultimate/scripts/start-memory.sh`
+6. **Use cognitive memory** for recall: `python3 skills/agent-memory-ultimate/scripts/mem.py recall "<query>"` (273ms with server vs 6.5s without)
+
+## Cognitive Memory (mem.py)
+
+Your brain lives in `db/memory.db`. Use it:
+
+- **Recall**: `mem.py recall "query"` — hybrid FTS5 + vector search (273ms)
+- **Store**: `mem.py store "content" --type semantic --importance 0.8` — auto-embeds
+- **Primed recall**: `mem.py primed-recall "query" --context "topic1" "topic2"` — context-aware
+- **Adaptive recall**: `mem.py recall-adaptive "query"` — auto-selects detail level
+- **Consolidate**: Runs nightly at 3 AM (cron), or manually: `mem.py consolidate`
+
+**When to store:** After learning something important, completing a task, or when Oscar says "remember this."
+**When to recall:** Before answering questions about prior work, decisions, people, preferences.
+**Path:** `skills/agent-memory-ultimate/scripts/mem.py`
+
+## Memory (Files)
 
 You wake up fresh each session. These files are your continuity:
 
