@@ -97,6 +97,19 @@ CREATE INDEX IF NOT EXISTS idx_assoc_source ON associations(source_id);
 CREATE INDEX IF NOT EXISTS idx_assoc_target ON associations(target_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_assoc_pair ON associations(source_id, target_id, edge_type);
 
+CREATE TABLE IF NOT EXISTS hierarchy (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    memory_id   INTEGER NOT NULL REFERENCES memories(id) ON DELETE CASCADE,
+    parent_id   INTEGER REFERENCES hierarchy(id) ON DELETE SET NULL,
+    level       INTEGER NOT NULL DEFAULT 0,
+    summary     TEXT,
+    created_at  TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_hierarchy_memory ON hierarchy(memory_id);
+CREATE INDEX IF NOT EXISTS idx_hierarchy_parent ON hierarchy(parent_id);
+CREATE INDEX IF NOT EXISTS idx_hierarchy_level ON hierarchy(level);
+
 CREATE TABLE IF NOT EXISTS schema_version (
     version INTEGER NOT NULL
 );
@@ -112,7 +125,7 @@ def get_conn() -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys=ON")
     return conn
 
-CURRENT_SCHEMA_VERSION = 2
+CURRENT_SCHEMA_VERSION = 3
 
 def init_db(conn: sqlite3.Connection):
     """Create schema if not exists. Migrates if needed."""
@@ -642,4 +655,232 @@ def association_stats(conn: sqlite3.Connection) -> dict:
         "by_type": by_type,
         "avg_weight": round(avg_weight, 3),
         "connected_memories": unique_memories,
+    }
+
+# ---------- hierarchy (Phase 4) ----------
+
+def build_hierarchy(conn: sqlite3.Connection, max_level: int = 3) -> dict:
+    """
+    Build RAPTOR-style multi-level hierarchy bottom-up.
+    Level 0: raw memories
+    Level 1: daily/topic clusters (small groups)
+    Level 2: theme clusters (medium groups)
+    Level 3: domain summaries (broad groups)
+    Returns stats dict.
+    """
+    from scipy.cluster.hierarchy import fcluster, linkage
+    from scipy.spatial.distance import pdist
+
+    t0 = time.time()
+    now = datetime.utcnow().isoformat() + "Z"
+
+    # Clear existing hierarchy
+    conn.execute("DELETE FROM hierarchy")
+
+    # Level 0: all active memories
+    rows = conn.execute(
+        """SELECT m.id, v.embedding FROM memories m
+           JOIN memories_vec v ON v.memory_id = m.id
+           WHERE m.is_deleted = 0"""
+    ).fetchall()
+
+    if len(rows) < 2:
+        conn.commit()
+        return {"levels": 0, "nodes": 0, "elapsed_ms": 0}
+
+    ids = [r['id'] for r in rows]
+    vecs = np.array([blob_to_vec(r['embedding']) for r in rows])
+
+    # Insert level-0 nodes
+    level_0_hids = {}
+    for mid in ids:
+        cur = conn.execute(
+            "INSERT INTO hierarchy (memory_id, level, created_at) VALUES (?, 0, ?)",
+            (mid, now)
+        )
+        level_0_hids[mid] = cur.lastrowid
+
+    # Distance matrix (compute once, reuse)
+    dists = pdist(vecs, metric='cosine')
+
+    total_nodes = len(ids)
+    thresholds = [0.4, 0.6, 0.8]  # Tighter → broader clustering per level
+
+    current_ids = list(ids)
+    current_vecs = vecs.copy()
+    current_hids = dict(level_0_hids)  # memory_id → hierarchy_id
+
+    for level in range(1, min(max_level, len(thresholds)) + 1):
+        if len(current_vecs) < 2:
+            break
+
+        level_dists = pdist(current_vecs, metric='cosine')
+        Z = linkage(level_dists, method='average')
+        labels = fcluster(Z, t=thresholds[level - 1], criterion='distance')
+
+        from collections import defaultdict
+        groups = defaultdict(list)
+        for idx, label in enumerate(labels):
+            groups[label].append(idx)
+
+        # Filter to clusters with 2+ members
+        clusters = {k: v for k, v in groups.items() if len(v) >= 2}
+        if not clusters:
+            break
+
+        next_ids = []
+        next_vecs = []
+        next_hids = {}
+
+        for cluster_indices in clusters.values():
+            member_ids = [current_ids[i] for i in cluster_indices]
+            member_vecs = current_vecs[cluster_indices]
+
+            # Centroid = mean of member embeddings
+            centroid = member_vecs.mean(axis=0)
+            centroid = centroid / (np.linalg.norm(centroid) + 1e-8)
+
+            # Build summary text
+            member_contents = []
+            for mid in member_ids:
+                row = conn.execute("SELECT content FROM memories WHERE id = ?", (mid,)).fetchone()
+                if row:
+                    member_contents.append(row['content'][:80])
+
+            summary = f"[L{level} summary of {len(member_ids)} memories] " + " | ".join(member_contents[:4])
+
+            # Store as new memory
+            summary_mid = store(conn, summary,
+                               memory_type="semantic",
+                               source="hierarchy",
+                               importance=0.6 + level * 0.1,
+                               metadata={"level": level, "member_count": len(member_ids)})
+
+            # Store centroid embedding
+            conn.execute(
+                "INSERT OR REPLACE INTO memories_vec (memory_id, embedding) VALUES (?, ?)",
+                (summary_mid, vec_to_blob(centroid))
+            )
+
+            # Insert hierarchy node
+            cur = conn.execute(
+                "INSERT INTO hierarchy (memory_id, level, summary, created_at) VALUES (?, ?, ?, ?)",
+                (summary_mid, level, summary[:200], now)
+            )
+            parent_hid = cur.lastrowid
+
+            # Link children to parent
+            for mid in member_ids:
+                child_hid = current_hids.get(mid)
+                if child_hid:
+                    conn.execute("UPDATE hierarchy SET parent_id = ? WHERE id = ?",
+                                (parent_hid, child_hid))
+
+            next_ids.append(summary_mid)
+            next_vecs.append(centroid)
+            next_hids[summary_mid] = parent_hid
+            total_nodes += 1
+
+        # Singletons carry forward
+        assigned = set()
+        for indices in clusters.values():
+            assigned.update(indices)
+        for idx in range(len(current_ids)):
+            if idx not in assigned:
+                next_ids.append(current_ids[idx])
+                next_vecs.append(current_vecs[idx])
+                next_hids[current_ids[idx]] = current_hids[current_ids[idx]]
+
+        current_ids = next_ids
+        current_vecs = np.array(next_vecs) if next_vecs else np.array([])
+        current_hids = next_hids
+
+    conn.commit()
+    elapsed = (time.time() - t0) * 1000
+
+    # Get level counts
+    level_counts = dict(conn.execute(
+        "SELECT level, COUNT(*) FROM hierarchy GROUP BY level"
+    ).fetchall())
+
+    return {
+        "total_nodes": total_nodes,
+        "by_level": level_counts,
+        "elapsed_ms": round(elapsed),
+    }
+
+
+def recall_adaptive(conn: sqlite3.Connection, query: str,
+                    detail_level: str = "auto", limit: int = 10) -> list[dict]:
+    """
+    Adaptive retrieval: start at high level, drill down for specific queries.
+    detail_level: 'auto', 'broad', 'specific', or int (0-3)
+    """
+    if detail_level == "broad":
+        target_level = 2
+    elif detail_level == "specific":
+        target_level = 0
+    elif detail_level == "auto":
+        # Heuristic: short/vague queries → high level, specific → low level
+        words = query.split()
+        has_specifics = any(w.isdigit() or len(w) > 8 for w in words)
+        has_names = any(w[0].isupper() for w in words if w)
+        if len(words) <= 3 and not has_specifics:
+            target_level = 2  # Broad
+        elif has_specifics or has_names or len(words) > 6:
+            target_level = 0  # Specific
+        else:
+            target_level = 1  # Medium
+    else:
+        target_level = int(detail_level)
+
+    # Get memories at target level from hierarchy
+    hier_rows = conn.execute(
+        "SELECT memory_id FROM hierarchy WHERE level = ?", (target_level,)
+    ).fetchall()
+
+    if not hier_rows:
+        # Fallback to standard recall
+        return recall(conn, query, strategy="hybrid", limit=limit)
+
+    target_ids = [r['memory_id'] for r in hier_rows]
+
+    # Vector search within the target level
+    query_vec = embedder.embed(query)
+    rows = conn.execute(
+        f"SELECT memory_id, embedding FROM memories_vec WHERE memory_id IN ({','.join('?' * len(target_ids))})",
+        target_ids
+    ).fetchall()
+
+    if not rows:
+        return recall(conn, query, strategy="hybrid", limit=limit)
+
+    ids = [r['memory_id'] for r in rows]
+    vecs = np.array([blob_to_vec(r['embedding']) for r in rows])
+    results_idx = embedder.cosine_search(query_vec, vecs, top_k=limit)
+
+    results = []
+    for idx, score in results_idx:
+        mid = ids[idx]
+        row = conn.execute("SELECT * FROM memories WHERE id = ?", (mid,)).fetchone()
+        if row:
+            d = dict(row)
+            d['score'] = round(float(score), 4)
+            d['hierarchy_level'] = target_level
+            results.append(d)
+
+    return results
+
+
+def hierarchy_stats(conn: sqlite3.Connection) -> dict:
+    """Get hierarchy statistics."""
+    level_counts = dict(conn.execute(
+        "SELECT level, COUNT(*) FROM hierarchy GROUP BY level"
+    ).fetchall())
+    total = conn.execute("SELECT COUNT(*) FROM hierarchy").fetchone()[0]
+    roots = conn.execute("SELECT COUNT(*) FROM hierarchy WHERE parent_id IS NULL AND level > 0").fetchone()[0]
+    return {
+        "total_nodes": total,
+        "by_level": level_counts,
+        "root_summaries": roots,
     }

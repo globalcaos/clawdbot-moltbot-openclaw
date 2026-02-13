@@ -12,6 +12,9 @@ Usage:
     mem.py links <memory_id>
     mem.py recall-assoc <query> [--hops N] [--limit N]
     mem.py graph-stats
+    mem.py build-hierarchy [--levels N]
+    mem.py recall-adaptive <query> [--detail auto|broad|specific|0-3] [--limit N]
+    mem.py hierarchy-stats
     mem.py consolidate [--days N] [--decay-only]
     mem.py init
     mem.py migrate  (migrate existing jarvis.db documents)
@@ -37,6 +40,7 @@ from lib.memory_core import (
     apply_decay, consolidate,
     associate, get_associations, recall_associated, association_stats,
     build_temporal_associations,
+    build_hierarchy, recall_adaptive, hierarchy_stats,
     WORKSPACE, DB_PATH
 )
 
@@ -284,6 +288,81 @@ def cmd_recall_assoc(args):
             print()
     conn.close()
 
+def cmd_build_hierarchy(args):
+    """Build RAPTOR-style multi-level hierarchy."""
+    max_level = 3
+    for i, a in enumerate(args):
+        if a == "--levels" and i + 1 < len(args):
+            max_level = int(args[i + 1])
+
+    conn = get_conn()
+    init_db(conn)
+    print(f"Building hierarchy (max {max_level} levels)...")
+    result = build_hierarchy(conn, max_level=max_level)
+    print(f"╔══════════════════════════════════════╗")
+    print(f"║       HIERARCHY BUILD RESULTS        ║")
+    print(f"╠══════════════════════════════════════╣")
+    print(f"║  Total nodes:     {result['total_nodes']:>6}             ║")
+    for level, count in sorted(result.get('by_level', {}).items()):
+        label = ["raw", "topic", "theme", "domain"][level] if level < 4 else f"L{level}"
+        print(f"║  L{level} ({label:6s}):   {count:>6}             ║")
+    print(f"║──────────────────────────────────────║")
+    print(f"║  Elapsed:     {result['elapsed_ms']:>6} ms            ║")
+    print(f"╚══════════════════════════════════════╝")
+    conn.close()
+
+def cmd_recall_adaptive(args):
+    """Adaptive recall across hierarchy levels."""
+    if not args:
+        print("Usage: mem.py recall-adaptive <query> [--detail auto|broad|specific|0-3] [--limit N]")
+        sys.exit(1)
+    query_parts = []
+    detail = "auto"
+    limit = 10
+    i = 0
+    while i < len(args):
+        if args[i] == "--detail" and i + 1 < len(args):
+            detail = args[i + 1]; i += 2
+        elif args[i] == "--limit" and i + 1 < len(args):
+            limit = int(args[i + 1]); i += 2
+        else:
+            query_parts.append(args[i]); i += 1
+
+    query = " ".join(query_parts)
+    conn = get_conn()
+    init_db(conn)
+    t0 = time.time()
+    results = recall_adaptive(conn, query, detail_level=detail, limit=limit)
+    elapsed = (time.time() - t0) * 1000
+
+    if not results:
+        print(f"No memories found [{elapsed:.0f}ms]")
+    else:
+        level = results[0].get('hierarchy_level', '?')
+        print(f"Found {len(results)} memories (adaptive, level={level}) [{elapsed:.0f}ms]:\n")
+        for r in results:
+            content = r.get('content', '')[:120]
+            print(f"  #{r['id']:>4}  [{r.get('memory_type','?'):10s}]  score={r.get('score',0):.3f}")
+            print(f"        {content}\n")
+    conn.close()
+
+def cmd_hierarchy_stats():
+    """Show hierarchy statistics."""
+    conn = get_conn()
+    init_db(conn)
+    s = hierarchy_stats(conn)
+    print(f"╔══════════════════════════════════════╗")
+    print(f"║       HIERARCHY STATS                ║")
+    print(f"╠══════════════════════════════════════╣")
+    print(f"║  Total nodes:     {s['total_nodes']:>6}             ║")
+    print(f"║  Root summaries:  {s['root_summaries']:>6}             ║")
+    print(f"║──────────────────────────────────────║")
+    for level, count in sorted(s.get('by_level', {}).items()):
+        label = ["raw", "topic", "theme", "domain"][level] if level < 4 else f"L{level}"
+        print(f"║  L{level} ({label:6s}):   {count:>6}             ║")
+    print(f"╚══════════════════════════════════════╝")
+    conn.close()
+
 def cmd_consolidate(args):
     """Run consolidation: decay + clustering + summaries."""
     days = 1
@@ -405,6 +484,12 @@ def main():
         cmd_recall_assoc(rest)
     elif cmd == "graph-stats":
         cmd_graph_stats()
+    elif cmd == "build-hierarchy":
+        cmd_build_hierarchy(rest)
+    elif cmd == "recall-adaptive":
+        cmd_recall_adaptive(rest)
+    elif cmd == "hierarchy-stats":
+        cmd_hierarchy_stats()
     elif cmd == "consolidate":
         cmd_consolidate(rest)
     elif cmd == "migrate":
