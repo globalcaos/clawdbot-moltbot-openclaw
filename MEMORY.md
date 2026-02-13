@@ -280,4 +280,15 @@ _Learned: whatsapp-ultimate v1.2.1 — removed dead hook-based archiver, publish
 
 ---
 
-_Last updated: 2026-02-11 — Added cleanup-to-publish pattern_
+## 🖥️ Webchat UX Priorities (2026-02-14)
+
+Oscar's top frustrations:
+
+1. **Message spacing too large** — was fixed before, regressed. Fix again.
+2. **No progress indicator** — silence = anxiety. Oscar can't tell thinking vs stuck vs forgotten.
+3. **Silent thinking → text dump** — stream activity in real-time instead.
+4. **Goal:** Claude Code-like transparency — show tool calls and thinking as they happen.
+
+**Check upstream** for streaming/progress PRs before building custom.
+
+_Last updated: 2026-02-14 — Added webchat UX priorities_
