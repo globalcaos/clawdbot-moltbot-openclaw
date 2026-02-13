@@ -15,6 +15,7 @@ Usage:
     mem.py build-hierarchy [--levels N]
     mem.py recall-adaptive <query> [--detail auto|broad|specific|0-3] [--limit N]
     mem.py hierarchy-stats
+    mem.py primed-recall <query> [--context 'text1' 'text2'] [--limit N]
     mem.py consolidate [--days N] [--decay-only]
     mem.py init
     mem.py migrate  (migrate existing jarvis.db documents)
@@ -41,6 +42,7 @@ from lib.memory_core import (
     associate, get_associations, recall_associated, association_stats,
     build_temporal_associations,
     build_hierarchy, recall_adaptive, hierarchy_stats,
+    spreading_activation, primed_recall,
     WORKSPACE, DB_PATH
 )
 
@@ -363,6 +365,46 @@ def cmd_hierarchy_stats():
     print(f"╚══════════════════════════════════════╝")
     conn.close()
 
+def cmd_primed_recall(args):
+    """Context-primed recall with spreading activation."""
+    if not args:
+        print("Usage: mem.py primed-recall <query> [--context 'text1' 'text2'] [--limit N]")
+        sys.exit(1)
+    query_parts = []
+    context = []
+    limit = 10
+    i = 0
+    while i < len(args):
+        if args[i] == "--context" and i + 1 < len(args):
+            i += 1
+            while i < len(args) and not args[i].startswith("--"):
+                context.append(args[i]); i += 1
+        elif args[i] == "--limit" and i + 1 < len(args):
+            limit = int(args[i + 1]); i += 2
+        else:
+            query_parts.append(args[i]); i += 1
+
+    query = " ".join(query_parts)
+    conn = get_conn()
+    init_db(conn)
+    t0 = time.time()
+    results = primed_recall(conn, query, context=context or None, limit=limit)
+    elapsed = (time.time() - t0) * 1000
+
+    if not results:
+        print(f"No memories found [{elapsed:.0f}ms]")
+    else:
+        ctx_label = f" + {len(context)} context" if context else ""
+        print(f"Found {len(results)} memories (primed{ctx_label}) [{elapsed:.0f}ms]:\n")
+        for r in results:
+            content = r.get('content', '')[:120]
+            act = r.get('activation', 0)
+            fscore = r.get('final_score', 0)
+            via = f" [{r['via']}]" if r.get('via') else ""
+            print(f"  #{r['id']:>4}  [{r.get('memory_type','?'):10s}]  final={fscore:.3f}  act={act:.3f}{via}")
+            print(f"        {content}\n")
+    conn.close()
+
 def cmd_consolidate(args):
     """Run consolidation: decay + clustering + summaries."""
     days = 1
@@ -490,6 +532,8 @@ def main():
         cmd_recall_adaptive(rest)
     elif cmd == "hierarchy-stats":
         cmd_hierarchy_stats()
+    elif cmd == "primed-recall":
+        cmd_primed_recall(rest)
     elif cmd == "consolidate":
         cmd_consolidate(rest)
     elif cmd == "migrate":

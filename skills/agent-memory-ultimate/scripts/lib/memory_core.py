@@ -884,3 +884,118 @@ def hierarchy_stats(conn: sqlite3.Connection) -> dict:
         "by_level": level_counts,
         "root_summaries": roots,
     }
+
+# ---------- spreading activation (Phase 5) ----------
+
+def spreading_activation(conn: sqlite3.Connection, seed_ids: list[int],
+                         iterations: int = 3, decay: float = 0.7,
+                         max_activated: int = 20) -> dict[int, float]:
+    """
+    Neural-inspired spreading activation through the memory graph.
+    Returns dict of memory_id → activation_level.
+    Includes lateral inhibition: competing clusters suppress each other.
+    """
+    # Initialize activation from seeds
+    activation = {mid: 1.0 for mid in seed_ids}
+
+    for iteration in range(iterations):
+        new_activation = dict(activation)
+
+        for mid, act_level in activation.items():
+            if act_level < 0.05:  # Below threshold, skip
+                continue
+
+            # Get outbound associations
+            assocs = conn.execute(
+                "SELECT target_id, weight, edge_type FROM associations WHERE source_id = ?",
+                (mid,)
+            ).fetchall()
+
+            for a in assocs:
+                target = a['target_id']
+                weight = a['weight']
+                # Edge type weighting
+                type_mult = {"semantic": 1.0, "temporal": 0.5, "explicit": 1.2, "causal": 1.5}.get(a['edge_type'], 0.8)
+                spread = act_level * weight * type_mult * decay
+                new_activation[target] = max(new_activation.get(target, 0), spread)
+
+        activation = new_activation
+
+    # Lateral inhibition: for each memory, reduce activation if competing with
+    # strongly activated neighbors (prevents flooding)
+    inhibited = {}
+    for mid, act in activation.items():
+        neighbors = conn.execute(
+            "SELECT target_id FROM associations WHERE source_id = ? AND target_id != ?",
+            (mid, mid)
+        ).fetchall()
+        neighbor_acts = [activation.get(n['target_id'], 0) for n in neighbors]
+        if neighbor_acts:
+            max_neighbor = max(neighbor_acts)
+            # If a neighbor is much stronger, suppress this one
+            if max_neighbor > act * 2:
+                inhibited[mid] = act * 0.5
+            else:
+                inhibited[mid] = act
+        else:
+            inhibited[mid] = act
+
+    # Sort by activation, limit
+    sorted_acts = sorted(inhibited.items(), key=lambda x: x[1], reverse=True)
+    return dict(sorted_acts[:max_activated])
+
+
+def primed_recall(conn: sqlite3.Connection, query: str,
+                  context: list[str] = None, limit: int = 10) -> list[dict]:
+    """
+    Context-primed recall: use conversation context to boost related memories.
+    1. Recall based on query
+    2. If context provided, also recall from context terms
+    3. Spread activation from both sets
+    4. Return top activated memories
+    """
+    t0 = time.time()
+
+    # Get direct matches
+    direct = recall(conn, query, strategy="hybrid", limit=limit)
+    seed_ids = [m['id'] for m in direct]
+
+    # If context provided, add context-primed seeds
+    if context:
+        context_text = " ".join(context[-3:])  # Last 3 context items
+        context_matches = recall(conn, context_text, strategy="vector", limit=5)
+        for m in context_matches:
+            if m['id'] not in seed_ids:
+                seed_ids.append(m['id'])
+
+    if not seed_ids:
+        return direct
+
+    # Spread activation
+    activated = spreading_activation(conn, seed_ids, iterations=2, decay=0.6)
+
+    # Merge direct scores with activation
+    results = {}
+    for m in direct:
+        results[m['id']] = m
+        m['activation'] = activated.get(m['id'], 0)
+        m['final_score'] = m.get('score', 0) * 0.6 + m.get('activation', 0) * 0.4
+
+    # Add highly activated memories not in direct results
+    for mid, act in activated.items():
+        if mid not in results and act > 0.3:
+            row = conn.execute("SELECT * FROM memories WHERE id = ? AND is_deleted = 0",
+                              (mid,)).fetchone()
+            if row:
+                d = dict(row)
+                d['score'] = 0
+                d['activation'] = act
+                d['final_score'] = act * 0.4
+                d['via'] = 'activation'
+                results[mid] = d
+
+    sorted_results = sorted(results.values(), key=lambda x: x.get('final_score', 0), reverse=True)
+
+    elapsed = (time.time() - t0) * 1000
+    log.debug(f"Primed recall '{query}': {len(sorted_results)} results in {elapsed:.0f}ms")
+    return sorted_results[:limit]
