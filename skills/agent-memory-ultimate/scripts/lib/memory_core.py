@@ -97,6 +97,21 @@ CREATE INDEX IF NOT EXISTS idx_assoc_source ON associations(source_id);
 CREATE INDEX IF NOT EXISTS idx_assoc_target ON associations(target_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_assoc_pair ON associations(source_id, target_id, edge_type);
 
+CREATE TABLE IF NOT EXISTS shared_memories (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    memory_id       INTEGER NOT NULL REFERENCES memories(id) ON DELETE CASCADE,
+    shared_by       TEXT NOT NULL,
+    shared_with     TEXT NOT NULL,
+    consent_owner   INTEGER DEFAULT 0,
+    consent_target  INTEGER DEFAULT 0,
+    sensitivity     REAL DEFAULT 0.5,
+    created_at      TEXT NOT NULL,
+    revoked_at      TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_shared_by ON shared_memories(shared_by);
+CREATE INDEX IF NOT EXISTS idx_shared_with ON shared_memories(shared_with);
+
 CREATE TABLE IF NOT EXISTS hierarchy (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     memory_id   INTEGER NOT NULL REFERENCES memories(id) ON DELETE CASCADE,
@@ -125,7 +140,7 @@ def get_conn() -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys=ON")
     return conn
 
-CURRENT_SCHEMA_VERSION = 3
+CURRENT_SCHEMA_VERSION = 4
 
 def init_db(conn: sqlite3.Connection):
     """Create schema if not exists. Migrates if needed."""
@@ -999,3 +1014,139 @@ def primed_recall(conn: sqlite3.Connection, query: str,
     elapsed = (time.time() - t0) * 1000
     log.debug(f"Primed recall '{query}': {len(sorted_results)} results in {elapsed:.0f}ms")
     return sorted_results[:limit]
+
+# ---------- cross-agent sharing (Phase 6) ----------
+
+# Sensitivity defaults by memory type
+SENSITIVITY_DEFAULTS = {
+    "episodic": 0.9,    # High sensitivity — personal experiences
+    "semantic": 0.3,    # Low sensitivity — factual knowledge
+    "procedural": 0.2,  # Very low — skills/procedures are generally safe
+}
+
+def sensitivity_gate(memory: dict, threshold: float = 0.5) -> bool:
+    """Check if a memory passes the sensitivity gate for sharing."""
+    mtype = memory.get('memory_type', 'episodic')
+    base = SENSITIVITY_DEFAULTS.get(mtype, 0.5)
+    # Importance increases sensitivity (important personal stuff = more sensitive)
+    importance = memory.get('importance', 0.5)
+    effective = base * (0.5 + importance * 0.5)
+    return effective < threshold
+
+
+def share_memory(conn: sqlite3.Connection, memory_id: int,
+                 shared_by: str, shared_with: str,
+                 sensitivity_threshold: float = 0.5) -> Optional[int]:
+    """
+    Share a memory with another agent. Applies sensitivity gate.
+    Returns share ID or None if blocked.
+    """
+    mem = conn.execute("SELECT * FROM memories WHERE id = ? AND is_deleted = 0",
+                      (memory_id,)).fetchone()
+    if not mem:
+        return None
+
+    mem_dict = dict(mem)
+
+    # Sensitivity gate
+    if not sensitivity_gate(mem_dict, sensitivity_threshold):
+        log.info(f"Memory #{memory_id} blocked by sensitivity gate (type={mem_dict['memory_type']})")
+        return None
+
+    # Only semantic and procedural are shareable
+    if mem_dict['memory_type'] not in ('semantic', 'procedural'):
+        log.info(f"Memory #{memory_id} not shareable (type={mem_dict['memory_type']})")
+        return None
+
+    now = datetime.utcnow().isoformat() + "Z"
+    sensitivity = SENSITIVITY_DEFAULTS.get(mem_dict['memory_type'], 0.5)
+
+    try:
+        cur = conn.execute(
+            """INSERT INTO shared_memories
+               (memory_id, shared_by, shared_with, consent_owner, sensitivity, created_at)
+               VALUES (?, ?, ?, 1, ?, ?)""",
+            (memory_id, shared_by, shared_with, sensitivity, now)
+        )
+        conn.commit()
+        return cur.lastrowid
+    except Exception as e:
+        log.warning(f"Failed to share memory #{memory_id}: {e}")
+        return None
+
+
+def approve_share(conn: sqlite3.Connection, share_id: int) -> bool:
+    """Target agent approves a shared memory (dual consent)."""
+    conn.execute("UPDATE shared_memories SET consent_target = 1 WHERE id = ?", (share_id,))
+    conn.commit()
+    return True
+
+
+def revoke_share(conn: sqlite3.Connection, share_id: int = None,
+                 memory_id: int = None) -> int:
+    """Revoke sharing. Either by share ID or memory ID (revokes all shares of that memory)."""
+    now = datetime.utcnow().isoformat() + "Z"
+    if share_id:
+        conn.execute("UPDATE shared_memories SET revoked_at = ? WHERE id = ?", (now, share_id))
+        conn.commit()
+        return 1
+    elif memory_id:
+        cur = conn.execute(
+            "UPDATE shared_memories SET revoked_at = ? WHERE memory_id = ? AND revoked_at IS NULL",
+            (now, memory_id)
+        )
+        conn.commit()
+        return cur.rowcount
+    return 0
+
+
+def get_shared(conn: sqlite3.Connection, agent: str = None,
+               direction: str = "both", active_only: bool = True) -> list[dict]:
+    """Get shared memories for/from an agent."""
+    conditions = []
+    params = []
+
+    if active_only:
+        conditions.append("s.revoked_at IS NULL")
+        conditions.append("s.consent_owner = 1")
+
+    if agent and direction == "from":
+        conditions.append("s.shared_by = ?")
+        params.append(agent)
+    elif agent and direction == "to":
+        conditions.append("s.shared_with = ?")
+        params.append(agent)
+    elif agent:
+        conditions.append("(s.shared_by = ? OR s.shared_with = ?)")
+        params.extend([agent, agent])
+
+    where = " AND ".join(conditions) if conditions else "1=1"
+    rows = conn.execute(
+        f"""SELECT s.*, m.content, m.memory_type, m.importance
+            FROM shared_memories s
+            JOIN memories m ON m.id = s.memory_id
+            WHERE {where}
+            ORDER BY s.created_at DESC""",
+        params
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def sharing_stats(conn: sqlite3.Connection) -> dict:
+    """Get sharing statistics."""
+    total = conn.execute("SELECT COUNT(*) FROM shared_memories").fetchone()[0]
+    active = conn.execute(
+        "SELECT COUNT(*) FROM shared_memories WHERE revoked_at IS NULL"
+    ).fetchone()[0]
+    consented = conn.execute(
+        "SELECT COUNT(*) FROM shared_memories WHERE consent_owner = 1 AND consent_target = 1 AND revoked_at IS NULL"
+    ).fetchone()[0]
+    by_agent = dict(conn.execute(
+        "SELECT shared_with, COUNT(*) FROM shared_memories WHERE revoked_at IS NULL GROUP BY shared_with"
+    ).fetchall())
+    return {
+        "total_shares": total,
+        "active": active,
+        "fully_consented": consented,
+        "by_target_agent": by_agent,
+    }

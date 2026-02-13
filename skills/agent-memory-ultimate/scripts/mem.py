@@ -16,6 +16,9 @@ Usage:
     mem.py recall-adaptive <query> [--detail auto|broad|specific|0-3] [--limit N]
     mem.py hierarchy-stats
     mem.py primed-recall <query> [--context 'text1' 'text2'] [--limit N]
+    mem.py share <memory_id> --with <agent> [--sensitivity N]
+    mem.py shared [--from AGENT] [--to AGENT]
+    mem.py revoke <share_id> | --memory <id>
     mem.py consolidate [--days N] [--decay-only]
     mem.py init
     mem.py migrate  (migrate existing jarvis.db documents)
@@ -43,6 +46,7 @@ from lib.memory_core import (
     build_temporal_associations,
     build_hierarchy, recall_adaptive, hierarchy_stats,
     spreading_activation, primed_recall,
+    share_memory, approve_share, revoke_share, get_shared, sharing_stats,
     WORKSPACE, DB_PATH
 )
 
@@ -405,6 +409,79 @@ def cmd_primed_recall(args):
             print(f"        {content}\n")
     conn.close()
 
+def cmd_share(args):
+    """Share a memory with another agent."""
+    if len(args) < 2:
+        print("Usage: mem.py share <memory_id> --with <agent> [--sensitivity N]")
+        sys.exit(1)
+    memory_id = int(args[0])
+    agent = None
+    sensitivity = 0.5
+    i = 1
+    while i < len(args):
+        if args[i] == "--with" and i + 1 < len(args):
+            agent = args[i + 1]; i += 2
+        elif args[i] == "--sensitivity" and i + 1 < len(args):
+            sensitivity = float(args[i + 1]); i += 2
+        else:
+            i += 1
+    if not agent:
+        print("Error: --with <agent> required")
+        sys.exit(1)
+
+    conn = get_conn()
+    init_db(conn)
+    sid = share_memory(conn, memory_id, "jarvis", agent, sensitivity)
+    if sid:
+        print(f"✓ Shared memory #{memory_id} with {agent} (share #{sid})")
+    else:
+        print(f"✗ Memory #{memory_id} blocked by sensitivity gate or not shareable")
+    conn.close()
+
+def cmd_shared(args):
+    """List shared memories."""
+    agent = None
+    direction = "both"
+    i = 0
+    while i < len(args):
+        if args[i] == "--from" and i + 1 < len(args):
+            agent = args[i + 1]; direction = "from"; i += 2
+        elif args[i] == "--to" and i + 1 < len(args):
+            agent = args[i + 1]; direction = "to"; i += 2
+        elif args[i] == "--agent" and i + 1 < len(args):
+            agent = args[i + 1]; i += 2
+        else:
+            i += 1
+
+    conn = get_conn()
+    init_db(conn)
+    shares = get_shared(conn, agent=agent, direction=direction)
+    if not shares:
+        print("No shared memories found")
+    else:
+        print(f"Shared memories ({len(shares)}):\n")
+        for s in shares:
+            content = s.get('content', '')[:80]
+            consent = "✅" if s['consent_owner'] and s['consent_target'] else "⏳"
+            print(f"  share #{s['id']}  mem #{s['memory_id']}  {s['shared_by']}→{s['shared_with']}  {consent}  sens={s['sensitivity']:.1f}")
+            print(f"        {content}\n")
+    conn.close()
+
+def cmd_revoke(args):
+    """Revoke a shared memory."""
+    if not args:
+        print("Usage: mem.py revoke <share_id> | mem.py revoke --memory <id>")
+        sys.exit(1)
+    conn = get_conn()
+    init_db(conn)
+    if args[0] == "--memory" and len(args) > 1:
+        count = revoke_share(conn, memory_id=int(args[1]))
+        print(f"✓ Revoked {count} shares for memory #{args[1]}")
+    else:
+        revoke_share(conn, share_id=int(args[0]))
+        print(f"✓ Revoked share #{args[0]}")
+    conn.close()
+
 def cmd_consolidate(args):
     """Run consolidation: decay + clustering + summaries."""
     days = 1
@@ -534,6 +611,12 @@ def main():
         cmd_hierarchy_stats()
     elif cmd == "primed-recall":
         cmd_primed_recall(rest)
+    elif cmd == "share":
+        cmd_share(rest)
+    elif cmd == "shared":
+        cmd_shared(rest)
+    elif cmd == "revoke":
+        cmd_revoke(rest)
     elif cmd == "consolidate":
         cmd_consolidate(rest)
     elif cmd == "migrate":
