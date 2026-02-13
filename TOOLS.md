@@ -7,16 +7,21 @@ Skills define _how_ tools work. This file is for _your_ specifics — the stuff 
 ## Voice Interface (Jarvis)
 
 ### TTS (Speak)
+
 **Command:** `jarvis "text"` (plays to speakers)
+
 - **Backend:** sherpa-onnx (Alan voice, 2x speed) + ffmpeg
 - **Effects:** Metallic (flanger, echo 15ms, +5% pitch, treble boost)
 - **Sample rate:** 22050Hz (native)
+- **LANGUAGE:** Always speak in ENGLISH, even if the conversation is in Spanish/Catalan. Alan's voice can't handle other languages.
 - **Output:** Headphones (Card 0) via `jarvis` script
 - **IMPORTANT:** Always run with `background: true` to avoid blocking text response
 
 ### TTS for WhatsApp (Voice Notes)
+
 **Format:** OGG/Opus (required for WhatsApp playback)
 **Process:**
+
 ```bash
 # 1. Generate raw WAV
 sherpa-onnx-offline-tts --vits-length-scale=0.5 --output-filename=raw.wav "text"
@@ -26,15 +31,20 @@ ffmpeg -i raw.wav \
   -af "asetrate=22050*1.05,aresample=22050,flanger=delay=0:depth=2:regen=50:width=71:speed=0.5,aecho=0.8:0.88:15:0.5,highpass=f=200,treble=g=6" \
   -c:a libopus -b:a 64k output.ogg
 ```
+
 **Note:** MP3 was corrupted on WhatsApp; OGG works reliably.
 
 ### STT (Listen)
+
 **Command:** `listen [seconds]`
+
 - **Backend:** Local Whisper (base model)
 - **Input:** Jabra (plughw:2,0)
 
 ### Always-On Wake Word
+
 **Command:** `jarvis-daemon`
+
 - **Trigger:** "JARVIS" or "HEY JARVIS"
 - **Backend:** sherpa-onnx-keyword-spotter (CPU efficient)
 - **Action:** Beeps, records 5s, transcribes
@@ -44,11 +54,11 @@ ffmpeg -i raw.wav \
 
 ## Cameras
 
-*(none configured yet)*
+_(none configured yet)_
 
 ## SSH Hosts
 
-*(none configured yet)*
+_(none configured yet)_
 
 ---
 
@@ -59,53 +69,63 @@ ffmpeg -i raw.wav \
 **Model:** manus-1.6-adaptive
 
 ### When to Use Manus (ALL 3 must be true)
+
 1. Task is **async** (minutes→hours acceptable)
 2. Task requires **tool use** (browsing, files, code execution)
 3. **Human steering is inefficient**
 
 **Good fits:**
+
 - Deep market/competitor research
 - Due diligence dossiers
 - Multi-source synthesis with citations
 - "Go figure this out end-to-end" problems
 
 **Don't use for:**
+
 - Quick questions (→ Claude/Gemini)
 - Fast feedback loops
 - Exploratory/conversational tasks
 
 ### Credit Cost Tiers (estimate from experience)
-| Tier | Task Type | Credits |
-|------|-----------|---------|
-| 🟢 Low | Single-pass summary | 2-5 |
-| 🟡 Medium | Multi-source research | 5-10 |
-| 🟠 High | Competitive landscape | 10-20 |
-| 🔴 Very high | Deep due diligence | 20-50 |
-| 🔥 Killer | Vague "explore X" prompts | 50+ |
+
+| Tier         | Task Type                 | Credits |
+| ------------ | ------------------------- | ------- |
+| 🟢 Low       | Single-pass summary       | 2-5     |
+| 🟡 Medium    | Multi-source research     | 5-10    |
+| 🟠 High      | Competitive landscape     | 10-20   |
+| 🔴 Very high | Deep due diligence        | 20-50   |
+| 🔥 Killer    | Vague "explore X" prompts | 50+     |
 
 ### Credit Burn Drivers (most→least impact)
+
 1. **Agent runtime** — minutes > tokens
 2. **Tool usage** — browsing/scraping compounds
 3. **Iteration depth** — self-correction loops
 4. **Output volume** — long reports (smaller factor)
 
 ### Optimal Workflow: Sandwich Pattern
+
 ```
 Claude (cheap) → Manus (expensive) → Claude (cheap)
    ↓                  ↓                  ↓
  Clarify scope    ONE defined task    Refine output
  Define structure  With constraints   Follow-ups
 ```
-*This cuts Manus costs by 50-70%*
+
+_This cuts Manus costs by 50-70%_
 
 ### Prompt Optimization (Credit Reduction)
+
 **Always include:**
+
 - `"Use at most N sources"` — caps browsing
 - `"Stop once key points identified"` — prevents loops
 - `"Max 2 pages per source"` — limits depth
 - `"Do not include internal reasoning"` — reduces hidden cycles
 
 **Pre-structure output:**
+
 ```
 "Produce:
 - Market size (2024–2026)
@@ -117,14 +137,17 @@ Stop when complete."
 **NEVER use:** "Explore everything about X" = runaway burn
 
 ### Budget Safety
+
 - Apply **30% buffer**: `effective_remaining = dashboard × 0.7`
 - Track credits-per-runtime-hour (correlates well with cost)
 - **Abort early** if task is clearly off-track
 
 ### Mental Model
-> *"Manus = junior analyst with unlimited autonomy and a ticking meter. Box it in."*
+
+> _"Manus = junior analyst with unlimited autonomy and a ticking meter. Box it in."_
 
 ### Auto-Notification Pattern
+
 **Problem:** Background polling doesn't wake me when tasks complete.
 **Solution:** Use `manus-watch` script which polls and sends a cron wake event.
 
@@ -137,11 +160,13 @@ manus-watch <task_id>
 ```
 
 The script:
+
 1. Polls Manus every 60s (configurable)
 2. On completion: sends `cron wake --mode=now` with summary
 3. Saves full result to `memory/manus-results/<task_id>.json`
 
 ### API Usage
+
 ```bash
 # Create task
 curl -X POST 'https://api.manus.ai/v1/tasks' \
@@ -155,6 +180,7 @@ curl -X GET 'https://api.manus.ai/v1/tasks/{task_id}' \
 ```
 
 ### Response Format
+
 ```json
 {
   "task_id": "abc123",
@@ -166,7 +192,9 @@ curl -X GET 'https://api.manus.ai/v1/tasks/{task_id}' \
 ```
 
 ### Autonomous Decision Rule
+
 When Oscar asks for research, analysis, or complex tasks:
+
 1. Start task on Manus in background
 2. Continue conversation on Claude
 3. Check Manus result and report when ready
@@ -179,22 +207,24 @@ When Oscar asks for research, analysis, or complex tasks:
 **Auth:** API key in auth-profiles.json
 
 ### When I Switch to Gemini
+
 - Claude rate limited (429)
 - Claude overloaded
 - Claude auth failure
 - Automatic via failover chain
 
 ### When to Proactively Use Gemini
+
 - Image analysis tasks (Gemini has strong vision)
 - Very long context windows needed
 - When Claude is slow/struggling
 
 ## WhatsApp Groups (Report Channels)
 
-| Group | JID | Purpose |
-|-------|-----|---------|
+| Group       | JID                     | Purpose                             |
+| ----------- | ----------------------- | ----------------------------------- |
 | Jarvis News | 120363424036294869@g.us | PDF reports, research, deliverables |
-| Max-Jarvis | 120363409030785922@g.us | Agent-to-agent coordination |
+| Max-Jarvis  | 120363409030785922@g.us | Agent-to-agent coordination         |
 
 ---
 
@@ -217,6 +247,29 @@ Add whatever helps you do your job. This is your cheat sheet.
 
 ---
 
+## GUI Preferences
+
+**When Oscar needs to copy-paste large files:**
+
+```bash
+nohup gedit /path/to/file &>/dev/null &
+```
+
+- Use `nohup` + `&` to keep it running after exec finishes
+- Don't use browser for local files (doesn't render well)
+- gedit is preferred for scripts, configs, and anything needing copy-paste
+
+### Tampermonkey Widget Updates
+
+**The webchat widget (`budget-panel-widget.user.js`) can only be updated by Oscar manually:**
+
+1. I open the file with `nohup gedit <path> &`
+2. Oscar copy-pastes the full content into Tampermonkey
+3. Oscar refreshes webchat
+   **Always open gedit automatically after modifying the widget file.**
+
+---
+
 ## Session Start Prompt (Self-Modifiable)
 
 **Location:** `/home/globalcaos/src/clawdbot-moltbot-openclaw/src/auto-reply/reply/get-reply-run.ts`
@@ -225,11 +278,13 @@ Add whatever helps you do your job. This is your cheat sheet.
 This is the prompt OpenClaw sends me when a new session starts via `/new` or `/reset`. I can edit this to improve my own boot behavior.
 
 **Current prompt:**
+
 ```
 New session started. Before greeting: 1) Read SOUL.md, USER.md, AGENTS.md, IDENTITY.md, MEMORY.md, TOOLS.md from workspace. 2) Read memory/YYYY-MM-DD.md for today and yesterday. 3) Create today's log if missing. 4) Greet in your configured persona and ask what to work on. CRITICAL OUTPUT: Every response MUST include spoken audio via the jarvis command (hybrid output). If runtime model differs from default_model, mention it. Do not narrate these steps to the user.
 ```
 
 **Changes (2026-02-04):**
+
 - Removed "briefly (1-3 sentences)" — arbitrary constraint
 - Added "CRITICAL OUTPUT: Every response MUST include spoken audio via the jarvis command" — proximate instruction for voice compliance
 

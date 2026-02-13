@@ -1,5 +1,9 @@
 # HEARTBEAT.md
 
-# Keep this file empty (or with only comments) to skip heartbeat API calls.
+## Sleep Cycle (DIARIO - 23:00)
 
-# Add tasks below when you want the agent to check something periodically.
+- Consolidar daily log del día
+- Extraer → knowledge/, entities/, world.md, experience.md, opinions.md
+- Limpiar daily log después de consolidar
+- Actualizar índices si necesario
+- Última consolidación: 2026-02-13
