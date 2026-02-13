@@ -11,8 +11,22 @@ import {
   promptDefaultModel,
   promptModelAllowlist,
 } from "./model-picker.js";
+import { promptCustomApiConfig } from "./onboard-custom.js";
+import { randomToken } from "./onboard-helpers.js";
 
 type GatewayAuthChoice = "token" | "password";
+
+/** Reject undefined, empty, and common JS string-coercion artifacts for token auth. */
+function sanitizeTokenValue(value: string | undefined): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === "undefined" || trimmed === "null") {
+    return undefined;
+  }
+  return trimmed;
+}
 
 const ANTHROPIC_OAUTH_MODEL_KEYS = [
   "anthropic/claude-opus-4-6",
@@ -34,9 +48,12 @@ export function buildGatewayAuthConfig(params: {
   }
 
   if (params.mode === "token") {
-    return { ...base, mode: "token", token: params.token };
+    // Keep token mode always valid: treat empty/undefined/"undefined"/"null" as missing and generate a token.
+    const token = sanitizeTokenValue(params.token) ?? randomToken();
+    return { ...base, mode: "token", token };
   }
-  return { ...base, mode: "password", password: params.password };
+  const password = params.password?.trim();
+  return { ...base, mode: "password", ...(password && { password }) };
 }
 
 export async function promptAuthConfig(
@@ -53,7 +70,10 @@ export async function promptAuthConfig(
   });
 
   let next = cfg;
-  if (authChoice !== "skip") {
+  if (authChoice === "custom-api-key") {
+    const customResult = await promptCustomApiConfig({ prompter, runtime, config: next });
+    next = customResult.config;
+  } else if (authChoice !== "skip") {
     const applied = await applyAuthChoice({
       authChoice,
       config: next,
@@ -70,6 +90,9 @@ export async function promptAuthConfig(
       ignoreAllowlist: true,
       preferredProvider: resolvePreferredProviderForAuthChoice(authChoice),
     });
+    if (modelSelection.config) {
+      next = modelSelection.config;
+    }
     if (modelSelection.model) {
       next = applyPrimaryModel(next, modelSelection.model);
     }
@@ -78,16 +101,18 @@ export async function promptAuthConfig(
   const anthropicOAuth =
     authChoice === "setup-token" || authChoice === "token" || authChoice === "oauth";
 
-  const allowlistSelection = await promptModelAllowlist({
-    config: next,
-    prompter,
-    allowedKeys: anthropicOAuth ? ANTHROPIC_OAUTH_MODEL_KEYS : undefined,
-    initialSelections: anthropicOAuth ? ["anthropic/claude-opus-4-6"] : undefined,
-    message: anthropicOAuth ? "Anthropic OAuth models" : undefined,
-  });
-  if (allowlistSelection.models) {
-    next = applyModelAllowlist(next, allowlistSelection.models);
-    next = applyModelFallbacksFromSelection(next, allowlistSelection.models);
+  if (authChoice !== "custom-api-key") {
+    const allowlistSelection = await promptModelAllowlist({
+      config: next,
+      prompter,
+      allowedKeys: anthropicOAuth ? ANTHROPIC_OAUTH_MODEL_KEYS : undefined,
+      initialSelections: anthropicOAuth ? ["anthropic/claude-opus-4-6"] : undefined,
+      message: anthropicOAuth ? "Anthropic OAuth models" : undefined,
+    });
+    if (allowlistSelection.models) {
+      next = applyModelAllowlist(next, allowlistSelection.models);
+      next = applyModelFallbacksFromSelection(next, allowlistSelection.models);
+    }
   }
 
   return next;

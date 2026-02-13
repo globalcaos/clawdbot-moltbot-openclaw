@@ -44,6 +44,50 @@ export function isLoopbackAddress(ip: string | undefined): boolean {
   return false;
 }
 
+/**
+ * Returns true if the IP belongs to a private or loopback network range.
+ * Private ranges: RFC1918, link-local, ULA IPv6, and CGNAT (100.64/10), plus loopback.
+ */
+export function isPrivateOrLoopbackAddress(ip: string | undefined): boolean {
+  if (!ip) {
+    return false;
+  }
+  if (isLoopbackAddress(ip)) {
+    return true;
+  }
+  const normalized = normalizeIPv4MappedAddress(ip.trim().toLowerCase());
+  const family = net.isIP(normalized);
+  if (!family) {
+    return false;
+  }
+
+  if (family === 4) {
+    const octets = normalized.split(".").map((value) => Number.parseInt(value, 10));
+    if (octets.length !== 4 || octets.some((value) => Number.isNaN(value))) {
+      return false;
+    }
+    const [o1, o2] = octets;
+    // RFC1918 IPv4 private ranges.
+    if (o1 === 10 || (o1 === 172 && o2 >= 16 && o2 <= 31) || (o1 === 192 && o2 === 168)) {
+      return true;
+    }
+    // IPv4 link-local and CGNAT (commonly used by Tailnet-like networks).
+    if ((o1 === 169 && o2 === 254) || (o1 === 100 && o2 >= 64 && o2 <= 127)) {
+      return true;
+    }
+    return false;
+  }
+
+  // IPv6 unique-local and link-local ranges.
+  if (normalized.startsWith("fc") || normalized.startsWith("fd")) {
+    return true;
+  }
+  if (/^fe[89ab]/.test(normalized)) {
+    return true;
+  }
+  return false;
+}
+
 function normalizeIPv4MappedAddress(ip: string): string {
   if (ip.startsWith("::ffff:")) {
     return ip.slice("::ffff:".length);
@@ -244,7 +288,7 @@ export async function resolveGatewayListenHosts(
  * @param host - The string to validate
  * @returns True if valid IPv4 format
  */
-function isValidIPv4(host: string): boolean {
+export function isValidIPv4(host: string): boolean {
   const parts = host.split(".");
   if (parts.length !== 4) {
     return false;
@@ -255,6 +299,20 @@ function isValidIPv4(host: string): boolean {
   });
 }
 
+/**
+ * Check if a hostname or IP refers to the local machine.
+ * Handles: localhost, 127.x.x.x, ::1, [::1], ::ffff:127.x.x.x
+ * Note: 0.0.0.0 and :: are NOT loopback - they bind to all interfaces.
+ */
 export function isLoopbackHost(host: string): boolean {
-  return isLoopbackAddress(host);
+  if (!host) {
+    return false;
+  }
+  const h = host.trim().toLowerCase();
+  if (h === "localhost") {
+    return true;
+  }
+  // Handle bracketed IPv6 addresses like [::1]
+  const unbracket = h.startsWith("[") && h.endsWith("]") ? h.slice(1, -1) : h;
+  return isLoopbackAddress(unbracket);
 }

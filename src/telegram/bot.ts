@@ -62,6 +62,10 @@ export type TelegramBotOptions = {
     lastUpdateId?: number | null;
     onUpdateId?: (updateId: number) => void | Promise<void>;
   };
+  testTimings?: {
+    mediaGroupFlushMs?: number;
+    textFragmentGapMs?: number;
+  };
 };
 
 export function getTelegramSequentialKey(ctx: {
@@ -449,11 +453,12 @@ export function createTelegramBot(opts: TelegramBotOptions) {
         : undefined;
       const peerId = isGroup ? buildTelegramGroupPeerId(chatId, resolvedThreadId) : String(chatId);
       const parentPeer = buildTelegramParentPeer({ isGroup, resolvedThreadId, chatId });
+      // Fresh config for bindings lookup; other routing inputs are payload-derived.
       const route = resolveAgentRoute({
-        cfg,
+        cfg: loadConfig(),
         channel: "telegram",
         accountId: account.accountId,
-        peer: { kind: isGroup ? "group" : "dm", id: peerId },
+        peer: { kind: isGroup ? "group" : "direct", id: peerId },
         parentPeer,
       });
       const sessionKey = route.sessionKey;
