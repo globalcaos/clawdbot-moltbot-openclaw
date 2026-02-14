@@ -19,6 +19,7 @@ Don't ask permission. Just do it.
 
 5. **Start embedding server** if not running: `bash skills/agent-memory-ultimate/scripts/start-memory.sh`
 6. **Use cognitive memory** for recall: `python3 skills/agent-memory-ultimate/scripts/mem.py recall "<query>"` (273ms with server vs 6.5s without)
+7. **Operating Doctrine:** Read `memory/knowledge/operating-doctrine.md` — your 12 intelligence strategies. This is HOW you think.
 
 ## Cognitive Memory (mem.py)
 
