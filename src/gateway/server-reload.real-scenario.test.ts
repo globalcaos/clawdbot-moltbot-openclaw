@@ -3,6 +3,21 @@
  * This test MUST fail if "imsg rpc not running" would occur in production.
  */
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import {
+  clearAllDispatchers,
+  getTotalPendingReplies,
+} from "../auto-reply/reply/dispatcher-registry.js";
+import { createReplyDispatcher } from "../auto-reply/reply/reply-dispatcher.js";
+
+function createDeferred<T = void>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
 
 describe("real scenario: config change during message processing", () => {
   let replyErrors: string[] = [];
@@ -16,18 +31,16 @@ describe("real scenario: config change during message processing", () => {
     vi.restoreAllMocks();
     // Wait for any pending microtasks (from markComplete()) to complete
     await Promise.resolve();
-    const { clearAllDispatchers } = await import("../auto-reply/reply/dispatcher-registry.js");
     clearAllDispatchers();
   });
 
   it("should NOT restart gateway while reply delivery is in flight", async () => {
-    const { createReplyDispatcher } = await import("../auto-reply/reply/reply-dispatcher.js");
-    const { getTotalPendingReplies } = await import("../auto-reply/reply/dispatcher-registry.js");
-
     let rpcConnected = true;
     const deliveredReplies: string[] = [];
+    const deliveryStarted = createDeferred();
+    const allowDelivery = createDeferred();
 
-    // Create dispatcher with slow delivery (simulates real network delay)
+    // Hold delivery open so restart checks run while reply is in-flight.
     const dispatcher = createReplyDispatcher({
       deliver: async (payload) => {
         if (!rpcConnected) {
@@ -35,8 +48,8 @@ describe("real scenario: config change during message processing", () => {
           replyErrors.push(error);
           throw new Error(error);
         }
-        // Slow delivery — restart checks will run during this window
-        await new Promise((resolve) => setTimeout(resolve, 150));
+        deliveryStarted.resolve();
+        await allowDelivery.promise;
         deliveredReplies.push(payload.text ?? "");
       },
       onError: () => {
@@ -49,6 +62,7 @@ describe("real scenario: config change during message processing", () => {
     // keeping pending > 0 is the in-flight delivery itself.
     dispatcher.sendFinalReply({ text: "Configuration updated!" });
     dispatcher.markComplete();
+    await deliveryStarted.promise;
 
     // At this point: markComplete flagged, delivery is in flight.
     // pending > 0 because the in-flight delivery keeps it alive.
@@ -59,7 +73,7 @@ describe("real scenario: config change during message processing", () => {
     // If the tracking is broken, pending would be 0 and we'd restart.
     let restartTriggered = false;
     for (let i = 0; i < 3; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 25));
+      await Promise.resolve();
       const pending = getTotalPendingReplies();
       if (pending === 0) {
         restartTriggered = true;
@@ -68,6 +82,7 @@ describe("real scenario: config change during message processing", () => {
       }
     }
 
+    allowDelivery.resolve();
     // Wait for delivery to complete
     await dispatcher.waitForIdle();
 
@@ -81,12 +96,11 @@ describe("real scenario: config change during message processing", () => {
   });
 
   it("should keep pending > 0 until reply is actually enqueued", async () => {
-    const { createReplyDispatcher } = await import("../auto-reply/reply/reply-dispatcher.js");
-    const { getTotalPendingReplies } = await import("../auto-reply/reply/dispatcher-registry.js");
+    const allowDelivery = createDeferred();
 
     const dispatcher = createReplyDispatcher({
       deliver: async (_payload) => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        await allowDelivery.promise;
       },
     });
 
@@ -94,7 +108,7 @@ describe("real scenario: config change during message processing", () => {
     expect(getTotalPendingReplies()).toBe(1);
 
     // Simulate command processing delay BEFORE reply is enqueued
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await Promise.resolve();
 
     // During this delay, pending should STILL be 1 (reservation active)
     expect(getTotalPendingReplies()).toBe(1);
@@ -112,6 +126,7 @@ describe("real scenario: config change during message processing", () => {
     const pendingAfterMarkComplete = getTotalPendingReplies();
     expect(pendingAfterMarkComplete).toBeGreaterThan(0);
 
+    allowDelivery.resolve();
     // Wait for reply to send
     await dispatcher.waitForIdle();
 
