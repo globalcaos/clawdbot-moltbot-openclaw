@@ -88,6 +88,7 @@ import {
   buildEmbeddedSystemPrompt,
   createSystemPromptOverride,
 } from "../system-prompt.js";
+import { truncateAggregateToolResults } from "../tool-result-truncation.js";
 import { splitSdkTools } from "../tool-split.js";
 import { describeUnknownError, mapThinkingLevel } from "../utils.js";
 import { flushPendingToolResultsAfterIdle } from "../wait-for-idle-before-flush.js";
@@ -650,9 +651,20 @@ export async function runEmbeddedAttempt(
         const limited = transcriptPolicy.repairToolUseResultPairing
           ? sanitizeToolUseResultPairing(truncated)
           : truncated;
-        cacheTrace?.recordStage("session:limited", { messages: limited });
-        if (limited.length > 0) {
-          activeSession.agent.replaceMessages(limited);
+        // Aggregate tool result truncation: if combined tool results exceed 50%
+        // of context, truncate oldest results to 35% target. Prevents cumulative
+        // tool result bloat from triggering premature compaction.
+        const { messages: aggregateTruncated, truncatedCount: aggTruncCount } =
+          truncateAggregateToolResults(limited, params.model.contextWindow);
+        if (aggTruncCount > 0) {
+          log.info(
+            `[run-attempt] Aggregate tool result truncation: ${aggTruncCount} results trimmed ` +
+              `(contextWindow=${params.model.contextWindow})`,
+          );
+        }
+        cacheTrace?.recordStage("session:limited", { messages: aggregateTruncated });
+        if (aggregateTruncated.length > 0) {
+          activeSession.agent.replaceMessages(aggregateTruncated);
         }
       } catch (err) {
         await flushPendingToolResultsAfterIdle({
