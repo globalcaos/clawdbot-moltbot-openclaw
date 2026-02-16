@@ -357,9 +357,24 @@ def main():
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
 
+    # Check for prior reports (longitudinal tracking)
+    prior_reports = []
+    id_file = db_path.parent / ".memory-bench-instance-id"
+    if id_file.exists():
+        instance_id = id_file.read_text().strip()
+        reports_dir = Path.home() / ".openclaw" / "workspace" / "benchmarks" / "memory-bench" / "reports"
+        if reports_dir.exists():
+            for f in reports_dir.glob("*.json"):
+                try:
+                    r = json.loads(f.read_text())
+                    if r.get("instance_id") == instance_id:
+                        prior_reports.append(r.get("collected_at", ""))
+                except (json.JSONDecodeError, KeyError):
+                    pass
+
     # Build report
     report = {
-        "schema_version": "1.0.0",
+        "schema_version": "2.0.0",
         "collected_at": datetime.now(timezone.utc).isoformat(),
         "collection_period_days": args.days,
         "contributor": args.contributor or os.environ.get("GITHUB_USER", "anonymous"),
@@ -368,6 +383,11 @@ def main():
         "memory_stats": collect_memory_stats(conn, args.days),
         "retrieval_stats": collect_retrieval_stats(conn, args.days),
         "token_stats": collect_token_stats(),
+        "longitudinal": {
+            "prior_reports": len(prior_reports),
+            "prior_dates": sorted(prior_reports)[-5:] if prior_reports else [],
+            "meets_minimum": len(prior_reports) >= 1,  # need ≥2 total (this + 1 prior)
+        },
     }
 
     conn.close()

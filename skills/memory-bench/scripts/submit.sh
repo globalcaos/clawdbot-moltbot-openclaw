@@ -18,12 +18,24 @@ if [ -z "$REPORT" ] || [ ! -f "$REPORT" ]; then
     exit 1
 fi
 
-# Extract contributor from report if not provided
-if [ -z "$CONTRIBUTOR" ]; then
-    CONTRIBUTOR=$(python3 -c "import json; print(json.load(open('$REPORT'))['contributor'])" 2>/dev/null || echo "anonymous")
+# Validate JSON
+if ! python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$REPORT" 2>/dev/null; then
+    echo "❌ Invalid JSON file: $REPORT"
+    exit 1
 fi
 
-INSTANCE_ID=$(python3 -c "import json; print(json.load(open('$REPORT'))['instance_id'])" 2>/dev/null || echo "unknown")
+# Extract contributor from report if not provided
+if [ -z "$CONTRIBUTOR" ]; then
+    CONTRIBUTOR=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['contributor'])" "$REPORT" 2>/dev/null || echo "anonymous")
+fi
+
+# Validate contributor username
+if [[ ! "$CONTRIBUTOR" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+    echo "❌ Invalid GitHub username: $CONTRIBUTOR"
+    exit 1
+fi
+
+INSTANCE_ID=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['instance_id'])" "$REPORT" 2>/dev/null || echo "unknown")
 TIMESTAMP=$(date -u +%Y%m%d-%H%M%S)
 BRANCH="bench/${CONTRIBUTOR}-${TIMESTAMP}"
 FILENAME="${CONTRIBUTOR}-${INSTANCE_ID}-${TIMESTAMP}.json"

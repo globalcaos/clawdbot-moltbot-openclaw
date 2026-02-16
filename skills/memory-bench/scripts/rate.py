@@ -421,6 +421,46 @@ def main():
     print(f"   Ablation: {'yes' if args.ablation else 'no'}")
     print(f"   Algorithm: {algo_version}")
 
+    # --- Inter-rater reliability: run both judges if openai available ---
+    if args.judge == "openai":
+        print("\n📏 Inter-rater reliability check (first 5 queries)...")
+        irr_queries = test_queries[:5]
+        openai_ratings_flat = []
+        local_ratings_flat = []
+        for q in irr_queries:
+            results, _ = run_recall(conn, q["query"], use_activation=True)
+            for r in results[:5]:
+                content = r.get("content", str(r))[:300] if isinstance(r, dict) else str(r)[:300]
+                try:
+                    o_rating = judge_with_openai(q["query"], content, api_key)
+                    l_rating = judge_with_embeddings(q["query"], content)
+                    openai_ratings_flat.append(o_rating)
+                    local_ratings_flat.append(l_rating)
+                except Exception:
+                    pass
+        if len(openai_ratings_flat) >= 5:
+            # Cohen's kappa (inline, no sklearn dependency)
+            def cohens_kappa(r1, r2):
+                n = len(r1)
+                if n == 0: return 0.0
+                categories = sorted(set(r1) | set(r2))
+                # Confusion matrix
+                matrix = {}
+                for c1 in categories:
+                    for c2 in categories:
+                        matrix[(c1, c2)] = sum(1 for a, b in zip(r1, r2) if a == c1 and b == c2)
+                po = sum(matrix[(c, c)] for c in categories) / n
+                pe = sum(
+                    (sum(matrix[(c, c2)] for c2 in categories) / n) *
+                    (sum(matrix[(c1, c)] for c1 in categories) / n)
+                    for c in categories
+                )
+                return (po - pe) / (1 - pe) if pe < 1 else 0.0
+
+            kappa = cohens_kappa(openai_ratings_flat, local_ratings_flat)
+            print(f"  Cohen's κ (openai vs local): {kappa:.3f}  (N={len(openai_ratings_flat)} pairs)")
+            print(f"  {'✅ Good agreement' if kappa > 0.4 else '⚠️ Weak agreement — prefer openai judge'}")
+
     # Main run (with activation)
     agg_main, _ = run_assessment(
         conn, test_queries, judge_fn, judge_method,
