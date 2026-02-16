@@ -60,6 +60,7 @@ import {
 } from "../../skills.js";
 import { buildSystemPromptParams } from "../../system-prompt-params.js";
 import { buildSystemPromptReport } from "../../system-prompt-report.js";
+import { retrieveTraceContext } from "../../trace/retrieve.js";
 import { resolveTranscriptPolicy } from "../../transcript-policy.js";
 import { DEFAULT_BOOTSTRAP_FILENAME } from "../../workspace.js";
 import { isRunnerAbortError } from "../abort.js";
@@ -854,6 +855,22 @@ export async function runEmbeddedAttempt(
           } catch (hookErr) {
             log.warn(`before_agent_start hook failed: ${String(hookErr)}`);
           }
+        }
+
+        // TRACE Phase 3: Retrieve relevant context from event store for this turn.
+        // Only fires if there's a trace.db and the query is non-trivial.
+        try {
+          const traceContext = retrieveTraceContext({
+            prompt: effectivePrompt,
+            sessionId: params.sessionId,
+            agentDir: resolveOpenClawAgentDir(),
+          });
+          if (traceContext) {
+            effectivePrompt = `${traceContext}\n\n${effectivePrompt}`;
+            log.debug(`[trace] injected ${traceContext.length} chars of retrieved context`);
+          }
+        } catch (traceErr) {
+          log.debug(`[trace] retrieval skipped: ${traceErr}`);
         }
 
         log.debug(`embedded run prompt start: runId=${params.runId} sessionId=${params.sessionId}`);
