@@ -1,6 +1,6 @@
 ---
-name: memory-bench
-description: Collect anonymized memory system benchmarks and submit them as PRs to the research fork. Use when measuring retrieval accuracy (RAR/MRR/nDCG/MAP), token savings, consolidation quality, or submitting benchmark data for the ENGRAM/CORTEX research papers. Works with agent-memory-ultimate. Supports LLM-as-judge evaluation and ablation studies.
+name: memory-bench-pioneer
+description: "Be one of the first to benchmark your agent's memory — and help shape how AI remembers. Runs a peer-review-grade evaluation suite (LLM-as-judge, nDCG/MAP/MRR with 95% CIs, ablation studies) against your live memory system and submits anonymized results to the ENGRAM/CORTEX research papers. Your data stays private; only aggregate stats leave. Works with agent-memory-ultimate. For the bold few who believe AI memory should be measured, not guessed at."
 ---
 
 # Memory Bench
