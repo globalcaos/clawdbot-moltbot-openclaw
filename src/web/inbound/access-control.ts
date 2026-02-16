@@ -173,11 +173,6 @@ export async function checkInboundAccessControl(params: {
   }
   if (params.group && groupPolicy === "allowlist") {
     if (!groupAllowFrom || groupAllowFrom.length === 0) {
-      // No groupAllowFrom configured — try allowChats before blocking.
-      const chatResult = tryAllowChats();
-      if (chatResult) {
-        return chatResult;
-      }
       logVerbose("Blocked group message (groupPolicy: allowlist, no groupAllowFrom)");
       return blocked();
     }
@@ -185,21 +180,31 @@ export async function checkInboundAccessControl(params: {
       groupHasWildcard ||
       (params.senderE164 != null && normalizedGroupAllowFrom.includes(params.senderE164));
     if (!senderAllowed) {
-      // Sender not in groupAllowFrom — try allowChats before blocking.
-      const chatResult = tryAllowChats();
-      if (chatResult) {
-        return chatResult;
-      }
       logVerbose(
         `Blocked group message from ${params.senderE164 ?? "unknown sender"} (groupPolicy: allowlist)`,
       );
       return blocked();
+    }
+    // Sender is authorized in group. If group is in allowChats with triggerPrefix,
+    // apply the prefix gate even for authorized senders.
+    if (allowChats?.includes(params.remoteJid)) {
+      const chatResult = tryAllowChats();
+      if (chatResult) {
+        return chatResult;
+      }
     }
   }
 
   // DM access control (secure defaults): "pairing" (default) / "allowlist" / "open" / "disabled".
   if (!params.group) {
     if (params.isFromMe && !isSamePhone) {
+      // Owner's outbound message in someone else's DM chat.
+      // Allow if chat is in allowChats and message has triggerPrefix — this lets the
+      // owner trigger the agent from within another person's DM conversation.
+      const chatResult = tryAllowChats();
+      if (chatResult) {
+        return chatResult;
+      }
       logVerbose("Skipping outbound DM (fromMe); no pairing reply needed.");
       return blocked();
     }
@@ -213,11 +218,8 @@ export async function checkInboundAccessControl(params: {
         dmHasWildcard ||
         (normalizedAllowFrom.length > 0 && normalizedAllowFrom.includes(candidate));
       if (!senderAllowed) {
-        // Sender not in allowFrom — try allowChats (Layer 2) before pairing/blocking.
-        const chatResult = tryAllowChats();
-        if (chatResult) {
-          return chatResult;
-        }
+        // Sender not in allowFrom and not the owner — no allowChats fallback.
+        // Only the owner (fromMe) can use allowChats to trigger from other chats.
         if (dmPolicy === "pairing") {
           if (suppressPairingReply) {
             logVerbose(`Skipping pairing reply for historical DM from ${candidate}.`);
