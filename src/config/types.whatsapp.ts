@@ -48,6 +48,8 @@ export type WhatsAppConfig = {
   allowFrom?: string[];
   /** Optional allowlist for WhatsApp group senders (E.164). */
   groupAllowFrom?: string[];
+  /** Chat JIDs where non-allowFrom senders can trigger the bot (subject to triggerPrefix). */
+  allowChats?: string[];
   /**
    * Controls how group messages are handled:
    * - "open": groups bypass allowFrom, only mention-gating applies
@@ -96,6 +98,8 @@ export type WhatsAppConfig = {
      */
     group?: "always" | "mentions" | "never";
   };
+  /** Trigger prefix required for allowChats-authorized messages (case-insensitive, stripped from body). */
+  triggerPrefix?: string;
   /** Debounce window (ms) for batching rapid consecutive messages from the same sender (0 to disable). */
   debounceMs?: number;
   /** Heartbeat visibility settings for this channel. */
@@ -127,6 +131,7 @@ export type WhatsAppAccountConfig = {
   selfChatMode?: boolean;
   allowFrom?: string[];
   groupAllowFrom?: string[];
+  allowChats?: string[];
   groupPolicy?: GroupPolicy;
   /** Max group messages to keep as history context (0 disables). */
   historyLimit?: number;
@@ -164,6 +169,8 @@ export type WhatsAppAccountConfig = {
      */
     group?: "always" | "mentions" | "never";
   };
+  /** Trigger prefix required for allowChats-authorized messages (case-insensitive, stripped from body). */
+  triggerPrefix?: string;
   /** Debounce window (ms) for batching rapid consecutive messages from the same sender (0 to disable). */
   debounceMs?: number;
   /** Heartbeat visibility settings for this account. */

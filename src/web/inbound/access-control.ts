@@ -13,9 +13,52 @@ export type InboundAccessControlResult = {
   shouldMarkRead: boolean;
   isSelfChat: boolean;
   resolvedAccountId: string;
+  /** Whether the triggerPrefix was stripped from the message body. */
+  prefixStripped: boolean;
+  /** The message body with the triggerPrefix removed (only set when prefixStripped is true). */
+  strippedBody?: string;
 };
 
 const PAIRING_REPLY_HISTORY_GRACE_MS = 30_000;
+
+/**
+ * Check if a chat is in the allowChats list and, if so, whether the message
+ * passes the triggerPrefix gate. Returns `null` if the chat is not in allowChats.
+ */
+export function checkAllowChats(opts: {
+  allowChats: string[] | undefined;
+  chatJid: string;
+  triggerPrefix: string | undefined;
+  messageBody: string | undefined;
+}): { allowed: boolean; prefixStripped: boolean; strippedBody?: string } | null {
+  if (!opts.allowChats || opts.allowChats.length === 0) {
+    return null;
+  }
+  if (!opts.allowChats.includes(opts.chatJid)) {
+    return null;
+  }
+  // Chat is in allowChats. Check triggerPrefix gate.
+  if (!opts.triggerPrefix) {
+    // No prefix configured — chat allowlist alone is sufficient.
+    return { allowed: true, prefixStripped: false };
+  }
+  const body = opts.messageBody ?? "";
+  const prefixLower = opts.triggerPrefix.toLowerCase();
+  const bodyLower = body.toLowerCase();
+  // Match prefix followed by end-of-string or whitespace.
+  if (bodyLower === prefixLower) {
+    return { allowed: true, prefixStripped: true, strippedBody: "" };
+  }
+  if (bodyLower.startsWith(`${prefixLower} `)) {
+    const stripped = body.slice(opts.triggerPrefix.length).trimStart();
+    return { allowed: true, prefixStripped: true, strippedBody: stripped };
+  }
+  // Message doesn't start with prefix — blocked.
+  logVerbose(
+    `Blocked allowChats message from ${opts.chatJid} (missing triggerPrefix "${opts.triggerPrefix}")`,
+  );
+  return { allowed: false, prefixStripped: false };
+}
 
 export async function checkInboundAccessControl(params: {
   accountId: string;
@@ -32,6 +75,8 @@ export async function checkInboundAccessControl(params: {
     sendMessage: (jid: string, content: { text: string }) => Promise<unknown>;
   };
   remoteJid: string;
+  /** Raw message body text for triggerPrefix checking. */
+  messageBody?: string;
 }): Promise<InboundAccessControlResult> {
   const cfg = loadConfig();
   const account = resolveWhatsAppAccount({
@@ -74,6 +119,48 @@ export async function checkInboundAccessControl(params: {
       ? groupAllowFrom.filter((entry) => entry !== "*").map(normalizeE164)
       : [];
 
+  const blocked = (extra?: Partial<InboundAccessControlResult>): InboundAccessControlResult => ({
+    allowed: false,
+    shouldMarkRead: false,
+    isSelfChat,
+    resolvedAccountId: account.accountId,
+    prefixStripped: false,
+    ...extra,
+  });
+
+  const allowed = (extra?: Partial<InboundAccessControlResult>): InboundAccessControlResult => ({
+    allowed: true,
+    shouldMarkRead: true,
+    isSelfChat,
+    resolvedAccountId: account.accountId,
+    prefixStripped: false,
+    ...extra,
+  });
+
+  // Resolve allowChats + triggerPrefix for Layer 2/3 checks.
+  const allowChats = account.allowChats ?? cfg.channels?.whatsapp?.allowChats;
+  const triggerPrefix = account.triggerPrefix ?? cfg.channels?.whatsapp?.triggerPrefix;
+
+  // Helper: attempt allowChats fallback before blocking.
+  const tryAllowChats = (): InboundAccessControlResult | null => {
+    const result = checkAllowChats({
+      allowChats,
+      chatJid: params.remoteJid,
+      triggerPrefix,
+      messageBody: params.messageBody,
+    });
+    if (!result) {
+      return null;
+    }
+    if (result.allowed) {
+      return allowed({
+        prefixStripped: result.prefixStripped,
+        strippedBody: result.strippedBody,
+      });
+    }
+    return blocked();
+  };
+
   // Group policy filtering:
   // - "open": groups bypass allowFrom, only mention-gating applies
   // - "disabled": block all group messages entirely
@@ -82,36 +169,31 @@ export async function checkInboundAccessControl(params: {
   const groupPolicy = account.groupPolicy ?? defaultGroupPolicy ?? "open";
   if (params.group && groupPolicy === "disabled") {
     logVerbose("Blocked group message (groupPolicy: disabled)");
-    return {
-      allowed: false,
-      shouldMarkRead: false,
-      isSelfChat,
-      resolvedAccountId: account.accountId,
-    };
+    return blocked();
   }
   if (params.group && groupPolicy === "allowlist") {
     if (!groupAllowFrom || groupAllowFrom.length === 0) {
+      // No groupAllowFrom configured — try allowChats before blocking.
+      const chatResult = tryAllowChats();
+      if (chatResult) {
+        return chatResult;
+      }
       logVerbose("Blocked group message (groupPolicy: allowlist, no groupAllowFrom)");
-      return {
-        allowed: false,
-        shouldMarkRead: false,
-        isSelfChat,
-        resolvedAccountId: account.accountId,
-      };
+      return blocked();
     }
     const senderAllowed =
       groupHasWildcard ||
       (params.senderE164 != null && normalizedGroupAllowFrom.includes(params.senderE164));
     if (!senderAllowed) {
+      // Sender not in groupAllowFrom — try allowChats before blocking.
+      const chatResult = tryAllowChats();
+      if (chatResult) {
+        return chatResult;
+      }
       logVerbose(
         `Blocked group message from ${params.senderE164 ?? "unknown sender"} (groupPolicy: allowlist)`,
       );
-      return {
-        allowed: false,
-        shouldMarkRead: false,
-        isSelfChat,
-        resolvedAccountId: account.accountId,
-      };
+      return blocked();
     }
   }
 
@@ -119,28 +201,23 @@ export async function checkInboundAccessControl(params: {
   if (!params.group) {
     if (params.isFromMe && !isSamePhone) {
       logVerbose("Skipping outbound DM (fromMe); no pairing reply needed.");
-      return {
-        allowed: false,
-        shouldMarkRead: false,
-        isSelfChat,
-        resolvedAccountId: account.accountId,
-      };
+      return blocked();
     }
     if (dmPolicy === "disabled") {
       logVerbose("Blocked dm (dmPolicy: disabled)");
-      return {
-        allowed: false,
-        shouldMarkRead: false,
-        isSelfChat,
-        resolvedAccountId: account.accountId,
-      };
+      return blocked();
     }
     if (dmPolicy !== "open" && !isSamePhone) {
       const candidate = params.from;
-      const allowed =
+      const senderAllowed =
         dmHasWildcard ||
         (normalizedAllowFrom.length > 0 && normalizedAllowFrom.includes(candidate));
-      if (!allowed) {
+      if (!senderAllowed) {
+        // Sender not in allowFrom — try allowChats (Layer 2) before pairing/blocking.
+        const chatResult = tryAllowChats();
+        if (chatResult) {
+          return chatResult;
+        }
         if (dmPolicy === "pairing") {
           if (suppressPairingReply) {
             logVerbose(`Skipping pairing reply for historical DM from ${candidate}.`);
@@ -170,20 +247,10 @@ export async function checkInboundAccessControl(params: {
         } else {
           logVerbose(`Blocked unauthorized sender ${candidate} (dmPolicy=${dmPolicy})`);
         }
-        return {
-          allowed: false,
-          shouldMarkRead: false,
-          isSelfChat,
-          resolvedAccountId: account.accountId,
-        };
+        return blocked();
       }
     }
   }
 
-  return {
-    allowed: true,
-    shouldMarkRead: true,
-    isSelfChat,
-    resolvedAccountId: account.accountId,
-  };
+  return allowed();
 }

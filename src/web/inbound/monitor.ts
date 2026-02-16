@@ -199,6 +199,10 @@ export async function monitorWebInbox(options: {
         ? Number(msg.messageTimestamp) * 1000
         : undefined;
 
+      // Extract raw message body for triggerPrefix checking in access control.
+      const rawMessageBody =
+        msg.message?.conversation ?? msg.message?.extendedTextMessage?.text ?? undefined;
+
       const access = await checkInboundAccessControl({
         accountId: options.accountId,
         from,
@@ -211,6 +215,7 @@ export async function monitorWebInbox(options: {
         connectedAtMs,
         sock: { sendMessage: (jid, content) => sock.sendMessage(jid, content) },
         remoteJid,
+        messageBody: rawMessageBody,
       });
       if (!access.allowed) {
         continue;
@@ -239,7 +244,10 @@ export async function monitorWebInbox(options: {
 
       const location = extractLocationData(msg.message ?? undefined);
       const locationText = location ? formatLocationText(location) : undefined;
-      let body = extractText(msg.message ?? undefined);
+      // If access control stripped the triggerPrefix, use the stripped body.
+      let body = access.prefixStripped
+        ? (access.strippedBody ?? "")
+        : extractText(msg.message ?? undefined);
       if (locationText) {
         body = [body, locationText].filter(Boolean).join("\n").trim();
       }

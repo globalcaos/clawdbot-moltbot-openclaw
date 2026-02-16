@@ -27,6 +27,8 @@ export const WhatsAppAccountSchema = z
     selfChatMode: z.boolean().optional(),
     allowFrom: z.array(z.string()).optional(),
     groupAllowFrom: z.array(z.string()).optional(),
+    /** Chat JIDs where non-allowFrom senders can trigger the bot (subject to triggerPrefix). */
+    allowChats: z.array(z.string()).optional(),
     groupPolicy: GroupPolicySchema.optional().default("allowlist"),
     historyLimit: z.number().int().min(0).optional(),
     dmHistoryLimit: z.number().int().min(0).optional(),
@@ -57,6 +59,8 @@ export const WhatsAppAccountSchema = z
       })
       .strict()
       .optional(),
+    triggerPrefix: z.string().optional(),
+    syncFullHistory: z.boolean().optional(),
     debounceMs: z.number().int().nonnegative().optional().default(0),
     heartbeat: ChannelHeartbeatVisibilitySchema,
   })
@@ -89,6 +93,8 @@ export const WhatsAppConfigSchema = z
     selfChatMode: z.boolean().optional(),
     allowFrom: z.array(z.string()).optional(),
     groupAllowFrom: z.array(z.string()).optional(),
+    /** Chat JIDs where non-allowFrom senders can trigger the bot (subject to triggerPrefix). */
+    allowChats: z.array(z.string()).optional(),
     groupPolicy: GroupPolicySchema.optional().default("allowlist"),
     historyLimit: z.number().int().min(0).optional(),
     dmHistoryLimit: z.number().int().min(0).optional(),
@@ -127,6 +133,8 @@ export const WhatsAppConfigSchema = z
       })
       .strict()
       .optional(),
+    triggerPrefix: z.string().optional(),
+    syncFullHistory: z.boolean().optional(),
     debounceMs: z.number().int().nonnegative().optional().default(0),
     heartbeat: ChannelHeartbeatVisibilitySchema,
   })
