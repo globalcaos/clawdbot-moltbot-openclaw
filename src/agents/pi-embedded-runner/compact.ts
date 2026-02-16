@@ -56,6 +56,8 @@ import {
   resolveSkillsPromptForRun,
   type SkillSnapshot,
 } from "../skills.js";
+import { createTraceStore } from "../trace/event-store.js";
+import { buildTaskStateExtractionInstructions } from "../trace/task-state.js";
 import { resolveTranscriptPolicy } from "../transcript-policy.js";
 import { buildEmbeddedExtensionPaths } from "./extensions.js";
 import {
@@ -189,6 +191,18 @@ function summarizeCompactionMessages(messages: AgentMessage[]): CompactionMessag
     estTokens: tokenEstimationFailed ? undefined : estTokens,
     contributors: contributors.toSorted((a, b) => b.chars - a.chars).slice(0, 3),
   };
+}
+
+/**
+ * TRACE Phase 1: Append task-state extraction instructions to compaction instructions.
+ * If the user already provided custom instructions, append; otherwise use TRACE instructions alone.
+ */
+function resolveTraceCompactionInstructions(customInstructions?: string): string {
+  const traceInstructions = buildTaskStateExtractionInstructions();
+  if (customInstructions) {
+    return `${customInstructions}\n\n${traceInstructions}`;
+  }
+  return traceInstructions;
 }
 
 function classifyCompactionReason(reason?: string): string {
@@ -616,6 +630,35 @@ export async function compactEmbeddedPiSessionDirect(
             });
         }
 
+        // TRACE Phase 0: Index session events before compaction evicts them from context.
+        // Fire-and-forget — indexing failure must not block compaction.
+        if (params.sessionFile) {
+          try {
+            const traceStore = createTraceStore(agentDir);
+            const sessionFileId = params.sessionId;
+            traceStore
+              .indexSession(sessionFileId, params.sessionFile)
+              .then((indexed) => {
+                if (indexed > 0) {
+                  log.info(
+                    `[trace] indexed ${indexed} events from session ${sessionFileId} before compaction`,
+                  );
+                }
+                traceStore.close();
+              })
+              .catch((err) => {
+                log.warn(`[trace] indexing failed: ${err}`);
+                try {
+                  traceStore.close();
+                } catch {
+                  /* ignore */
+                }
+              });
+          } catch (traceErr) {
+            log.warn(`[trace] store init failed: ${traceErr}`);
+          }
+        }
+
         const diagEnabled = log.isEnabled("debug");
         const preMetrics = diagEnabled ? summarizeCompactionMessages(session.messages) : undefined;
         if (diagEnabled && preMetrics) {
@@ -631,8 +674,11 @@ export async function compactEmbeddedPiSessionDirect(
           );
         }
 
+        // TRACE Phase 1: Inject task-state extraction instructions into compaction
+        const traceInstructions = resolveTraceCompactionInstructions(params.customInstructions);
+
         const compactStartedAt = Date.now();
-        const result = await session.compact(params.customInstructions);
+        const result = await session.compact(traceInstructions);
         // Estimate tokens after compaction by summing token estimates for remaining messages
         let tokensAfter: number | undefined;
         try {
