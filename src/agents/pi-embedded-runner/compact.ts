@@ -57,6 +57,7 @@ import {
   type SkillSnapshot,
 } from "../skills.js";
 import { createTraceStore } from "../trace/event-store.js";
+import { buildManifestFromMessages, encodeManifestInSummary } from "../trace/pointer-manifest.js";
 import { buildTaskStateExtractionInstructions } from "../trace/task-state.js";
 import { resolveTranscriptPolicy } from "../transcript-policy.js";
 import { buildEmbeddedExtensionPaths } from "./extensions.js";
@@ -711,6 +712,26 @@ export async function compactEmbeddedPiSessionDirect(
             .catch((hookErr) => {
               log.warn(`after_compaction hook failed: ${hookErr}`);
             });
+        }
+
+        // TRACE Phase 2: Build and store pointer manifest for compacted events.
+        // The manifest captures topic clusters and pinned events so Phase 3
+        // can retrieve specific context without re-scanning the full event store.
+        try {
+          const tokensFreed = result.tokensBefore - (tokensAfter ?? 0);
+          const manifest = buildManifestFromMessages({
+            sessionId: params.sessionId,
+            messages: preCompactionMessages,
+            tokensFreed,
+          });
+          const traceStore = createTraceStore(agentDir);
+          traceStore.storeManifest(params.sessionId, JSON.stringify(manifest));
+          traceStore.close();
+          log.info(
+            `[trace] manifest stored: ${manifest.eventsCompacted} events, ${manifest.pinnedEvents.length} pinned, ${manifest.topics.length} topics`,
+          );
+        } catch (manifestErr) {
+          log.warn(`[trace] manifest storage failed: ${manifestErr}`);
         }
 
         const postMetrics = diagEnabled ? summarizeCompactionMessages(session.messages) : undefined;

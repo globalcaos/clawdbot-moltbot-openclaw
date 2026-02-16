@@ -218,6 +218,16 @@ function initDb(db: DatabaseSync): { ftsAvailable: boolean } {
   }
 
   db.exec(`
+    CREATE TABLE IF NOT EXISTS trace_compaction_manifests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_id TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      manifest_json TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_trace_manifest_session ON trace_compaction_manifests(session_id);
+  `);
+
+  db.exec(`
     CREATE TABLE IF NOT EXISTS trace_watermarks (
       session_id TEXT PRIMARY KEY,
       byte_offset INTEGER NOT NULL DEFAULT 0,
@@ -371,7 +381,7 @@ export class TraceEventStore {
 
   private searchFts(options: TraceSearchOptions): TraceSearchResult[] {
     const conditions: string[] = ["trace_fts.trace_fts MATCH ?"];
-    const params: unknown[] = [options.query];
+    const params: (string | number | null)[] = [options.query];
 
     this.addFilters(conditions, params, options);
 
@@ -387,12 +397,12 @@ export class TraceEventStore {
       LIMIT ${limit}
     `;
 
-    return this.db.prepare(sql).all(...params) as TraceSearchResult[];
+    return this.db.prepare(sql).all(...params) as unknown as TraceSearchResult[];
   }
 
   private searchLike(options: TraceSearchOptions): TraceSearchResult[] {
     const conditions: string[] = ["e.text_content LIKE ?"];
-    const params: unknown[] = [`%${options.query}%`];
+    const params: (string | number | null)[] = [`%${options.query}%`];
 
     this.addFilters(conditions, params, options);
 
@@ -407,10 +417,14 @@ export class TraceEventStore {
       LIMIT ${limit}
     `;
 
-    return this.db.prepare(sql).all(...params) as TraceSearchResult[];
+    return this.db.prepare(sql).all(...params) as unknown as TraceSearchResult[];
   }
 
-  private addFilters(conditions: string[], params: unknown[], options: TraceSearchOptions): void {
+  private addFilters(
+    conditions: string[],
+    params: (string | number | null)[],
+    options: TraceSearchOptions,
+  ): void {
     if (options.sessionId) {
       conditions.push("e.session_id = ?");
       params.push(options.sessionId);
@@ -445,7 +459,7 @@ export class TraceEventStore {
          ORDER BY timestamp DESC
          LIMIT ?`,
       )
-      .all(sessionId, limit) as TraceSearchResult[];
+      .all(sessionId, limit) as unknown as TraceSearchResult[];
   }
 
   /**
@@ -460,7 +474,7 @@ export class TraceEventStore {
          ORDER BY timestamp DESC
          LIMIT ?`,
       )
-      .all(sessionId, aroundTimestamp, Math.ceil(windowSize / 2)) as TraceSearchResult[];
+      .all(sessionId, aroundTimestamp, Math.ceil(windowSize / 2)) as unknown as TraceSearchResult[];
 
     const after = this.db
       .prepare(
@@ -470,7 +484,11 @@ export class TraceEventStore {
          ORDER BY timestamp ASC
          LIMIT ?`,
       )
-      .all(sessionId, aroundTimestamp, Math.floor(windowSize / 2)) as TraceSearchResult[];
+      .all(
+        sessionId,
+        aroundTimestamp,
+        Math.floor(windowSize / 2),
+      ) as unknown as TraceSearchResult[];
 
     return [...before.toReversed(), ...after];
   }
@@ -496,6 +514,35 @@ export class TraceEventStore {
     }
 
     return { totalEvents, sessions, dbSizeBytes };
+  }
+
+  /**
+   * Store a compaction manifest for later retrieval by Phase 3.
+   */
+  storeManifest(sessionId: string, manifestJson: string): void {
+    this.db
+      .prepare(
+        "INSERT INTO trace_compaction_manifests (session_id, created_at, manifest_json) VALUES (?, ?, ?)",
+      )
+      .run(sessionId, new Date().toISOString(), manifestJson);
+  }
+
+  /**
+   * Get all compaction manifests for a session, newest first.
+   */
+  getManifests(
+    sessionId: string,
+    limit = 10,
+  ): Array<{ id: number; created_at: string; manifest_json: string }> {
+    return this.db
+      .prepare(
+        "SELECT id, created_at, manifest_json FROM trace_compaction_manifests WHERE session_id = ? ORDER BY id DESC LIMIT ?",
+      )
+      .all(sessionId, limit) as unknown as Array<{
+      id: number;
+      created_at: string;
+      manifest_json: string;
+    }>;
   }
 
   get hasFts(): boolean {
