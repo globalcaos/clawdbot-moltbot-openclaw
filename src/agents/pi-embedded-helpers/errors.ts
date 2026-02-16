@@ -3,12 +3,14 @@ import type { OpenClawConfig } from "../../config/config.js";
 import type { FailoverReason } from "./types.js";
 import { formatSandboxToolPolicyBlockedMessage } from "../sandbox.js";
 
-export function formatBillingErrorMessage(provider?: string): string {
+export function formatBillingErrorMessage(provider?: string, model?: string): string {
   const providerName = provider?.trim();
+  const modelName = model?.trim();
+  const modelInfo = modelName ? ` (model: ${modelName})` : "";
   if (providerName) {
-    return `⚠️ ${providerName} returned a billing error — your API key has run out of credits or has an insufficient balance. Check your ${providerName} billing dashboard and top up or switch to a different API key.`;
+    return `⚠️ ${providerName}${modelInfo} returned a billing error — your API key has run out of credits or has an insufficient balance. Check your ${providerName} billing dashboard and top up or switch to a different API key.`;
   }
-  return "⚠️ API provider returned a billing error — your API key has run out of credits or has an insufficient balance. Check your provider's billing dashboard and top up or switch to a different API key.";
+  return `⚠️ API provider${modelInfo} returned a billing error — your API key has run out of credits or has an insufficient balance. Check your provider's billing dashboard and top up or switch to a different API key.`;
 }
 
 export const BILLING_ERROR_USER_MESSAGE = formatBillingErrorMessage();
@@ -418,7 +420,7 @@ export function formatRawAssistantErrorForUi(raw?: string): string {
 
 export function formatAssistantErrorText(
   msg: AssistantMessage,
-  opts?: { cfg?: OpenClawConfig; sessionKey?: string; provider?: string },
+  opts?: { cfg?: OpenClawConfig; sessionKey?: string; provider?: string; model?: string },
 ): string | undefined {
   // Also format errors if errorMessage is present, even if stopReason isn't "error"
   const raw = (msg.errorMessage ?? "").trim();
@@ -470,6 +472,12 @@ export function formatAssistantErrorText(
     );
   }
 
+  // Billing errors must be checked before the generic invalidRequest regex,
+  // because Anthropic wraps billing errors in invalid_request_error payloads.
+  if (isBillingErrorMessage(raw)) {
+    return formatBillingErrorMessage(opts?.provider, opts?.model ?? msg.model);
+  }
+
   const invalidRequest = raw.match(/"type":"invalid_request_error".*?"message":"([^"]+)"/);
   if (invalidRequest?.[1]) {
     return `LLM request rejected: ${invalidRequest[1]}`;
@@ -478,10 +486,6 @@ export function formatAssistantErrorText(
   const transientCopy = formatRateLimitOrOverloadedErrorCopy(raw);
   if (transientCopy) {
     return transientCopy;
-  }
-
-  if (isBillingErrorMessage(raw)) {
-    return formatBillingErrorMessage(opts?.provider);
   }
 
   if (isLikelyHttpErrorText(raw) || isRawApiErrorPayload(raw)) {

@@ -493,6 +493,7 @@ export async function runEmbeddedPiAgent(
                 cfg: params.config,
                 sessionKey: params.sessionKey ?? params.sessionId,
                 provider,
+                model: lastAssistant.model,
               })
             : undefined;
           const assistantErrorText =
@@ -841,6 +842,7 @@ export async function runEmbeddedPiAgent(
                       cfg: params.config,
                       sessionKey: params.sessionKey ?? params.sessionId,
                       provider,
+                      model: lastAssistant.model,
                     })
                   : undefined) ||
                 lastAssistant?.errorMessage?.trim() ||

@@ -60,6 +60,7 @@ export function buildEmbeddedRunPayloads(params: {
         cfg: params.config,
         sessionKey: params.sessionKey,
         provider: params.provider,
+        model: params.lastAssistant.model,
       })
     : undefined;
   const rawErrorMessage = lastAssistantErrored
