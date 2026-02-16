@@ -1,6 +1,6 @@
 ---
 name: memory-bench
-description: Collect anonymized memory system benchmarks and submit them as PRs to the research fork. Use when measuring retrieval accuracy (RAR/MRR), token savings, consolidation quality, or submitting benchmark data for the ENGRAM/CORTEX research papers. Works with agent-memory-ultimate.
+description: Collect anonymized memory system benchmarks and submit them as PRs to the research fork. Use when measuring retrieval accuracy (RAR/MRR/nDCG/MAP), token savings, consolidation quality, or submitting benchmark data for the ENGRAM/CORTEX research papers. Works with agent-memory-ultimate. Supports LLM-as-judge evaluation and ablation studies.
 ---
 
 # Memory Bench
@@ -9,45 +9,44 @@ Collect, assess, and submit anonymized memory system statistics for the ENGRAM a
 
 ## Three-Step Pipeline
 
-### 1. Assess Retrieval Quality (optional but valuable)
+### 1. Assess Retrieval Quality
 
-Run retrieval queries and rate relevance to populate `retrieval_log`:
+Run the standard test set (30 queries across 4 types × 3 difficulty levels) with LLM-as-judge:
 
 ```bash
-# Auto-rate using score heuristics (no human input needed)
-python3 scripts/rate.py --queries 20 --auto
+# Full assessment with GPT-4o-mini judge + ablation (recommended)
+python3 scripts/rate.py --queries 30 --judge openai --ablation
 
-# Interactive rating (agent or human rates each result 1-5)
-python3 scripts/rate.py --queries 10
+# Without OpenAI key: local embedding judge (weaker, marked in output)
+python3 scripts/rate.py --queries 30 --judge local --ablation
+
+# Custom test set
+python3 scripts/rate.py --testset path/to/queries.json --judge openai
 ```
 
-This populates the `retrieval_log` table with RAR, MRR, and latency data that `collect.py` picks up.
+**What it measures:**
+
+- **RAR** (Recall Accuracy Ratio), **MRR** (Mean Reciprocal Rank)
+- **nDCG@5**, **MAP@5**, **Precision@5**, **Hit Rate**
+- All metrics include **95% bootstrap confidence intervals**
+- **Ablation**: runs with AND without spreading activation to isolate its contribution
+
+**Judge methods:**
+
+- `openai` — GPT-4o-mini rates each (query, result) pair 1-5. Independent from retrieval system. ~$0.01 per run.
+- `local` — Embedding cosine similarity. Weaker, marked as such in output. Zero cost.
+
+**Standard test set** (`scripts/testset.json`): 30 queries stratified across semantic/episodic/procedural/strategic types and easy/medium/hard difficulty. No lexical overlap with stored memories. All deployments run the same queries for cross-site comparability.
 
 ### 2. Collect Statistics
 
 ```bash
-# Generate anonymized report (14 days default)
 python3 scripts/collect.py --contributor GITHUB_USER --days 14 --output /tmp/memory-bench-report.json
-
-# Longer collection period for better data
-python3 scripts/collect.py --contributor GITHUB_USER --days 30 --output /tmp/memory-bench-report.json
 ```
 
-**What's collected (all anonymized):**
+**Collected (anonymized):** Memory counts/types/ages, strength/importance histograms, association graph size, hierarchy levels, consolidation history, retrieval metrics (RAR/MRR/nDCG/MAP with CIs), ablation results, judge method, algorithm version, embedding coverage. Instance ID is a random UUID (not reversible).
 
-- Memory counts, type distribution, age distribution
-- Strength and importance histograms
-- Association graph size and types
-- Hierarchy level counts
-- Consolidation run history (counts, not content)
-- Retrieval performance (RAR, MRR, latency) if `rate.py` was run
-- Embedding coverage percentage
-- System info (OS, arch — no hostname, no paths)
-
-**What's NEVER collected:**
-
-- Memory content, queries, file paths, usernames, personal data
-- Instance ID is a one-way hash — cannot be reversed
+**Never collected:** Memory content, queries, file paths, usernames, hostnames.
 
 ### 3. Submit as PR
 
@@ -55,45 +54,31 @@ python3 scripts/collect.py --contributor GITHUB_USER --days 30 --output /tmp/mem
 scripts/submit.sh /tmp/memory-bench-report.json GITHUB_USERNAME
 ```
 
-This automatically:
+Forks, branches, places report, updates INDEX.json, opens PR. Requires `gh` CLI.
 
-1. Forks the research repo (if needed)
-2. Creates a branch `bench/USERNAME-TIMESTAMP`
-3. Places the report in `benchmarks/memory-bench/reports/`
-4. Updates the aggregate INDEX.json
-5. Opens a PR with a formatted summary
+## Validation Protocol
 
-**Prerequisites:** `gh` CLI authenticated (`gh auth login`).
+For peer-review-ready data, contributors should:
+
+1. Run `rate.py --ablation --judge openai` (minimum N=30 queries)
+2. Collect at least 2 reports from the same instance, ≥7 days apart (longitudinal)
+3. Report the algorithm version (auto-captured from git)
+
+## Test Set Format
+
+Custom test sets are JSON arrays:
+
+```json
+[
+  {
+    "id": "T01",
+    "query": "...",
+    "category": "semantic|episodic|procedural|strategic",
+    "difficulty": "easy|medium|hard"
+  }
+]
+```
 
 ## Agent Workflow
 
-When a user asks to submit benchmarks or contribute to the papers:
-
-1. Run `rate.py --auto --queries 20` to populate retrieval metrics
-2. Run `collect.py` with their GitHub username
-3. Show them the report summary (memory count, RAR, MRR)
-4. Run `submit.sh` to create the PR
-5. Share the PR link
-
-## Report Schema (v1.0.0)
-
-```
-{
-  schema_version, collected_at, collection_period_days,
-  contributor, instance_id (hashed),
-  system: { os, arch, python, node },
-  memory_stats: {
-    memories: { total_active, total_deleted, type_distribution, age_distribution,
-                strength_histogram, importance_histogram, embedding_coverage },
-    associations: { total, type_distribution },
-    hierarchy: { levels },
-    consolidation: { recent_runs[], total_runs_in_period },
-    sharing: { total_shared }
-  },
-  retrieval_stats: {
-    available, total_queries,
-    by_strategy: { [name]: { query_count, avg_score, avg_latency_ms, p95_latency_ms, avg_results } }
-  },
-  token_stats: { available, [provider]: { total_tokens, total_cost_usd, sessions } }
-}
-```
+When asked to submit benchmarks: run `rate.py --ablation --judge openai`, then `collect.py`, review summary, then `submit.sh`. Share the PR link.

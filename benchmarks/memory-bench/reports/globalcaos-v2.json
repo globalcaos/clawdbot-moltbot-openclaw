@@ -1,0 +1,305 @@
+{
+  "schema_version": "1.0.0",
+  "collected_at": "2026-02-16T22:34:25.252561+00:00",
+  "collection_period_days": 14,
+  "contributor": "globalcaos",
+  "instance_id": "635b7421-587",
+  "system": {
+    "os": "Linux",
+    "arch": "x86_64",
+    "python": "3.10.12",
+    "node": "v22.22.0"
+  },
+  "memory_stats": {
+    "memories": {
+      "total_active": 237,
+      "total_deleted": 2,
+      "type_distribution": {
+        "episodic": 2,
+        "procedural": 2,
+        "semantic": 233
+      },
+      "age_distribution": {
+        "<1d": 0,
+        "1-7d": 237,
+        "7-30d": 0,
+        "30-90d": 0,
+        ">90d": 0
+      },
+      "strength_histogram": [
+        {
+          "range": "0.74-0.76",
+          "count": 3
+        },
+        {
+          "range": "0.76-0.79",
+          "count": 0
+        },
+        {
+          "range": "0.79-0.82",
+          "count": 0
+        },
+        {
+          "range": "0.82-0.84",
+          "count": 0
+        },
+        {
+          "range": "0.84-0.87",
+          "count": 0
+        },
+        {
+          "range": "0.87-0.89",
+          "count": 0
+        },
+        {
+          "range": "0.89-0.92",
+          "count": 1
+        },
+        {
+          "range": "0.92-0.95",
+          "count": 202
+        },
+        {
+          "range": "0.95-0.97",
+          "count": 28
+        },
+        {
+          "range": "0.97-1.00",
+          "count": 3
+        }
+      ],
+      "importance_histogram": [
+        {
+          "range": "0.30-0.37",
+          "count": 1
+        },
+        {
+          "range": "0.37-0.44",
+          "count": 0
+        },
+        {
+          "range": "0.44-0.51",
+          "count": 0
+        },
+        {
+          "range": "0.51-0.58",
+          "count": 0
+        },
+        {
+          "range": "0.58-0.65",
+          "count": 110
+        },
+        {
+          "range": "0.65-0.72",
+          "count": 81
+        },
+        {
+          "range": "0.72-0.79",
+          "count": 0
+        },
+        {
+          "range": "0.79-0.86",
+          "count": 37
+        },
+        {
+          "range": "0.86-0.93",
+          "count": 6
+        },
+        {
+          "range": "0.93-1.00",
+          "count": 0
+        }
+      ],
+      "embedding_coverage": 1.0
+    },
+    "associations": {
+      "total": 20202,
+      "type_distribution": {}
+    },
+    "hierarchy": {
+      "levels": {
+        "0": 173,
+        "1": 38,
+        "2": 18,
+        "3": 2
+      }
+    },
+    "consolidation": {
+      "recent_runs": [],
+      "total_runs_in_period": 0
+    },
+    "sharing": {
+      "total_shared": 1
+    }
+  },
+  "retrieval_stats": {
+    "available": true,
+    "total_queries": 20,
+    "by_config": {
+      "hybrid|without-activation": {
+        "strategy": "hybrid",
+        "ablation": "without-activation",
+        "query_count": 5,
+        "avg_score": {
+          "mean": 2.12,
+          "std": 1.1143,
+          "min": 1.2,
+          "max": 4.0,
+          "n": 5
+        },
+        "latency": {
+          "mean": 17.9,
+          "p50": 18.6,
+          "p95": 21.1
+        },
+        "rar": {
+          "mean": 0.32,
+          "std": 0.4118,
+          "min": 0.0,
+          "max": 1.0,
+          "n": 5
+        },
+        "mrr": {
+          "mean": 0.3,
+          "std": 0.4,
+          "min": 0.0,
+          "max": 1.0,
+          "n": 5
+        },
+        "ndcg": {
+          "mean": 0.9269,
+          "std": 0.1112,
+          "min": 0.7129,
+          "max": 1.0,
+          "n": 5
+        },
+        "map": {
+          "mean": 0.264,
+          "std": 0.3883,
+          "min": 0.0,
+          "max": 1.0,
+          "n": 5
+        },
+        "precision_at_k": {
+          "mean": 0.32,
+          "std": 0.4118,
+          "min": 0.0,
+          "max": 1.0,
+          "n": 5
+        },
+        "hit_rate": {
+          "mean": 0.4,
+          "std": 0.4899,
+          "min": 0.0,
+          "max": 1.0,
+          "n": 5
+        }
+      },
+      "hybrid|with-activation": {
+        "strategy": "hybrid",
+        "ablation": "with-activation",
+        "query_count": 5,
+        "avg_score": {
+          "mean": 2.08,
+          "std": 1.0925,
+          "min": 1.2,
+          "max": 4.0,
+          "n": 5
+        },
+        "latency": {
+          "mean": 63.5,
+          "p50": 60.8,
+          "p95": 78.6
+        },
+        "rar": {
+          "mean": 0.32,
+          "std": 0.4118,
+          "min": 0.0,
+          "max": 1.0,
+          "n": 5
+        },
+        "mrr": {
+          "mean": 0.3,
+          "std": 0.4,
+          "min": 0.0,
+          "max": 1.0,
+          "n": 5
+        },
+        "ndcg": {
+          "mean": 0.9528,
+          "std": 0.0629,
+          "min": 0.8428,
+          "max": 1.0,
+          "n": 5
+        },
+        "map": {
+          "mean": 0.264,
+          "std": 0.3883,
+          "min": 0.0,
+          "max": 1.0,
+          "n": 5
+        },
+        "precision_at_k": {
+          "mean": 0.32,
+          "std": 0.4118,
+          "min": 0.0,
+          "max": 1.0,
+          "n": 5
+        },
+        "hit_rate": {
+          "mean": 0.4,
+          "std": 0.4899,
+          "min": 0.0,
+          "max": 1.0,
+          "n": 5
+        }
+      },
+      "hybrid|default": {
+        "strategy": "hybrid",
+        "ablation": "default",
+        "query_count": 10,
+        "avg_score": {
+          "mean": 2.9,
+          "std": 0.313,
+          "min": 2.2,
+          "max": 3.2,
+          "n": 10
+        },
+        "latency": {
+          "mean": 42.6,
+          "p50": 14.1,
+          "p95": 295.1
+        },
+        "rar": {
+          "mean": 0.82,
+          "std": 0.2891,
+          "min": 0.2,
+          "max": 1.0,
+          "n": 10
+        },
+        "mrr": {
+          "mean": 1.0,
+          "std": 0.0,
+          "min": 1.0,
+          "max": 1.0,
+          "n": 10
+        }
+      }
+    },
+    "judge_methods": ["openai/gpt-4o-mini", "unknown"],
+    "algorithm_versions": ["unknown", "38744af65 fe"]
+  },
+  "token_stats": {
+    "available": true,
+    "claude": {
+      "total_tokens": 0,
+      "total_cost_usd": 0,
+      "sessions": 0
+    },
+    "gemini": {
+      "total_tokens": 0,
+      "total_cost_usd": 0,
+      "sessions": 0
+    }
+  }
+}

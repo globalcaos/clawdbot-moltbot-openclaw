@@ -15,7 +15,6 @@ import sqlite3
 import json
 import sys
 import os
-import hashlib
 import platform
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
@@ -33,9 +32,15 @@ def find_db():
             return c
     return None
 
-def anonymize_id(val: str) -> str:
-    """One-way hash for contributor privacy."""
-    return hashlib.sha256(val.encode()).hexdigest()[:12]
+def get_or_create_instance_id(db_path: Path) -> str:
+    """Persistent random UUID per installation. Not reversible."""
+    id_file = db_path.parent / ".memory-bench-instance-id"
+    if id_file.exists():
+        return id_file.read_text().strip()
+    import uuid
+    instance_id = str(uuid.uuid4())[:12]
+    id_file.write_text(instance_id)
+    return instance_id
 
 def get_system_info() -> dict:
     """Non-identifying system metadata."""
@@ -165,7 +170,7 @@ def collect_memory_stats(conn: sqlite3.Connection, days: int) -> dict:
             "age_distribution": age_buckets,
             "strength_histogram": histogram(strengths),
             "importance_histogram": histogram(importances),
-            "embedding_coverage": round(embedding_count / max(total, 1), 3),
+            "embedding_coverage": round(min(embedding_count, total) / max(total, 1), 3),
         },
         "associations": {
             "total": assoc_count,
@@ -189,46 +194,118 @@ def collect_retrieval_stats(conn: sqlite3.Connection, days: int) -> dict:
     stats = {"available": False}
 
     try:
-        rows = conn.execute(
-            "SELECT strategy, avg_score, result_count, latency_ms, timestamp "
-            "FROM retrieval_log WHERE timestamp > ? ORDER BY timestamp DESC LIMIT 500",
-            (cutoff,)
-        ).fetchall()
+        # Try new schema first (with ndcg, map_score, ablation)
+        try:
+            rows = conn.execute(
+                "SELECT strategy, avg_score, result_count, latency_ms, timestamp, "
+                "rar, mrr, ndcg, map_score, precision_at_k, hit_rate, "
+                "judge_method, ablation_config, algorithm_version "
+                "FROM retrieval_log WHERE timestamp > ? ORDER BY timestamp DESC LIMIT 500",
+                (cutoff,)
+            ).fetchall()
+        except sqlite3.OperationalError:
+            # Fall back to old schema
+            rows = conn.execute(
+                "SELECT strategy, avg_score, result_count, latency_ms, timestamp "
+                "FROM retrieval_log WHERE timestamp > ? ORDER BY timestamp DESC LIMIT 500",
+                (cutoff,)
+            ).fetchall()
+
         if not rows:
             return stats
 
         stats["available"] = True
         stats["total_queries"] = len(rows)
 
-        # Per-strategy breakdown
-        by_strategy = {}
-        for strategy, avg_score, count, latency, _ in rows:
-            if strategy not in by_strategy:
-                by_strategy[strategy] = {"scores": [], "latencies": [], "counts": []}
-            if avg_score is not None:
-                by_strategy[strategy]["scores"].append(avg_score)
-            if latency is not None:
-                by_strategy[strategy]["latencies"].append(latency)
-            if count is not None:
-                by_strategy[strategy]["counts"].append(count)
+        # Detect schema version
+        has_new_cols = len(rows[0]) > 5
 
-        stats["by_strategy"] = {}
-        for strat, data in by_strategy.items():
-            entry = {"query_count": len(data["scores"]) + len(data["latencies"])}
-            if data["scores"]:
-                s = data["scores"]
-                entry["avg_score"] = round(sum(s) / len(s), 4)
-                entry["min_score"] = round(min(s), 4)
-                entry["max_score"] = round(max(s), 4)
+        # Per-strategy + ablation breakdown
+        by_config = {}
+        judge_methods_seen = set()
+        algo_versions_seen = set()
+
+        for row in rows:
+            strategy = row[0]
+            avg_score = row[1]
+            count = row[2]
+            latency = row[3]
+
+            ablation_label = "default"
+            if has_new_cols:
+                judge_method = row[11] or "unknown"
+                ablation_cfg = row[12]
+                algo_ver = row[13] or "unknown"
+                judge_methods_seen.add(judge_method)
+                algo_versions_seen.add(algo_ver)
+                if ablation_cfg:
+                    try:
+                        cfg = json.loads(ablation_cfg)
+                        ablation_label = cfg.get("label", "default")
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+
+            key = f"{strategy}|{ablation_label}"
+            if key not in by_config:
+                by_config[key] = {
+                    "scores": [], "latencies": [], "counts": [],
+                    "rars": [], "mrrs": [], "ndcgs": [], "maps": [],
+                    "precisions": [], "hit_rates": [],
+                }
+
+            d = by_config[key]
+            if avg_score is not None: d["scores"].append(avg_score)
+            if latency is not None: d["latencies"].append(latency)
+            if count is not None: d["counts"].append(count)
+
+            if has_new_cols:
+                if row[5] is not None: d["rars"].append(row[5])
+                if row[6] is not None: d["mrrs"].append(row[6])
+                if row[7] is not None: d["ndcgs"].append(row[7])
+                if row[8] is not None: d["maps"].append(row[8])
+                if row[9] is not None: d["precisions"].append(row[9])
+                if row[10] is not None: d["hit_rates"].append(row[10])
+
+        def safe_stats(vals):
+            if not vals: return None
+            vals_s = sorted(vals)
+            return {
+                "mean": round(sum(vals) / len(vals), 4),
+                "std": round((sum((v - sum(vals)/len(vals))**2 for v in vals) / len(vals))**0.5, 4),
+                "min": round(min(vals), 4),
+                "max": round(max(vals), 4),
+                "n": len(vals),
+            }
+
+        stats["by_config"] = {}
+        for key, data in by_config.items():
+            strategy, ablation = key.split("|", 1)
+            entry = {
+                "strategy": strategy,
+                "ablation": ablation,
+                "query_count": max(len(data["scores"]), len(data["latencies"])),
+            }
+            if data["scores"]: entry["avg_score"] = safe_stats(data["scores"])
             if data["latencies"]:
                 l = data["latencies"]
-                entry["avg_latency_ms"] = round(sum(l) / len(l), 1)
-                entry["p50_latency_ms"] = round(sorted(l)[len(l) // 2], 1)
-                entry["p95_latency_ms"] = round(sorted(l)[int(len(l) * 0.95)], 1)
-            if data["counts"]:
-                c = data["counts"]
-                entry["avg_results"] = round(sum(c) / len(c), 1)
-            stats["by_strategy"][strat] = entry
+                entry["latency"] = {
+                    "mean": round(sum(l)/len(l), 1),
+                    "p50": round(sorted(l)[len(l)//2], 1),
+                    "p95": round(sorted(l)[int(len(l)*0.95)], 1),
+                }
+            for metric, vals in [("rar", data["rars"]), ("mrr", data["mrrs"]),
+                                  ("ndcg", data["ndcgs"]), ("map", data["maps"]),
+                                  ("precision_at_k", data["precisions"]),
+                                  ("hit_rate", data["hit_rates"])]:
+                s = safe_stats(vals)
+                if s: entry[metric] = s
+
+            stats["by_config"][key] = entry
+
+        if judge_methods_seen:
+            stats["judge_methods"] = list(judge_methods_seen)
+        if algo_versions_seen:
+            stats["algorithm_versions"] = list(algo_versions_seen)
 
     except sqlite3.OperationalError:
         pass
@@ -286,7 +363,7 @@ def main():
         "collected_at": datetime.now(timezone.utc).isoformat(),
         "collection_period_days": args.days,
         "contributor": args.contributor or os.environ.get("GITHUB_USER", "anonymous"),
-        "instance_id": anonymize_id(str(db_path) + platform.node()),
+        "instance_id": get_or_create_instance_id(db_path),
         "system": get_system_info(),
         "memory_stats": collect_memory_stats(conn, args.days),
         "retrieval_stats": collect_retrieval_stats(conn, args.days),
