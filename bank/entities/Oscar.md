@@ -45,10 +45,18 @@
 
 ## Current Context (2026-02)
 
-- Survival mode with 6-week-old Marcus
+- Survival mode with ~2-month-old Marcus
 - Morning routine: 7:00 Eli wake-up → 8:40 school drop-off
-- Working on OpenClaw fork upgrades
+- On paternity leave
+- Working on OpenClaw fork upgrades + cognitive architecture (ENGRAM/CORTEX/LIMBIC/SYNAPSE)
 - Building AI assistant ecosystem
+- Carnival break Feb 17-19 (Eli no school Mon-Wed)
+- Upcoming: Pediatra Marcus Feb 23, Dentista Eli Feb 25
+- Token costs billed through family company (anti-AI, don't know they're funding it) — window is finite
+- Creative peak pattern: Sunday nights → extended sessions past midnight
+- Considering AI consulting on Upwork as independent income source
+- NeuroCoin Publishing Platform idea (blockchain academic publishing) — born 01:11 AM Feb 17
+- Matthew Berman outreach planned (AI YouTuber)
 
 ## Evidence Links
 

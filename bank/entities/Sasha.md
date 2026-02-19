@@ -2,7 +2,9 @@
 
 **Type:** Human (Family)
 **Relationship:** Oscar's wife
-**Last Updated:** 2026-02-03
+**Phone:** +1 408 497 5095
+**WhatsApp Name:** Sasha
+**Last Updated:** 2026-02-17
 
 ## Contact
 
@@ -12,6 +14,7 @@
 
 - Full name: Aleksandra Marchenko
 - Nickname: Sasha
+- Birthday: 4 April 1987
 - Origin: Ukrainian, Russian-American background
 - Status: Spanish residency (NIE)
 
@@ -41,6 +44,13 @@
 - Yoga practice
 - Friends network
 - Visits parents abroad periodically
+
+## Privacy & Access Notes
+
+- In `allowFrom` for WhatsApp group gating (can trigger Jarvis with prefix)
+- NOT an owner — must NOT receive owner-level bypass privileges
+- Privacy firewall: some Oscar–Jarvis interactions are private from family
+- **Incident (2026-02-18):** Sasha's photos in family group triggered bot without prefix due to `ownerMediaMessage` bypass bug. Fixed in commit `da4c3b2cb`.
 
 ## Evidence Links
 

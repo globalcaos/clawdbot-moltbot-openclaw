@@ -38,6 +38,34 @@
 - Covers: platform types, positioning, safety/regulations, fleet management, cost tradeoffs, Levante case study
 - Targets: smaller companies needing specialized solutions, or larger companies needing custom manipulation
 
+## AMR Strategy — Chinese Manufacturers (Feb 2026)
+
+Oscar's Priority 1: Push AMR project forward. Key contacts:
+
+| Manufacturer      | Contact                                                 | Status                   | Notes                                                 |
+| ----------------- | ------------------------------------------------------- | ------------------------ | ----------------------------------------------------- |
+| **HikRobot**      | Raquel Perea (raquel.perea@hikrobotics.com)             | Active                   | Training in Madrid done                               |
+| **VisionNav**     | info@visionnav.com, EU: +31 97 010282849 (Rotterdam)    | Contacted                | Autonomous forklifts, 500+ team, 750+ projects        |
+| **SEER Robotics** | contact@seer-robotics.ai, EU: SEER Robotics Europe GmbH | Form submitted (Chinese) | AMR controllers+SW platform — SERRA builds own robots |
+| **Deli Logitech** | Bruce Lu (lu@delilogitech.com)                          | Contacted                | Pallet Stacker Cranes / Miniloads                     |
+
+- **Key email thread:** "Acta reunió robots mòbils" (Nov 19-24, 2025) — full AMR strategy explained to Tristany/Ramon
+- **Draft created (Feb 15):** Catalan email to Ramon, Tristany, Xavi Ortodó about VisionNav + SEER outreach
+- **LogiMAT 2026:** March 24-26, Messe Stuttgart. VisionNav booth 8B53 (Hall 8), SEER confirmed exhibitor. Barcelona→Stuttgart ~1h40 flight. Potential conflict with Oscar's 10-day silent retreat in March.
+
+## SerraVision — Current Priorities (Feb 2026)
+
+- Direction A: SW development — finish ForeCR board testing & documentation + complete Lanaccess purchase
+- Direction B: Boost sales — needs deeper discussion with Oscar
+
+## Oscar's Paternity Leave
+
+- 21 days, Feb 9–Mar 1, 2026 (Factorial HR)
+
+## Unpaid Fines
+
+- Multiple "Multa O.SERRA" emails from y.perez@serra.com.es (Aug 2025–Feb 2026). Oscar thinks he didn't pay the previous fine either.
+
 ## Public Tender: AQUAS-2025-42
 
 - AI in dermatology — considering participation

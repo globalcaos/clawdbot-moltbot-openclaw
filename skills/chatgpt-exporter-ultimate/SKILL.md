@@ -1,7 +1,7 @@
 ---
 name: chatgpt-exporter-ultimate
-version: 1.0.3
-description: "Export ALL your ChatGPT conversations instantly — no 24-hour wait, no browser extensions. Works via OpenClaw browser relay OR standalone bookmarklet. Full message history with timestamps, roles, metadata, and code blocks preserved. Migrate to OpenClaw with your complete conversation history."
+version: 2.0.0
+description: "Export ALL your ChatGPT conversations instantly — including conversations inside Projects/folders! No 24-hour wait, no browser extensions. Works via OpenClaw browser relay OR standalone bookmarklet. Full message history with timestamps, roles, metadata, and code blocks preserved. Migrate to OpenClaw with your complete conversation history."
 homepage: https://github.com/globalcaos/clawdbot-moltbot-openclaw
 repository: https://github.com/globalcaos/clawdbot-moltbot-openclaw
 ---
@@ -28,8 +28,14 @@ Export my ChatGPT conversations
 
 1. **Attach browser** - User clicks OpenClaw toolbar icon on chatgpt.com tab
 2. **Inject script** - Agent injects background export script
-3. **Fetch all** - Script fetches all conversations via internal API
-4. **Download** - JSON file auto-downloads to user's Downloads folder
+3. **List conversations** - Script fetches all conversations from the main listing API
+4. **Discover Project conversations** - Script searches with broad terms to find conversations hidden inside ChatGPT Projects/folders (these are invisible to the main listing endpoint)
+5. **Fetch all** - Script fetches full content for every conversation found
+6. **Download** - JSON file auto-downloads to user's Downloads folder
+
+### Why Search-Based Discovery?
+
+ChatGPT's `/backend-api/conversations` endpoint only returns conversations that are NOT inside Projects. Conversations created within Projects (e.g., "Feina", "Receptes") are invisible to this endpoint. The `/backend-api/conversations/search` endpoint searches across ALL conversations including those in Projects, so we use broad search terms to discover them.
 
 ## Technical Details
 
@@ -63,19 +69,28 @@ The agent injects a self-running script that:
 ### Progress Tracking
 
 ```javascript
-window.__exportStatus = { phase: "fetching", progress: N, total: M };
+// Check progress in console — the script logs each conversation as it's fetched
+// Phase 1: listing (fast), Phase 2: search discovery (~30s), Phase 3: fetching (100ms/conv)
 ```
 
 ## Output Format
 
 ```json
 {
-  "exported": "2026-02-06T11:10:09.699Z",
+  "exported": "2026-02-15T16:30:00.000Z",
+  "exporter_version": "2.0",
+  "total": 264,
+  "listed": 189,
+  "from_projects": 75,
+  "successful": 264,
+  "errors": 0,
   "conversations": [
     {
       "id": "abc123",
       "title": "Conversation Title",
-      "created": 1770273234.966738,
+      "created": "2025-09-19T12:34:00.901734Z",
+      "updated": "2025-09-22T15:12:11.617018Z",
+      "gizmo_id": "g-p-690b268fc9f8819191a7742fce2700fb",
       "messages": [
         { "role": "user", "text": "...", "time": 1770273234 },
         { "role": "assistant", "text": "...", "time": 1770273240 }
@@ -87,9 +102,11 @@ window.__exportStatus = { phase: "fetching", progress: N, total: M };
 
 ## Rate Limits
 
-- 100ms delay between conversation fetches
-- ~3 minutes for 200 conversations
-- ChatGPT allows ~100 requests/minute
+- 100ms delay between conversation fetches and search queries
+- Phase 1 (listing): ~2 seconds
+- Phase 2 (search discovery): ~30 seconds (searches ~50 terms)
+- Phase 3 (fetching): ~100ms per conversation
+- Total for ~250 conversations: ~3-4 minutes
 
 ## Troubleshooting
 

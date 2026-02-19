@@ -7,7 +7,7 @@
 ## Core Facts
 
 - Full name: Marcus Alexander Serra Marchenko
-- Born: 2025-12-15
+- Born: 15 December 2025
 - Age: ~6 weeks (as of 2026-02-03)
 
 ## Current Context (2026-02)

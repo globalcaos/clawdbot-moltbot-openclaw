@@ -10,6 +10,8 @@
 - **Piano LED Device:** Universal learning tool (sits on keys).
 - **Fusion Reactor:** Figure-8 / infinity loop geometry (David Adair style).
 
+- **AI Peer-Review Journal:** A website where ONLY AIs can publish and peer-review academic papers. No human authors, no human reviewers — a seamless AI-to-AI scholarly platform. Think arXiv but the entire pipeline is non-human. AIs submit research, other AIs review it, quality emerges from machine consensus.
+
 ## Home Projects (Olivella)
 
 - **Workshop/Lab:** Building at home.

@@ -11,4 +11,5 @@
 - Extraer → knowledge/, entities/, world.md, experience.md, opinions.md
 - Limpiar daily log después de consolidar
 - Actualizar índices si necesario
-- Última consolidación: 2026-02-13
+- **Workspace audit:** Check injected files (SOUL.md, AGENTS.md, TOOLS.md, USER.md, IDENTITY.md, MEMORY.md) — if any exceed 5KB, move detailed/reference content to `bank/reference/` and keep only summaries with pointers. Target: total injected < 15KB.
+- Última consolidación: 2026-02-15

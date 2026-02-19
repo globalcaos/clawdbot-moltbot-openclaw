@@ -149,6 +149,16 @@ def main():
 
     api_key = os.environ.get("MANUS_API_KEY")
     if not api_key:
+        # Fallback: Try to read from ~/.openclaw/openclaw.json
+        try:
+            config_path = Path.home() / ".openclaw/openclaw.json"
+            if config_path.exists():
+                data = json.loads(config_path.read_text())
+                api_key = data.get("env", {}).get("MANUS_API_KEY")
+        except Exception:
+            pass
+
+    if not api_key:
         print("Error: MANUS_API_KEY not set", file=sys.stderr)
         sys.exit(1)
 

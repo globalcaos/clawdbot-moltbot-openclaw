@@ -7,6 +7,7 @@ const env = {
 export default defineConfig([
   {
     entry: "src/index.ts",
+    clean: true,
     env,
     fixedExtension: false,
     platform: "node",
@@ -26,6 +27,7 @@ export default defineConfig([
   {
     entry: "src/plugin-sdk/index.ts",
     outDir: "dist/plugin-sdk",
+    clean: true,
     env,
     fixedExtension: false,
     platform: "node",

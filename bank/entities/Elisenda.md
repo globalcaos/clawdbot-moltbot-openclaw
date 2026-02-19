@@ -7,7 +7,7 @@
 ## Core Facts
 
 - Full name: Elisenda Serra Marchenko
-- Born: 2017 (age 8)
+- Born: 1 July 2017 (age 8)
 - Nationality: Spanish (DNI)
 - School: Olive Tree British School
 

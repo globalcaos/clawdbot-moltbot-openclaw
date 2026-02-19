@@ -26,6 +26,13 @@ _Originally imported 2026-02-01 | Updated: 2026-02-09 (sleep cycle consolidation
 | **audio-transcript**       | `~/src/audio-transcript/`              | Audio Processing    | Unknown            |
 | **R project**              | `~/src/R/`                             | Unknown             | Uses claude memory |
 
+| **continuous-compacting** | OpenClaw core | Context Management | Planning |
+| **TRACE** | `docs/papers/context-compaction.md` | Research Paper | v2.0 Complete |
+| **Cognitive Architecture** | `src/memory/integration/` | AI System | Active (Phase 8) |
+| **NeuroCoin Publishing** | `memory/projects/neurocoin-publishing` | Blockchain/AI | Planning |
+| **WhatsApp Ultimate** | `skills/whatsapp-ultimate` | Messaging | v1.9.0 |
+| **Memory Bench Pioneer** | `benchmarks/memory-bench-pioneer` | Evaluation Tool | v1.0 |
+
 ---
 
 ## Shared Infrastructure

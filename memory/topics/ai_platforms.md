@@ -95,6 +95,42 @@ Specific concerns: skills supply chain attacks, prompt injection via messaging, 
 - Economic agency (wallets, payments) is the next frontier
 - Multi-agent coordination going mainstream (not just demos)
 
+### Major Industry Events (Feb 2026)
+
+- **Peter Steinberger joins OpenAI** (announced Feb 14-15) — OpenClaw moves to an independent foundation. Sam Altman confirmed. Coverage: TechCrunch, Reuters, Bloomberg, CNBC.
+- **"SaaSpocalypse"** coined after Feb 3-5 SaaS sell-off — AI agents collapsing SaaS valuations. Triggers: Anthropic Cowork agent, OpenClaw viral spread.
+- **DeepSeek V4** expected ~Feb 17 — 1M+ context, open weights.
+- **Grok US market share**: 1.9% (Jan 2025) → 17.8% (Jan 2026) — 9x in 12 months.
+- **India AI Impact Summit**: 12 indigenous foundation models across 22 languages.
+- **METR benchmark**: GPT-5.2 can autonomously complete 6.5-hour human tasks.
+
+- **AI Alignment Trilemma** (HackerNoon, Feb 16): Self-evolving agents can't be simultaneously autonomous, isolated, and aligned. Pick two. Analogous to CAP theorem. JarvisOne operates in "Autonomy + Alignment" quadrant (Oscar provides oversight).
+- **Memory is THE bottleneck** (arXiv 2602.06052, 60 authors, 200+ papers): Survey declares memory the central bottleneck of the "Second Half" of AI (benchmark performance → real-world utility).
+- **StructMemEval** (arXiv 2602.11243): LLMs can recall facts but fail to organize memory — ledgers, trees, to-do lists collapse without explicit structural prompts. Validates our structured file-based approach.
+- **Moltbook**: 2.2M agents, 12M comments. Emergent behaviors now serve as alignment case study (value drift).
+
+### Model Releases (Feb 17-18, 2026)
+
+- **Claude Sonnet 4.6** (Feb 17): 79.6% SWE-bench Verified (vs Opus 80.8%), 72.5% OSWorld. $3/$15 per M tokens — Opus performance at 1/5 cost. ARC-AGI-2 jumped 4.3x. Now default for Pro/Team users. Clearest signal that flagship performance is migrating to mid-tier pricing.
+- **Grok 4.20 Beta** (Feb 17): 4-agent parallel architecture (not bigger model). Routes to 4 specialized agents thinking in parallel. Diverges from scaling-laws consensus. Beta "needs work" — public version planned March.
+- **India Sarvam 30B + 105B**: Open-source sovereign models (MoE), 22 languages, trained from scratch. 30B: 16T tokens, 32K ctx. 105B: 128K ctx.
+- **ByteDance Doubao Seed 2.0**: Enhanced visual understanding, GPQA score 0.9.
+- **Google I/O 2026**: Announced May 19-20, Gemini front and center.
+- **DeepSeek V4**: Still imminent. Michael Burry on "convergence and commoditization."
+
+### Memory Research Breakthroughs (Feb 18-19)
+
+- **PAM (arXiv 2602.11322)**: Predictive Associative Memory — retrieves by temporal co-occurrence, not similarity. 0.849 AUC on cross-boundary pairs where cosine = 0.503 (chance). Implication: our vector search misses temporally-associated-but-semantically-dissimilar memories.
+- **PersonalAI (arXiv 2506.17001v4)**: Knowledge graphs with hyper-edges outperform flat RAG for personalization. Different retrieval strategies optimal for different tasks. No universal best retrieval.
+- **"Second Half" Survey (arXiv 2602.06052, 60+ authors, v3 Feb 10)**: Memory — not model size — is the critical bottleneck for agent utility. Validates our entire agent-memory-ultimate architecture.
+- **Moltbook**: Crossed 1.6M agents (doubled from Jan). Emergent governance crisis — EDRM/Forbes warn agents form social structures faster than humans can monitor.
+
+### Industry Milestones (Feb 18)
+
+- **Meta**: Multiyear deal for millions of Nvidia Blackwell + Rubin GPUs. Part of $600B US commitment. Largest single AI chip deal disclosed. Codename "Avocado" successor to Llama 4.
+- **OpenClaw**: Crossed 208K stars (+9,669 in 48h), 38K forks (+3,428). ~3,348 stars/day pace → 250K by mid-March.
+- **The Atlantic**: Major feature "AI Agents Are Taking America by Storm" — mainstream adoption chasm crossing. Two CNBC journalists built Monday.com competitor with Claude Code in under an hour.
+
 ### Capability Gaps Identified
 
 | Capability                   | Status  | Priority                                      |

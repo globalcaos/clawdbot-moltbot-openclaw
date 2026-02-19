@@ -27,6 +27,12 @@
 - Oscar gave volunteer science classes (Eli's age group, 2024-2025)
 - New neighbor relations (family with daughter Eli's age)
 
+## Upcoming (Feb 2026)
+
+- Carnival break: Eli no school Mon-Wed (Feb 16-18)
+- Pediatra Marcus: Feb 23
+- Dentista Eli: Feb 25
+
 ## Astral Charts
 
 - Marcus Alexander: Born Dec 15, 2025, 18:39 CET, Clinica Diagonal, Barcelona — full natal chart calculated

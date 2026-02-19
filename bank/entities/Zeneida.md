@@ -1,7 +1,9 @@
 # Zeneida Serra
 
-**Relación:** Hermana de Oscar
-**Ubicación:** Urús (Cerdanya), montaña
+**Relationship:** Oscar's sister
+**Phone:** +34 659 418 211
+**WhatsApp Name:** Zen
+**Location:** Urús (Cerdanya), mountain
 **Coche:** Toyota Lancer 2006
 **AI Assistant:** Max
 
@@ -12,6 +14,7 @@
 **Visión:** Defiende el proyecto UWB como clave para independencia tecnológica. Está al tanto de los proyectos del depto de programación.
 
 **Frustraciones:**
+
 - La oficina técnica es cuello de botella
 - Agentes comerciales sin formar ni seguir
 - Presupuesto de ~100k€ sin plan de distribución claro
@@ -52,4 +55,5 @@
 - Necesitan: comunicación fluida, traducción tech ↔ business
 
 ---
-*Fuente: Max (AI de Zen), 2026-02-07*
+
+_Fuente: Max (AI de Zen), 2026-02-07_

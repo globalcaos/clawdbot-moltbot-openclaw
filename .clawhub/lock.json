@@ -104,6 +104,14 @@
     "whatsapp-business": {
       "version": "1.0.3",
       "installedAt": 1770907475116
+    },
+    "x-twitter": {
+      "version": "2.3.1",
+      "installedAt": 1771321886682
+    },
+    "reddit": {
+      "version": "1.0.0",
+      "installedAt": 1771321888085
     }
   }
 }

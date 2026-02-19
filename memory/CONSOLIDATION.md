@@ -110,7 +110,7 @@ CREATE A NEW TOPIC (see "New Bucket Policy" below)
 
 When information doesn't fit any existing bucket:
 
-1. **Check twice.** Re-read `memory/memory_index.md`. Is there really no existing bucket? Often the information fits if you think about it from the USE CASE perspective (who needs this, when?).
+1. **Check twice.** Re-read `memory/memory-index.md`. Is there really no existing bucket? Often the information fits if you think about it from the USE CASE perspective (who needs this, when?).
 
 2. **If truly new, create a topic file:**
    - File: `topics/<descriptive-name>.md`
@@ -119,7 +119,7 @@ When information doesn't fit any existing bucket:
    - Add at least 3 items before creating (don't create a file for one fact)
 
 3. **Update the index immediately:**
-   - Add the new file to `memory/memory_index.md` under "Core Memory Topics"
+   - Add the new file to `memory/memory-index.md` under "Core Memory Topics"
    - This is MANDATORY — an unindexed file is a lost file
 
 4. **Grouping principle: USE CASE first, TOPIC second.**
@@ -175,12 +175,12 @@ When information doesn't fit any existing bucket:
 ## Process
 
 1. **Read** `consolidation-state.json` to find last processed date
-2. **Read** `memory/memory_index.md` to know the current bucket structure
+2. **Read** `memory/memory-index.md` to know the current bucket structure
 3. **Scan** daily logs from last processed date to today
 4. **For each piece of information**, use the Decision Tree above to route it
 5. **Merge intelligently** — don't duplicate. If a fact already exists, skip or update it
 6. **Process** `## Retain` sections from daily logs (explicit consolidation requests)
-7. **If you created new files**, update `memory/memory_index.md`
+7. **If you created new files**, update `memory/memory-index.md`
 8. **Update** `consolidation-state.json` with completion time
 9. **Report** summary of changes to `consolidation-logs/YYYY-MM-DD.md`
 

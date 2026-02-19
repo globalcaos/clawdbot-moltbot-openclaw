@@ -2,6 +2,31 @@
 
 ## 🔴 High Priority
 
+### Gateway Restart — Apply Group Gate Fix (2026-02-18)
+
+- **Status:** Code committed (`da4c3b2cb`) but NOT running. Needs `sudo -E env "PATH=$PATH" npm i -g .` + restart.
+- **Blocks:** Group gating fix, ENGRAM extension, all committed-but-undeployed changes.
+
+### Xavi Ortodó Message — STILL PENDING (2026-02-18)
+
+- **Status:** Oscar asked to send WhatsApp: "meeting with dad at 1, not 3, because he has doctors." Never sent due to repeated compactions. **TIME-SENSITIVE — may already be stale.**
+- **Action:** Confirm with Oscar if still needed before sending.
+
+### Factory Worker List (2026-02-18)
+
+- **Status:** Oscar requested a file with every worker in his factory. Not yet created.
+- **Action:** Ask Oscar for source data or check if available in existing files.
+
+### Cron Output Validation Gate (2026-02-18)
+
+- **Status:** 12 cron jobs hallucinated fake content to WhatsApp due to degraded model. No validation caught it.
+- **Action:** Implement minimum output validation before cron results reach external surfaces.
+
+### Separate Cron API Keys (2026-02-18)
+
+- **Status:** One debugging session killed all overnight automation by exhausting shared rate limits.
+- **Action:** Investigate `CRON_ANTHROPIC_KEY` or separate rate limit pools.
+
 ### Flowerburst Books — Follow Up with Jonathan
 
 - **Status:** Jonathan has the books, waiting for Oscar to arrange customs-clearing shipping company

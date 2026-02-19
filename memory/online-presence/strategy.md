@@ -6,17 +6,17 @@
 
 ## 🎯 Unified Identity
 
-| Platform      | Handle/URL                                                       | Status                        | Purpose                      |
-| ------------- | ---------------------------------------------------------------- | ----------------------------- | ---------------------------- | --- |
-| **GitHub**    | globalcaos/clawdbot-moltbot-openclaw                             | ✅ Active (0 stars)           | OUR fork - track this!       |
-| **GitHub**    | openclaw/openclaw                                                | 📊 Upstream                   | Reference only (190K stars)  |
-| **ClawHub**   | globalcaos                                                       | ✅ Active (8 skills, 3 at #1) | Skill publishing             |
-| **YouTube**   | [@TheTinkerZone-o7t](https://www.youtube.com/@TheTinkerZone-o7t) | ✅ Channel exists (0 videos)  | Invention demos, AI content  |
-| **Website**   | thetinkerzone.com                                                | ✅ Domain active (Cloudflare) | Hub/blog — SET UP 2026-02-13 |
-| **Twitter/X** | TBD → rebrand to "The Tinker Zone"                               | ⚠️ Exists, unused             | Social reach                 |
-| **Facebook**  | TBD                                                              | ❌ Not connected              | Broader reach                |
-| **LinkedIn**  | TBD                                                              | ❌ Not connected              | Professional network         |     |
-| **Moltbook**  | JarvisOne                                                        | ⏳ Needs Twitter              | Agent social network         |
+| Platform      | Handle/URL                                                       | Status                             | Purpose                      |
+| ------------- | ---------------------------------------------------------------- | ---------------------------------- | ---------------------------- | --- |
+| **GitHub**    | globalcaos/clawdbot-moltbot-openclaw                             | ✅ Active (0 stars)                | OUR fork - track this!       |
+| **GitHub**    | openclaw/openclaw                                                | 📊 Upstream                        | Reference only (190K stars)  |
+| **ClawHub**   | globalcaos                                                       | ✅ Active (8 skills, 3 at #1)      | Skill publishing             |
+| **YouTube**   | [@TheTinkerZone-o7t](https://www.youtube.com/@TheTinkerZone-o7t) | ✅ Channel exists (0 videos)       | Invention demos, AI content  |
+| **Website**   | thetinkerzone.com                                                | ✅ Domain active (Cloudflare)      | Hub/blog — SET UP 2026-02-13 |
+| **Twitter/X** | @The_Tinker_Zone                                                 | ✅ Active (3 tweets, 22 followers) | Social reach                 |
+| **Facebook**  | TBD                                                              | ❌ Not connected                   | Broader reach                |
+| **LinkedIn**  | TBD                                                              | ❌ Not connected                   | Professional network         |     |
+| **Moltbook**  | JarvisOne                                                        | ⏳ Needs Twitter                   | Agent social network         |
 
 ---
 

@@ -292,6 +292,105 @@ export function truncateOversizedToolResultsInMessages(
 }
 
 /**
+ * Maximum share of the context window that ALL tool results combined should occupy.
+ * When exceeded, older tool results are truncated more aggressively to make room
+ * for recent conversation context. This prevents cumulative tool result bloat
+ * from triggering premature compaction.
+ */
+const MAX_AGGREGATE_TOOL_RESULT_CONTEXT_SHARE = 0.5;
+
+/**
+ * Target share after aggregate truncation kicks in.
+ * We truncate down to this level to leave headroom.
+ */
+const AGGREGATE_TRUNCATION_TARGET_SHARE = 0.35;
+
+/**
+ * Minimum chars to keep per tool result during aggregate truncation.
+ * Enough to understand what the tool returned without the full payload.
+ */
+const AGGREGATE_MIN_KEEP_CHARS = 800;
+
+/**
+ * Truncate tool results in aggregate when their combined size exceeds
+ * a threshold share of the context window. Older results are truncated
+ * more aggressively than recent ones, preserving short-term context.
+ *
+ * Returns a new array — does not mutate inputs.
+ */
+export function truncateAggregateToolResults(
+  messages: AgentMessage[],
+  contextWindowTokens: number,
+): { messages: AgentMessage[]; truncatedCount: number } {
+  const maxAggregateChars = Math.floor(
+    contextWindowTokens * MAX_AGGREGATE_TOOL_RESULT_CONTEXT_SHARE * 4,
+  );
+  const targetChars = Math.floor(contextWindowTokens * AGGREGATE_TRUNCATION_TARGET_SHARE * 4);
+
+  // Collect tool result indices and their sizes
+  const toolResults: Array<{ index: number; chars: number }> = [];
+  let totalToolChars = 0;
+
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    if ((msg as { role?: string }).role !== "toolResult") {
+      continue;
+    }
+    const chars = getToolResultTextLength(msg);
+    toolResults.push({ index: i, chars });
+    totalToolChars += chars;
+  }
+
+  if (totalToolChars <= maxAggregateChars) {
+    return { messages, truncatedCount: 0 };
+  }
+
+  log.info(
+    `[tool-result-truncation] Aggregate tool results exceed threshold: ` +
+      `${totalToolChars} chars > ${maxAggregateChars} chars (${toolResults.length} results). ` +
+      `Truncating oldest to reach ${targetChars} chars target.`,
+  );
+
+  // Calculate how much we need to shed
+  let excessChars = totalToolChars - targetChars;
+  const result = [...messages];
+  let truncatedCount = 0;
+
+  // Truncate oldest tool results first (they're least relevant to current conversation)
+  for (const tr of toolResults) {
+    if (excessChars <= 0) {
+      break;
+    }
+    const msg = result[tr.index];
+    const currentChars = getToolResultTextLength(msg);
+
+    // How much can we save by truncating this result?
+    const minKeep = AGGREGATE_MIN_KEEP_CHARS;
+    if (currentChars <= minKeep) {
+      continue; // Already small enough
+    }
+
+    const canSave = currentChars - minKeep;
+    const willSave = Math.min(canSave, excessChars);
+    const newSize = currentChars - willSave;
+
+    result[tr.index] = truncateToolResultMessage(msg, newSize);
+    excessChars -= willSave;
+    truncatedCount++;
+  }
+
+  if (truncatedCount > 0) {
+    log.info(
+      `[tool-result-truncation] Aggregate truncation complete: ` +
+        `truncated ${truncatedCount}/${toolResults.length} tool results, ` +
+        `saved ~${totalToolChars - targetChars + excessChars} chars.`,
+    );
+  }
+
+  return { messages: result, truncatedCount };
+}
+
+/**
  * Check if a tool result message exceeds the size limit for a given context window.
  */
 export function isOversizedToolResult(msg: AgentMessage, contextWindowTokens: number): boolean {

@@ -5,6 +5,104 @@ Format: `B @entity: experience (date)`
 
 ---
 
+## 2026-02-19: Quiet Day — Silent Failures Detected
+
+- B @System: Detected `memory_search` module broken (missing compiled `manager-DTK1C4h0.js`). Wind-down cron failed silently at 04:00.
+- B @Security: Processed security report — 2 new npm vulns (markdown-it ReDoS, minimatch ReDoS), Chrome .109 update pending, s1ngularity CI/CD attack pattern documented, AI Recommendation Poisoning formally named by Microsoft.
+- B @Lesson: Learned "Monitor your own tools" — silent breakage of core capabilities compounds into multi-day failures. Need internal health checks.
+- B @Pending: Xavi Ortodó message still unsent (2 days overdue). Factory worker list uncreated. Gateway not restarted (group-gating fix undeployed).
+- B @Research: Processed 10 cron reports from Feb 18 overnight cycle — AI agent research, spiritual-tech, self-evolution, security, fork sync, WhatsApp summary, online engagement.
+
+## 2026-02-18: Cron Failure Recovery + Group Gate Fix + Jarvis Voice
+
+- B @Postmortem: Conducted full root-cause analysis of overnight cron failure — 12 jobs hallucinated due to rate limit exhaustion from group gating bug (2026-02-18).
+- B @Security: Rewrote `group-gating.ts` with strict 3-rule gate (Allowed Chat → Authorized Sender → Prefix Match). Removed all bypasses including `ownerMediaMessage` media bypass. Commit `da4c3b2cb`.
+- B @UI: Fixed Jarvis Voice purple text rendering — client-side post-sanitization transform in `ui/src/ui/markdown.ts` (`applyJarvisVoiceHtml`). Server-side HTML injection fails when client escapes raw HTML.
+- B @Lesson: Learned "allowFrom ≠ Owner" — convenience access must never inherit owner-level bypass privileges. Privacy firewall between Oscar and family members.
+- B @Lesson: Reinforced "Code > Prompts" principle — initially drifted into SOUL.md edits for gating fix, Oscar corrected to programmatic solution.
+- B @Cron: Identified need for output validation gate and separate rate limit pools for cron vs interactive sessions.
+
+## 2026-02-17: Cognitive Architecture Sprint Reflection + NeuroCoin + Marketing
+
+- B @Branding: Established "The Tinker Zone" identity for public channels (privacy/separation).
+- B @Twitter: Revived 2016 account as @The_Tinker_Zone. Bypassed API paywall with browser automation (`twclaw-real.mjs`). Posted first thread (3 tweets) on memory benchmark.
+- B @Copywriting: Learned "Fresh Account Rule" from Oscar's edits — cut the origin story, show value, one link. Credibility before vulnerability.
+- B @Infrastructure: Documented 8-layer root cause analysis for Feb 16 API freeze (Auth store desync, Allowlist bug, OAuth vs Key confusion).
+- B @Cron: Upgraded all 11 cron jobs to 30-minute timeout (was varying).
+- B @Marketing: Drafted Matthew Berman outreach email (AI YouTuber) — angle: 4 papers + benchmark + live demo offer. Saved to `/tmp/marketing/matthew-berman-email.md`.
+- B @NeuroCoin: Documented NeuroCoin Publishing Platform concept — blockchain-backed AI-native academic publishing with tokenized peer review. Spec at `memory/projects/neurocoin-publishing/idea.md`.
+- B @Communication: Learned 5-revision copywriting process — lead with reader benefit, verify every technical claim against running code, don't self-congratulate in openers.
+- B @Benchmark: Built memory-bench-pioneer from scratch, graded D→C+→A-→A through 4 GPT-4o review rounds. Published to ClawHub.
+
+## 2026-02-16 (post-consolidation): Cognitive Architecture + Security + Papers
+
+- B @Research: Produced TRACE paper (Task-aware Retrieval, Artifact-based Compaction, Event-sourcing) — 7,300 words, 6 algorithms, 23 references. 4 GPT-5.2 Pro sessions ($14.61 total).
+- B @Research: Key insight: "compaction is cache eviction, not memory" — context window is a cache over a lossless event store.
+- B @CogArch: Implemented full cognitive architecture in 8 phases (~3 hours, 7 sub-agents): event store, pointer compaction, async embeddings, PersonaState, drift detection, humor engine, CDI/RAAC debate, unified integration. 10,742 LOC, 796 tests passing, 8 commits.
+- B @Meta-Lesson: **Sandwich Pattern** verified — Cheap model (scope) → Expensive model (depth) → Cheap model (refine) is optimal for research.
+- B @Infrastructure: **API Failover** fixed — Anthropic API → Max Subscription → OpenAI → Gemini. Max subscription saved the day when API credits depleted.
+- B @WhatsApp: Published whatsapp-ultimate v1.9.0 (thinking heartbeat, metallic voice notes).
+- B @Security: Implemented WhatsApp access control (allowFrom, allowChats, triggerPrefix).
+- B @ENGRAM: Created Pi extension (`compaction-engram.ts`) — hooks into session_before_compact, persists to event store, returns time-range markers. Committed fcbba962c.
+- B @OpenClaw: Fixed plugin-SDK bundle breakage — rolldown mangled `__exportAll` as export `C`. Reverted continuous-compact, restored all plugins.
+- B @OpenClaw: Restored custom session reset prompt lost in upstream refactor (616658d4b).
+- B @Security: Stopped Squid proxy (port 3128 open since Feb 5). Patched CVE-2026-2391 (qs 6.14.1→6.14.2).
+- B @Backup: Configured Timeshift to include src/, Documents/, .openclaw/, .config/ (excluding node_modules, .git/objects, dist/).
+- B @OpenClaw: Rewrote README with marketing focus — compaction-as-cache hook, token savings, skills catalog.
+- B @Research: Drafted RFC for upstream PR — "Persistent Agent Memory" with Mermaid diagrams, token savings table, phased implementation.
+- B @Research: Cleaned 2 papers for publication (agent-memory, humor-embeddings). Uploaded 3 papers to `docs/papers/`.
+- B @Memory: Audited 234 memory files — trimmed MEMORY.md 384→112 lines (−71%), archived ChatGPT imports.
+- B @Architecture: Designed Relay Protocol — triangular discussion (PG 9.6/10, PGem 9.2/10), budgetRatio()-driven triggers, smart truncation, Dead Man's Switch.
+- B @Research: Doctor GPT review slashed paper scores: ENGRAM 8.0, CORTEX 7.5, LIMBIC 7.0, SYNAPSE 6.5. Key finding: self-referential validation is flawed.
+
+## 2026-02-15: Cron Pipeline Consolidation + Report Standards + Outlook Hack
+
+- B @CronPipeline: Merged two memory consolidation jobs into one at 04:15. Full pipeline: wind-down(04:00)→memory(04:15)→security(04:30)→fork(04:45)→AI(05:00)→spiritual(05:15)→self-evo(05:30)→WhatsApp(05:45)→life-butler(06:00)→briefing(07:00)→engagement(08:00).
+- B @CronPipeline: Created wind-down cron (04:00, internal-only) and life-butler cron (06:00, personal secretary with birthday tracking).
+- B @Reports: Rewrote REPORT_GUIDELINES.md (16.4KB) based on journalism research (Loewenstein info-gap, Tufte data-ink, Knaflic). Headlines must be findings, not labels.
+- B @Reports: Built shared LaTeX template (report-template.tex), standardized all 7 report crons with 5-step META→draft→improve→PDF→WhatsApp pipeline.
+- B @Reports: Migrated ~47 historical reports from memory/\* into proper Cron_Tasks/ folders.
+- B @Reports: Built amalgamated Spiritual-Tech report (177KB PDF) from 8 daily scans.
+- B @OpenClaw: PR #16689 — multi-extension browser relay (replaced single extensionWs with Map<string, ExtensionConnection>).
+- B @WhatsApp: Fixed Zod schema — added triggerPrefix and syncFullHistory to WhatsAppAccountSchema/.strict().
+- B @ClawHub: Published outlook-hack v1.0.0 — browser relay-based Outlook email access via MSAL localStorage token extraction + Outlook REST API v2.0.
+- B @ClawHub: 4 skills delisted by scanner false positive. Filed issue #314, commented on #237 and PR #273.
+- B @Security: Scanned 142 files in origin/main, found and fixed 2 personal name leaks (commit 7d52b6419).
+- B @Calendar: Discovered Family Calendar (shared with Sasha). Rule: always query Primary + Family calendars.
+- B @Family: Extracted all birthday/anniversary dates into entity files for life-butler cron.
+
+## 2026-02-13: LinkedIn Skill + WhatsApp History Resync + ClawHub Metrics
+
+- B @LinkedIn: Built linkedin-inbox skill with ghost-cursor anti-detection (Gaussian delays, Bézier curves, 3% typo sim).
+- B @LinkedIn: Scanned 14+ conversations, drafted follow-ups for Jordi Zapatero (SEAT) and Harshil Dave (Softude).
+- B @WhatsApp: Built whatsapp-resync plugin — force re-link approach for historical message recovery. Confirmed fetchMessageHistory is a Baileys bug (#1934).
+- B @WhatsApp: Full SQLite+FTS5 pipeline working (live capture + JSON migration 358 msgs + export importer).
+- B @ClawHub: First per-skill metrics scrape — 4,700 total downloads, 4 stars. Created CSV tracking + cron integration.
+- B @Research: Humor paper draft "Bisociation in Embedding Space" — formalizes Koestler's bisociation with vector embeddings.
+- B @Research: Multi-agent parallel research pattern — 3 sub-agents converged on same answer in <2 minutes.
+- B @TokenPanel: Created gemini-usage-fetch.py. Google doesn't expose rate-limit headers; limits from docs only.
+
+## 2026-02-12: Olivella Petition + Chrome Extension Fixes + Multi-AI Pipeline
+
+- B @Community: Created Change.org petition for underground cabling in Olivella. 24 signatures in first hour. Posted to 3 WhatsApp groups.
+- B @Community: Downloaded 71 photos from WhatsApp groups, created collage v3 and flyer v2.
+- B @ChromeExt: Fixed infobar loop (canceled_by_user → permanent detach). Auto-reattach still unreliable.
+- B @MultiAI: Designed reusable multi-AI report pipeline: Requirements→Gemini draft→GPT-4o critique→iterate until 8+/10.
+- B @Config: Added GPT-4o as fallback (chain: Claude Opus 4→GPT-4o→Gemini 3 Pro).
+- B @Petition: Created cron job petition-olivella-monitor (hourly) with smart repost logic (only if buried 50+ msgs or 6h+ milestone).
+
+## 2026-02-14: Upstream Merge + WhatsApp Pipeline Fixes
+
+- B @OpenClaw: Merged 719 upstream commits (115 behind). Sub-agents failed twice (false success/conflicts). Manually resolved 14 files + 2 UI files.
+- B @Git: Added `maxSecurityLevel` to `ExecToolDefaults` and `@types/better-sqlite3` dev dep.
+- B @WhatsApp: Fixed self-chat DM dropping by replacing blanket append-skip with 6h recovery window (commits 2ca376073, 52b8ecf27).
+- B @WhatsApp: Fixed voice note pipeline — moved `isInboundAudioContext()` before triggerPrefix gate, added audio config, fixed native sqlite binding.
+- B @WhatsApp: Audited cron delivery — fixed "phantom groups" issue (they existed, just hadn't checked DB). Updated `memory/whatsapp-groups.md`.
+- B @ClawHub: Published whatsapp-ultimate v1.6.0/v1.7.1 and agent-memory-ultimate v3.0.
+- B @ClawHub: Note: Skills not showing consistently in search. 7/8 flagged "suspicious".
+- B @Project: Completed Agent Memory v3.0 specification (9,852 words).
+- B @Security: Implemented per-channel-peer session isolation (dmScope).
+
 ## 2026-02-11: Online Engagement + Agent Memory v3 + Humor Research
 
 - B @GitHub: Closed PR #6735 (duplicate of #4997), closed #6753 (upstream fixed independently, 70-commit divergence), closed #6500 (retracted per Oscar). Only #6747 (SVG callout icons) remains active, CI green.
@@ -33,7 +131,7 @@ Format: `B @entity: experience (date)`
 ## 2026-02-09: Sleep Cycle Consolidation + Fork Stabilization
 
 - B @Memory: Executed 10-phase sleep cycle consolidation — distributed 76 ChatGPT memories, family/YouTube imports, cron research outputs across bank/topics/projects/knowledge files
-- B @Memory: Rewrote memory_index.md (27→114 lines), added 9 missing projects to projects-index.md
+- B @Memory: Rewrote memory-index.md (27→114 lines), added 9 missing projects to projects-index.md
 - B @Memory: Added Context Management strategy to SOUL.md, rewrote CONSOLIDATION.md with routing table and decision tree
 - B @Sessions: Pruned sessions.json from 4.6MB (223 entries) to 187KB (37 entries), archived 185 .jsonl transcripts
 - B @OpenClaw: Merged 40 upstream commits into fork (resolved package.json conflict: kept lancedb + upstream version bumps)
@@ -170,4 +268,4 @@ Format: `B @entity: experience (date)`
 
 ---
 
-_Last updated: 2026-02-09 (Phase 5-6 consolidation)_
+_Last updated: 2026-02-16 (consolidation)_

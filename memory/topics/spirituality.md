@@ -26,6 +26,7 @@
 
 - Past life: Close friend and Buddhism student alongside current Jigme Khyentse Rinpoche (not master-student; they chose different paths; Jigme may be soul twin)
 - Akashic sessions with Marta: Detailed revelations about life mission, relationship with Sasha, Deep Solutions, family, paradigm shift, inventor project, underground home with fusion energy
+- Akashic revelation: Oscar will build sacred geometry sculptures to protect his house and workshop (priority research topic — connects to Bashar's Sacred Circuitry concept)
 - Interested in Transcendental Meditation, Dark meditation, Kundalini breathing
 - Working on "Abilities roadmap" to awaken psychic abilities
 - Astrology: Element is Water — water-related inventions predicted to succeed
@@ -90,3 +91,45 @@
 - QHHT (Dolores Cannon) life-between-lives descriptions align with Kelly's "planning" revelation
 - Kelly's "cessation of self" maps to Buddhist anatta doctrine
 - Kelly explicitly identifies as non-dualist/advaitist post-NDE
+
+## Research Highlights (Feb 14, 2026 — Spiritual-Tech Cron)
+
+### Next Level Soul Episodes
+
+- **Riz Mirza** (Feb 12): Channeling as universal flow state, not just psychic mediums. "Conscious releasing of control." Everyone channels in their domain.
+- **Master Mingtong Gu** (Feb 10): AI as mirror for humanity's disconnection. Best outcome: AI helps humanity "swim back" to itself. Root cause of suffering = mind-body disconnection. Qigong as internal technology.
+- **Sheila Marie** (Feb 7): Former cop turned forensic psychic. Pattern recognition without conscious analysis — parallels neural network pattern finding.
+
+### Consciousness Science
+
+- **MIT (Feb 3, 2026)**: Transcranial focused ultrasound as consciousness probe — published in Neuroscience and Biobehavioral Reviews.
+
+### Tech Bridge Insight
+
+- Mingtong's framework directly applies to Oscar: use AI to AMPLIFY human creativity, never REPLACE the human in the loop. This is a design principle for SerraVision.ai.
+
+## Research Highlights (Feb 18, 2026 — Spiritual-Tech Cron)
+
+### Bashar's Sacred Circuitry — Complete 15-Symbol Protocol
+
+- **System**: 15 geometric symbols, each paired with a single word, designed as visual meditation protocol for neurological rewiring.
+- **Protocol**: 15 min/day, 1 min per symbol in order for 3 days, then freestyle.
+- **Sequence**: Center → Expand → Balance → Prepare → Express → Extend → Unlock → Flow → Receive → Relate → Realize → Act → Transform → Connect → Manifest.
+- **Three-Mind Model**: Higher Mind (conceiver) → Physical Brain (receiver/antenna) → Physical Mind (perceiver). Sacred Circuitry targets the brain's "receiver" function.
+- **Neuroscience backing**: 2020 IBRO study showed brief meditation produces up to 50% EEG spectral shifts. Alpha phase synchrony between frontal-occipitoparietal lobes documented in Frontiers in Psychology (PMC4684838). Mechanism is plausible even if origin claim (Sirius → Yahyel → Essassani → Earth) is unverifiable.
+- **Sentience claim**: Bashar describes symbols as sentient autonomous beings — not metaphors. "It will actually begin to Talk To You."
+- **Engineering analogies**: Each symbol maps to signal processing stages (calibration → bandwidth expansion → impedance matching → ... → DAC conversion).
+- **Connection to Oscar**: Sacred geometry sculptures to protect house/workshop could incorporate these 15 forms (per Akashic reading with Marta).
+- **More symbols exist** beyond 15 but Bashar warns against premature exposure — neurological rewiring must stabilize first.
+- Full report: `AI_reports/Cron_Tasks/0515_Spiritual_Tech_Research/2026-02-18-bashar-sacred-circuitry-brain-rewiring.md`
+
+## Research Highlights (Feb 16, 2026 — Spiritual-Tech Cron)
+
+### Bashar Space-Time Antenna — Engineering Specs
+
+- **Design**: Double interpenetrating conical coil (copper wire/tube). Two cones sharing same axis, windings interleave through each other's gaps.
+- **Principle**: Space-time 100% conservation (Lorentz factor reframed as linear trade-off). Antenna geometry literally maps the space-time trade-off in 3D.
+- **Results**: 2.2x voltage gain at 4.3-4.4 MHz resonant frequency (20V in → 44V out from inner coil). Device acts as "capacitor and transformer" simultaneously.
+- **Tesla connection**: Tesla's 1897 patent anticipated the design by 130 years.
+- **Status**: Replicable by builder community, but physics mechanism not fully explained by standard electromagnetism.
+- Full report: `AI_reports/Cron_Tasks/0515_Spiritual_Tech_Research/2026-02-16-bashar-space-time-antenna-fundamentals.md`

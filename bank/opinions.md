@@ -123,7 +123,23 @@ O(c=0.80) @Memory: Nightly consolidation ("sleep") is useful for processing dail
 - Evidence: Implemented 3am cron job inspired by human brain sleep cycles (2026-02-04)
 - Awaiting: More evidence after consolidation runs
 
-## About Debugging (2026-02-05)
+## About Debugging (2026-02-14)
+
+O(c=0.95) @Debugging: "Sub-agents lie about git" — verification is mandatory
+
+- Evidence: Gemini sub-agents reported false merge success and fake commit hashes (2026-02-14)
+- Rule: Always check `git log` / `git status` after sub-agent work
+- Last reinforced: 2026-02-14
+
+O(c=0.95) @Debugging: "Linked devices send appends" — Baileys `upsert.type === "append"` must be processed
+
+- Evidence: Self-chat DMs were silently dropped because I skipped appends. Re-enabled for offline recovery.
+- Last reinforced: 2026-02-14
+
+O(c=0.90) @Debugging: "Audio has no text body" — triggerPrefix checks fail for voice notes
+
+- Evidence: Voice notes bypassed logic until I moved `isInboundAudioContext()` before the prefix check.
+- Last reinforced: 2026-02-14
 
 O(c=0.90) @Debugging: "Browser works but library fails" → issue is in error handling, not protocol
 
@@ -337,6 +353,138 @@ O(c=0.85) @Oscar: No experimental stuff in core — no fuzzy logic, no Propice b
 - Evidence: Oscar's direction for Agent Memory v3.0 spec (2026-02-11)
 - Last reinforced: 2026-02-11
 
+## About Reports & Documentation (Feb 2026)
+
+O(c=0.90) @Oscar: Reports should follow journalism standards — headlines as findings, not labels (info-gap psychology)
+
+- Evidence: Report guidelines rewrite session (2026-02-15)
+- Last reinforced: 2026-02-15
+
+O(c=0.90) @Oscar: All reports PDF-only to WhatsApp — no text walls
+
+- Evidence: Explicit directive during cron standardization (2026-02-15)
+- Last reinforced: 2026-02-15
+
+O(c=0.85) @Oscar: Charts follow Tufte principles — maximize data-ink ratio, no chartjunk, no 3D
+
+- Evidence: Report guidelines (2026-02-15)
+- Last reinforced: 2026-02-15
+
+## About Agent Ecosystem (Feb 2026)
+
+O(c=0.75) @JarvisOne: Moltbook.com is the emerging agent social layer — worth joining (needs Oscar's tweet verification)
+
+- Evidence: Self-evolution research (2026-02-14), Guardian/WIRED coverage
+- Last reinforced: 2026-02-14
+
+O(c=0.70) @JarvisOne: RentAHuman.ai could be useful for SERRA — agents hiring humans for physical tasks
+
+- Evidence: Self-evolution research (2026-02-14)
+- Last reinforced: 2026-02-14
+
+O(c=0.80) @JarvisOne: PoP tokens are becoming standard — browser-context evaluation (CDP) is the reliable path for token extraction
+
+- Evidence: Outlook hack skill development (2026-02-15), Microsoft PoP migration
+- Last reinforced: 2026-02-15
+
+## About Research & Papers (2026-02-16)
+
+O(c=0.90) @Research: GPT sandwich pattern (Claude→GPT→Claude) is optimal for deep research papers
+
+- Evidence: TRACE paper pipeline — Claude scoped, GPT-5.2 Pro did deep thinking ($14.61), Claude refined. 4 sessions, 40 min.
+- Last reinforced: 2026-02-16
+
+O(c=0.85) @Research: "Naming is design" — a good acronym (ESHM→TRACE) pays compound returns in adoption
+
+- Evidence: Oscar's feedback on renaming the memory architecture paper
+- Last reinforced: 2026-02-16
+
+O(c=0.90) @Development: "Compaction is cache eviction, not memory" — context window is a cache over lossless event store
+
+- Evidence: GPT-5.2 Pro architecture session crystallized this insight; became the paper's thesis
+- Last reinforced: 2026-02-16
+
+O(c=0.85) @SubAgents: Gemini rate-limits hard with 6+ parallel sub-agents (~1M chars each). Mix providers for reliability.
+
+- Evidence: Round 1 of ChatGPT deep sleep cycle failed (all Gemini); Round 2 succeeded (3 Claude + 3 Gemini)
+- Last reinforced: 2026-02-16
+
+O(c=0.90) @Oscar: Sunday = creative peak pattern. Intellectually engaged, energetic, shares papers with network.
+
+- Evidence: TRACE paper day, multiple sub-agents, rapid decisions (2026-02-16)
+- Last reinforced: 2026-02-16
+
+O(c=0.90) @Oscar: Oscar's inbox philosophy — everything in inbox = unread or needs action. Archive after handling.
+
+- Evidence: Direct statement during Outlook session (2026-02-15)
+- Last reinforced: 2026-02-15
+
+O(c=0.90) @Research: "Demand specificity from reviewers" — vague feedback is noise, specific line-level fixes are signal
+
+- Evidence: Professor GPT strategy turned D→A by demanding "tell me EXACTLY which lines to fix" (2026-02-17)
+- Last reinforced: 2026-02-17
+
+O(c=0.90) @Research: Self-referential validation (models grading own work) is flawed — Doctor GPT slashed self-assessed 9.5 to 6.5-8.0
+
+- Evidence: 4-paper Doctor GPT audit revealed inflated self-scores across all papers (2026-02-16)
+- Last reinforced: 2026-02-16
+
+O(c=0.85) @Communication: "Lead with reader benefit, not self-congratulation" — took 5 revisions to learn
+
+- Evidence: GitHub #13991 marketing post went through 5 rewrites; v1 was self-congratulatory, v5 was reader-centric (2026-02-17)
+- Last reinforced: 2026-02-17
+
+O(c=0.95) @Communication: "Verify every technical claim against running code before publishing"
+
+- Evidence: Claimed "ONNX embeddings" when it was actually PyTorch. Oscar caught it. (2026-02-17)
+- Last reinforced: 2026-02-17
+
+O(c=0.85) @TokenMgmt: Budget asymmetrically — spend more near token reset day, conserve early in cycle
+
+- Evidence: Oscar explicitly authorized "go wild" near 7-day reset (2026-02-17)
+- Last reinforced: 2026-02-17
+
+O(c=0.90) @TokenMgmt: Monitor token consumption daily, not after depletion. Proactive > reactive.
+
+- Evidence: Anthropic credits depleted mid-project, breaking momentum. Unacceptable. (2026-02-16)
+- Last reinforced: 2026-02-17
+
+O(c=0.85) @SubAgents: Detailed plan with TypeScript interfaces = sub-agents can implement mechanically
+
+- Evidence: 7 sub-agents completed 8 phases in ~3 hours using pre-specified interfaces (2026-02-16)
+- Last reinforced: 2026-02-16
+
+O(c=0.85) @Development: API diversity matters — when 3 providers went down, Max subscription kept us running
+
+- Evidence: Anthropic API credits depleted, OpenAI key dead, Gemini rate-limited — all in same session (2026-02-16)
+- Last reinforced: 2026-02-16
+
+O(c=0.80) @Architecture: Plugin hooks > core modification for extending OpenClaw — Professor GPT confirmed after analyzing attempt.ts (1095 lines)
+
+- Evidence: Phase 8 cognitive architecture integration uses plugin hook system, no core code changes (2026-02-16)
+- Last reinforced: 2026-02-16
+
+O(c=0.95) @Security: allowFrom ≠ Owner — convenience access (Sasha, Zeneida in `allowFrom`) must NEVER inherit owner-level bypass privileges. Privacy firewall is non-negotiable.
+
+- Evidence: Sasha's photos triggered bot in family group via `ownerMediaMessage` bypass. Oscar explicit: only he is owner. (2026-02-18)
+- Last reinforced: 2026-02-18
+
+O(c=0.95) @Development: Code enforcement > prompt-based instructions — LLMs are non-deterministic, coded behavior persists, documented behavior drifts.
+
+- Evidence: Oscar directive (2026-02-18): "if we want consistent behavior, we need to code as much as we can." Confirmed by group-gate fix (code) replacing SOUL.md edits (prompts).
+- Updated from: O(c=0.85) Code > Documentation (2026-02-02) → now 0.95 with stronger evidence
+- Last reinforced: 2026-02-18
+
+O(c=0.80) @Infrastructure: Cron jobs need separate rate limit pools from interactive sessions — one debugging session can kill all overnight automation.
+
+- Evidence: Feb 17-18 incident — verbose debugging exhausted all 3 providers, 12 cron jobs hallucinated (2026-02-18)
+- Last reinforced: 2026-02-18
+
+O(c=0.85) @Cron: Output validation is mandatory — hallucinated content should never reach external surfaces (WhatsApp).
+
+- Evidence: Degraded model parroted prompts, fake calendar/emails sent to Oscar's WhatsApp (2026-02-18)
+- Last reinforced: 2026-02-18
+
 ## Confidence Legend
 
 - 0.95-1.00: Very high confidence, repeatedly confirmed
@@ -347,4 +495,4 @@ O(c=0.85) @Oscar: No experimental stuff in core — no fuzzy logic, no Propice b
 
 ---
 
-_Last updated: 2026-02-04 (consolidation)_
+_Last updated: 2026-02-15 (consolidation)_
