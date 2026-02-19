@@ -84,3 +84,9 @@ USER.md
 !.agent/workflows/
 /local/
 package-lock.json
+
+# HIPPOCAMPUS generated artifacts
+memory/hippocampus-index.json
+memory/hippocampus-embeds.npz
+memory/hippocampus-meta.json
+*.npz
