@@ -61,7 +61,7 @@ An implementation of Arthur Koestler's bisociation theory using vector embedding
 
 A protocol for using specialized sub-agents (Claude for architecture, GPT-4 for code, Gemini for creative) in a voting ring.
 
-- **Paper:** [`memory/projects/hippocampus/implementation-plan.md`](memory/projects/hippocampus/implementation-plan.md)
+- **Paper:** [`docs/papers/synapse-multi-model.md`](docs/papers/synapse-multi-model.md)
 - **Status:** Active Research
 
 ### 5. **Project CORTEX (Persistent Identity)**
@@ -70,6 +70,7 @@ A protocol for using specialized sub-agents (Claude for architecture, GPT-4 for 
 
 The cognitive architecture that powers long-term identity across sessions.
 
+- **Paper:** [`docs/papers/cortex-identity.md`](docs/papers/cortex-identity.md)
 - **Status:** Active Research
 
 ### 6. **WhatsApp Ultimate (Strict Gating)**
