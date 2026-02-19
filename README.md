@@ -37,7 +37,25 @@ Our flagship contribution. A two-tier memory system that creates a **Concept Ind
 - **Code:** `scripts/hippocampus/`
 - **Status:** Production (v1.1)
 
-### 2. **WhatsApp Ultimate (Strict Gating)**
+### 2. **Project ENGRAM (Context Compaction)**
+
+> _Context is a cache, not a log._
+
+A theoretical framework for treating LLM context windows as cache eviction problems rather than summarization tasks.
+
+- **Paper:** [`docs/papers/context-compaction.md`](docs/papers/context-compaction.md)
+- **Status:** Production
+
+### 3. **Project LIMBIC (Humor Geometry)**
+
+> _Humor is the intersection of two incompatible matrices._
+
+An implementation of Arthur Koestler's bisociation theory using vector embedding distances to generate and detect humor.
+
+- **Paper:** [`AI_reports/humor-embeddings-paper-draft.md`](AI_reports/humor-embeddings-paper-draft.md)
+- **Status:** Draft Complete
+
+### 4. **WhatsApp Ultimate (Strict Gating)**
 
 > _Native Baileys integration. Zero Docker. Zero compromises._
 
@@ -47,7 +65,7 @@ We rewrote the WhatsApp channel to be **safe**.
 - **Privacy Firewall:** Family members can talk to the bot, but they can't _command_ the bot.
 - **Jarvis Voice:** Native OGG/Opus voice notes with "Thinking" heartbeat.
 
-### 3. **Jarvis Voice & "The Purple Text"**
+### 5. **Jarvis Voice & "The Purple Text"**
 
 > _If you can't hear it, it's not Jarvis._
 
@@ -57,12 +75,11 @@ A hybrid output engine that combines:
 - **Visual Transcript:** Purple, italicized text in WebChat for voice-generated responses.
 - **Audio Preflight:** Voice notes are transcribed, checked for commands, and executed silently.
 
-### 4. **Project ENGRAM & CORTEX**
+### 6. **Project CORTEX (Persistent Identity)**
 
-The cognitive architecture that powers long-term identity.
+The cognitive architecture that powers long-term identity across sessions.
 
-- **ENGRAM:** Context compaction as cache eviction.
-- **CORTEX:** Persistent identity across sessions.
+- **Status:** Active Research
 
 ---
 
