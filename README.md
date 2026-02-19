@@ -55,7 +55,24 @@ An implementation of Arthur Koestler's bisociation theory using vector embedding
 - **Paper:** [`AI_reports/humor-embeddings-paper-draft.md`](AI_reports/humor-embeddings-paper-draft.md)
 - **Status:** Draft Complete
 
-### 4. **WhatsApp Ultimate (Strict Gating)**
+### 4. **Project SYNAPSE (Multi-Model Deliberation)**
+
+> _One model hallucinates. Three models triangulate._
+
+A protocol for using specialized sub-agents (Claude for architecture, GPT-4 for code, Gemini for creative) in a voting ring.
+
+- **Paper:** [`memory/projects/hippocampus/implementation-plan.md`](memory/projects/hippocampus/implementation-plan.md)
+- **Status:** Active Research
+
+### 5. **Project CORTEX (Persistent Identity)**
+
+> _I remember, therefore I am._
+
+The cognitive architecture that powers long-term identity across sessions.
+
+- **Status:** Active Research
+
+### 6. **WhatsApp Ultimate (Strict Gating)**
 
 > _Native Baileys integration. Zero Docker. Zero compromises._
 
@@ -65,7 +82,7 @@ We rewrote the WhatsApp channel to be **safe**.
 - **Privacy Firewall:** Family members can talk to the bot, but they can't _command_ the bot.
 - **Jarvis Voice:** Native OGG/Opus voice notes with "Thinking" heartbeat.
 
-### 5. **Jarvis Voice & "The Purple Text"**
+### 7. **Jarvis Voice & "The Purple Text"**
 
 > _If you can't hear it, it's not Jarvis._
 
@@ -75,11 +92,7 @@ A hybrid output engine that combines:
 - **Visual Transcript:** Purple, italicized text in WebChat for voice-generated responses.
 - **Audio Preflight:** Voice notes are transcribed, checked for commands, and executed silently.
 
-### 6. **Project CORTEX (Persistent Identity)**
-
-The cognitive architecture that powers long-term identity across sessions.
-
-- **Status:** Active Research
+<!-- Removed duplicate -->
 
 ---
 
