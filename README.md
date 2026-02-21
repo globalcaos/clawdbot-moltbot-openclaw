@@ -66,11 +66,12 @@ Over 50 turns in a day, that's the difference between burning your rate limit by
 
 The theoretical foundations behind this fork's memory system:
 
-| Paper                                                      | Description                                                                                      |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| 📄 [Agent Memory](docs/papers/agent-memory.md)             | Cognitive memory architecture for persistent AI agents — from daily logs to spreading activation |
-| 📄 [Context Compaction](docs/papers/context-compaction.md) | Why lossy compaction fails and how structured memory eliminates the need for it                  |
-| 📄 [Humor Embeddings](docs/papers/humor-embeddings.md)     | Embedding space bisociation theory — computational humor for AI agents                           |
+| Paper                                                            | Codename    | Description                                                                                    |
+| ---------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------- |
+| 📄 [Agent Memory v3](docs/papers/agent-memory-v3.md)             | **CORTEX**  | Persona-aware context engineering with SDT-based drift detection and Lyapunov stability bounds |
+| 📄 [Context Compaction v3](docs/papers/context-compaction-v3.md) | **ENGRAM**  | Task-conditioned retrieval and pointer-based compaction — why lossy summarization fails        |
+| 📄 [Humor Embeddings v2](docs/papers/humor-embeddings-v2.md)     | **LIMBIC**  | Bisociation in embedding space — computational humor via inverted semantic retrieval           |
+| 📄 [Multi-Model Debate v2](docs/papers/synapse-v2.md)            | **SYNAPSE** | Adversarial multi-model reasoning with cognitive diversity index and convergence protocols     |
 
 ---
 

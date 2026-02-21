@@ -99,3 +99,24 @@ package-lock.json
 
 # Local iOS signing overrides
 apps/ios/LocalSigning.xcconfig
+
+# Internal tools — not public
+bank/
+
+# Personal workspace files
+MEMORY.md
+SOUL.md
+TOOLS.md
+USER.md
+IDENTITY.md
+HEARTBEAT.md
+BOOTSTRAP.md
+PRIVACY.md
+memory/
+crm_data/
+db/
+employees.txt
+voice-setup.md
+src/jarvis-icu/
+.openclaw/
+.clawhub/
