@@ -1,265 +1,231 @@
 ---
 name: whatsapp-ultimate
-version: 1.0.0
-description: "The most comprehensive WhatsApp skill for AI agents. Full messaging (text, media, polls, stickers, voice), reactions, replies, edits, unsend, and complete group management. Native Baileys integration - no external services required."
-homepage: https://github.com/openclaw/openclaw
+version: 3.3.0
+description: "WhatsApp skill with a 3-rule security gate. Your agent speaks only when spoken to — in the right chat, by the right person."
 metadata:
-  openclaw:
-    emoji: "📱"
-    requires:
-      channels: ["whatsapp"]
+  {
+    "openclaw":
+      {
+        "emoji": "💬",
+        "os": ["linux", "darwin"],
+        "requires": { "bins": ["npx", "tsx", "sed", "python3"], "channels": ["whatsapp"] },
+        "patches":
+          {
+            "description": "Two optional bash scripts patch OpenClaw source files to add (1) self-chat history capture in monitor.ts and (2) model/auth prefix template variables in response-prefix-template.ts, types.ts, reply-prefix.ts, and agent-runner-execution.ts. Both scripts are idempotent (safe to run multiple times) and skip if already applied. Review the scripts before running.",
+            "files": ["scripts/apply-history-fix.sh", "scripts/apply-model-prefix.sh"],
+            "modifies":
+              [
+                "src/web/inbound/monitor.ts",
+                "src/auto-reply/reply/response-prefix-template.ts",
+                "src/auto-reply/types.ts",
+                "src/channels/reply-prefix.ts",
+                "src/auto-reply/reply/agent-runner-execution.ts",
+              ],
+            "mechanism": "sed + python3 string replacement with anchor-point matching",
+            "reversible": "git checkout on modified files restores originals",
+          },
+        "notes":
+          {
+            "security": "PATCHES: Two optional install scripts modify OpenClaw source files using sed and python3 to add history capture and model prefix features. Both are idempotent and skip if already applied. Review scripts/apply-history-fix.sh and scripts/apply-model-prefix.sh before running. ADMIN SCRIPTS: wa-fetch-contacts.ts and wa-create-group.ts connect to WhatsApp via Baileys using existing OpenClaw credentials in ~/.openclaw/credentials/whatsapp/. No new credentials are requested. No external network calls beyond WhatsApp's own WebSocket connection. All operations are local.",
+          },
+      },
+  }
 ---
 
 # WhatsApp Ultimate
 
-**Everything you can do in WhatsApp, your AI agent can do too.**
+**Your agent won't flirt with your boss in the company group.**
 
-This skill documents all WhatsApp capabilities available through OpenClaw's native channel integration. No external Docker services, no CLI wrappers — just direct WhatsApp Web protocol via Baileys.
+It won't offer unsolicited life advice to your mother-in-law. It won't settle a family debate about paella with a 400-word essay nobody asked for. It won't reply "Actually..." to your partner's story at 2 AM.
+
+Because WhatsApp Ultimate has a 3-rule security gate: **right person + right chat + right prefix = response. Everything else = absolute silence.** Not "maybe silence." Not "I'll just help a little." Stone-cold, disciplined, beautiful silence.
+
+That's the gate. Here's the engine:
+
+- 🤖 **Model ID on every reply** — `claude-opus-4-6|sub` stamped on each message, so nobody mistakes the bot for a human
+- **Full message history capture** — every conversation stored and searchable. Context that doesn't evaporate.
+- **Contact sync + group management** — your agent knows who's who without hand-holding
+- **Thinking heartbeat** — typing indicators while processing, so users know it's alive
+- **Direct Baileys API** — no middleware bloat. Fast. Light. Reliable.
+
+Three rules. Zero awkward moments. Because we're that kind of obsessive.
+
+## The Full Stack
+
+Pair with [**jarvis-voice**](https://clawhub.com/globalcaos/jarvis-voice) for WhatsApp voice notes and [**ai-humor-ultimate**](https://clawhub.com/globalcaos/ai-humor-ultimate) for personality. Both part of a 13-skill cognitive architecture.
+
+👉 **[Clone it. Fork it. Break it. Make it yours.](https://github.com/globalcaos/clawdbot-moltbot-openclaw)**
 
 ---
 
-## Prerequisites
+## Features
 
-- OpenClaw with WhatsApp channel configured
-- WhatsApp account linked via QR code (`openclaw whatsapp login`)
+### Messaging & Monitoring
 
----
+- **Model ID Prefix:** Every bot message shows which model and auth mode is active: `🤖(claude-opus-4-6|sub)` or `🤖(gpt-4o|api)`. Instantly know what's running.
+- **Complete Message History:** Captures ALL messages — including self-chat inbound messages that Baileys misses
+- **Self-Chat Mode:** Full bidirectional logging in your own chat (command channel)
+- **Security Gating:** 3-rule allowlist — authorized users, authorized chats, trigger prefix
+- **Full History Sync:** Enable `syncFullHistory: true` to backfill messages on reconnect
 
-## Capabilities Overview
+### Administration & Group Management
 
-| Category | Features |
-|----------|----------|
-| **Messaging** | Text, media, polls, stickers, voice notes, GIFs |
-| **Interactions** | Reactions, replies/quotes, edit, unsend |
-| **Groups** | Create, rename, icon, description, participants, admin, invite links |
+- **Contact Sync:** Extract all contacts from all WhatsApp groups with phone numbers, admin status, and LID resolution
+- **Group Creation:** Create groups programmatically with participant lists
+- **Group Management:** Rename, update descriptions, add/remove/promote/demote participants
+- **Direct Baileys Access:** Bypasses the gateway — works even if the listener is down
 
-**Total: 22 distinct actions**
+## Setup
 
----
+### Install
 
-## Messaging
-
-### Send Text
-```
-message action=send channel=whatsapp to="+34612345678" message="Hello!"
-```
-
-### Send Media (Image/Video/Document)
-```
-message action=send channel=whatsapp to="+34612345678" message="Check this out" filePath=/path/to/image.jpg
-```
-Supported: JPG, PNG, GIF, MP4, PDF, DOC, etc.
-
-### Send Poll
-```
-message action=poll channel=whatsapp to="+34612345678" pollQuestion="What time?" pollOption=["3pm", "4pm", "5pm"]
-```
-
-### Send Sticker
-```
-message action=sticker channel=whatsapp to="+34612345678" filePath=/path/to/sticker.webp
-```
-Must be WebP format, ideally 512x512.
-
-### Send Voice Note
-```
-message action=send channel=whatsapp to="+34612345678" filePath=/path/to/audio.ogg asVoice=true
-```
-**Critical:** Use OGG/Opus format for WhatsApp voice notes. MP3 may not play correctly.
-
-### Send GIF
-```
-message action=send channel=whatsapp to="+34612345678" filePath=/path/to/animation.mp4 gifPlayback=true
-```
-Convert GIF to MP4 first (WhatsApp requires this):
 ```bash
-ffmpeg -i input.gif -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" output.mp4 -y
+clawhub install whatsapp-ultimate
 ```
 
----
+### ⚠️ Patches (Optional — Read Before Running)
 
-## Interactions
+This skill includes two **optional** bash scripts that patch OpenClaw source files. The base skill (security gating, admin tools, contact sync) works without them. The patches add:
 
-### Add Reaction
-```
-message action=react channel=whatsapp chatJid="34612345678@s.whatsapp.net" messageId="ABC123" emoji="🚀"
-```
+1. **`apply-history-fix.sh`** — Captures self-chat messages that Baileys misses. Modifies `monitor.ts`.
+2. **`apply-model-prefix.sh`** — Adds model/auth info to every reply. Modifies `response-prefix-template.ts`, `types.ts`, `reply-prefix.ts`, `agent-runner-execution.ts`.
 
-### Remove Reaction
-```
-message action=react channel=whatsapp chatJid="34612345678@s.whatsapp.net" messageId="ABC123" remove=true
-```
+**Before running:**
 
-### Reply/Quote Message
-```
-message action=reply channel=whatsapp to="34612345678@s.whatsapp.net" replyTo="QUOTED_MSG_ID" message="Replying to this!"
-```
+- Read each script — they're short and commented
+- `git commit` your OpenClaw repo first (so you can `git checkout` to revert)
+- Both scripts are idempotent (safe to run multiple times)
+- Both skip automatically if already applied
 
-### Edit Message (Own Messages Only)
-```
-message action=edit channel=whatsapp chatJid="34612345678@s.whatsapp.net" messageId="ABC123" message="Updated text"
-```
-
-### Unsend/Delete Message
-```
-message action=unsend channel=whatsapp chatJid="34612345678@s.whatsapp.net" messageId="ABC123"
-```
-
----
-
-## Group Management
-
-### Create Group
-```
-message action=group-create channel=whatsapp name="Project Team" participants=["+34612345678", "+34687654321"]
-```
-
-### Rename Group
-```
-message action=renameGroup channel=whatsapp groupId="123456789@g.us" name="New Name"
-```
-
-### Set Group Icon
-```
-message action=setGroupIcon channel=whatsapp groupId="123456789@g.us" filePath=/path/to/icon.jpg
-```
-
-### Set Group Description
-```
-message action=setGroupDescription channel=whatsapp groupJid="123456789@g.us" description="Team chat for Q1 project"
-```
-
-### Add Participant
-```
-message action=addParticipant channel=whatsapp groupId="123456789@g.us" participant="+34612345678"
-```
-
-### Remove Participant
-```
-message action=removeParticipant channel=whatsapp groupId="123456789@g.us" participant="+34612345678"
-```
-
-### Promote to Admin
-```
-message action=promoteParticipant channel=whatsapp groupJid="123456789@g.us" participants=["+34612345678"]
-```
-
-### Demote from Admin
-```
-message action=demoteParticipant channel=whatsapp groupJid="123456789@g.us" participants=["+34612345678"]
-```
-
-### Leave Group
-```
-message action=leaveGroup channel=whatsapp groupId="123456789@g.us"
-```
-
-### Get Invite Link
-```
-message action=getInviteCode channel=whatsapp groupJid="123456789@g.us"
-```
-Returns: `https://chat.whatsapp.com/XXXXX`
-
-### Revoke Invite Link
-```
-message action=revokeInviteCode channel=whatsapp groupJid="123456789@g.us"
-```
-
-### Get Group Info
-```
-message action=getGroupInfo channel=whatsapp groupJid="123456789@g.us"
-```
-Returns: name, description, participants, admins, creation date.
-
----
-
-## JID Formats
-
-WhatsApp uses JIDs (Jabber IDs) internally:
-
-| Type | Format | Example |
-|------|--------|---------|
-| Individual | `<number>@s.whatsapp.net` | `34612345678@s.whatsapp.net` |
-| Group | `<id>@g.us` | `123456789012345678@g.us` |
-
-When using `to=` with phone numbers, OpenClaw auto-converts to JID format.
-
----
-
-## Tips
-
-### Voice Notes
-Always use OGG/Opus format:
 ```bash
-ffmpeg -i input.wav -c:a libopus -b:a 64k output.ogg
+# Review first, then run:
+bash ~/.openclaw/workspace/skills/whatsapp-ultimate/scripts/apply-history-fix.sh
+bash ~/.openclaw/workspace/skills/whatsapp-ultimate/scripts/apply-model-prefix.sh
 ```
 
-### Stickers
-Convert images to WebP stickers:
+**What they touch:**
+| Script | Files Modified | What Changes |
+|--------|---------------|-------------|
+| apply-history-fix.sh | `src/web/inbound/monitor.ts` | Adds `insertHistoryMessage()` call to store all inbound messages |
+| apply-model-prefix.sh | 4 files in `src/` | Adds `{authMode}` and `{authProfile}` template variables |
+
+**To revert:** `git checkout -- src/` from your OpenClaw repo root.
+
+### Config (openclaw.json)
+
+```json
+{
+  "channels": {
+    "whatsapp": {
+      "selfChatMode": true,
+      "syncFullHistory": true,
+      "responsePrefix": "🤖({model}|{authMode})",
+      "dmPolicy": "allowlist",
+      "allowFrom": ["+your_number"],
+      "triggerPrefix": "jarvis"
+    }
+  }
+}
+```
+
+## Model ID Prefix
+
+The `responsePrefix` supports template variables:
+
+| Variable        | Example           | Description                                            |
+| --------------- | ----------------- | ------------------------------------------------------ |
+| `{model}`       | `claude-opus-4-6` | Short model name                                       |
+| `{authMode}`    | `sub` / `api`     | Auth mode: `sub` = subscription/OAuth, `api` = API key |
+| `{provider}`    | `anthropic`       | Provider name                                          |
+| `{auth}`        | `sub`             | Alias for `{authMode}`                                 |
+| `{authProfile}` | `anthropic:oauth` | Full auth profile ID                                   |
+| `{think}`       | `low`             | Current thinking level                                 |
+
+**Prefix examples:**
+
+- `🤖(claude-opus-4-6|sub)` — Opus on subscription
+- `🤖(claude-opus-4-6|api)` — Opus on API key (costs money!)
+- `🤖(gpt-4o|api)` — GPT-4o fallback
+- `🤖(llama3.2:1b|api)` — Local Ollama model
+
+This lets you immediately identify:
+
+1. Which model answered (was it a fallback?)
+2. Whether you're burning subscription or API credits
+
+## Self-Chat History Fix
+
+**Problem:** Baileys doesn't emit `messages.upsert` events for messages you send from your phone to your own self-chat. They never reach the history DB.
+
+**Solution:** The patch adds `insertHistoryMessage()` in the inbound monitor — right where messages are processed after access control. Every message the bot sees gets stored. Duplicates are silently ignored.
+
+**Additionally:** `syncFullHistory: true` triggers full message backfill on reconnect.
+
+## Usage
+
+```
+whatsapp_history(action="search", query="meeting tomorrow")
+whatsapp_history(action="search", chat="Oscar", limit=20)
+whatsapp_history(action="stats")
+```
+
+## Administration Tools
+
+### Contact Sync
+
+Extract all contacts from all WhatsApp groups:
+
 ```bash
-ffmpeg -i input.png -vf "scale=512:512:force_original_aspect_ratio=decrease,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=0x00000000" output.webp
+npx tsx ~/.openclaw/workspace/skills/whatsapp-ultimate/scripts/wa-fetch-contacts.ts
 ```
 
-### Rate Limits
-WhatsApp has anti-spam measures. Avoid:
-- Bulk messaging to many contacts
-- Rapid-fire messages
-- Messages to contacts who haven't messaged you first
+**Output:** `~/.openclaw/workspace/bank/whatsapp-contacts-full.json`
 
-### Message IDs
-To react/edit/unsend, you need the message ID. Incoming messages include this in the event payload. For your own sent messages, the send response includes the ID.
+Contains: all groups with participant counts, all contacts with phone numbers (LID-resolved), group membership per contact, admin status.
 
----
+### Group Creation
 
-## Comparison with Other Skills
-
-| Feature | whatsapp-ultimate | wacli | whatsapp-automation | gif-whatsapp |
-|---------|-------------------|-------|---------------------|--------------|
-| Native integration | ✅ | ❌ (CLI) | ❌ (Docker) | N/A |
-| Send text | ✅ | ✅ | ❌ | ❌ |
-| Send media | ✅ | ✅ | ❌ | ❌ |
-| Polls | ✅ | ❌ | ❌ | ❌ |
-| Stickers | ✅ | ❌ | ❌ | ❌ |
-| Voice notes | ✅ | ❌ | ❌ | ❌ |
-| GIFs | ✅ | ❌ | ❌ | ✅ |
-| Reactions | ✅ | ❌ | ❌ | ❌ |
-| Reply/Quote | ✅ | ❌ | ❌ | ❌ |
-| Edit | ✅ | ❌ | ❌ | ❌ |
-| Unsend | ✅ | ❌ | ❌ | ❌ |
-| Group create | ✅ | ❌ | ❌ | ❌ |
-| Group management | ✅ (full) | ❌ | ❌ | ❌ |
-| Receive messages | ✅ | ✅ | ✅ | ❌ |
-| Two-way chat | ✅ | ❌ | ❌ | ❌ |
-| External deps | None | Go binary | Docker + WAHA | ffmpeg |
-
----
-
-## Architecture
-
-```
-Your Agent
-    ↓
-OpenClaw message tool
-    ↓
-WhatsApp Channel Plugin
-    ↓
-Baileys (WhatsApp Web Protocol)
-    ↓
-WhatsApp Servers
+```bash
+npx tsx ~/.openclaw/workspace/skills/whatsapp-ultimate/scripts/wa-create-group.ts "Group Name" "+phone1" "+phone2"
 ```
 
-No external services. No Docker. No CLI tools. Direct protocol integration.
+Phone numbers in E.164 format. Creator auto-added as admin. Returns group JID.
 
----
+### Key Baileys Methods
 
-## License
+| Method                                               | Description                   |
+| ---------------------------------------------------- | ----------------------------- |
+| `groupFetchAllParticipating()`                       | Get all groups + participants |
+| `groupMetadata(jid)`                                 | Get single group details      |
+| `groupCreate(name, participants)`                    | Create new group              |
+| `groupUpdateSubject(jid, name)`                      | Rename group                  |
+| `groupUpdateDescription(jid, desc)`                  | Update group description      |
+| `groupParticipantsUpdate(jid, participants, action)` | Add/remove/promote/demote     |
 
-MIT — Part of OpenClaw
+### LID Resolution
 
----
+WhatsApp uses LIDs (Linked IDs) internally. The contact sync script automatically resolves LIDs to phone numbers using mappings in `~/.openclaw/credentials/whatsapp/default/lid-mapping-*_reverse.json`.
 
-## Links
+## Changelog
 
-- OpenClaw: https://github.com/openclaw/openclaw
-- Baileys: https://github.com/WhiskeySockets/Baileys
-- ClawHub: https://clawhub.com
+### 3.0.0
+
+- **Merged:** whatsapp-tools into whatsapp-ultimate — contact sync, group creation, and admin operations now included
+- **Added:** Proper metadata.openclaw block with required bins, channels, and security notes
+- **Added:** Administration Tools section with Baileys API reference and LID resolution docs
+
+### 2.2.0
+
+- **Added:** Model + auth mode prefix in every message (`{model}`, `{authMode}` template vars)
+- **Added:** Install script for model prefix patch
+- **Added:** Full template variable documentation
+
+### 2.1.0
+
+- **Fixed:** Self-chat inbound messages now captured in history DB
+- **Added:** Install script for history capture patch
+- **Added:** `syncFullHistory` config for full backfill
+
+### 2.0.3
+
+- Initial ClawHub release with security gating and bot prefix
