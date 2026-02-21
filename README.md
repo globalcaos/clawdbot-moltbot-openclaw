@@ -9,7 +9,7 @@ Every AI agent today handles long conversations the same way: when context gets 
 This fork replaces compaction with **cognitive memory** — a system that organizes, retrieves, and consolidates knowledge the way humans do. The result: **60-80% fewer tokens per session**, because the agent loads only what it needs instead of everything it has.
 
 [![Built on OpenClaw](https://img.shields.io/badge/built%20on-OpenClaw-blue?logo=github)](https://github.com/openclaw/openclaw)
-[![Skills on ClawHub](https://img.shields.io/badge/skills-12%20published-purple)](https://clawhub.com)
+[![Skills on ClawHub](https://img.shields.io/badge/skills-13%20published-purple)](https://clawhub.com)
 [![Downloads](https://img.shields.io/badge/downloads-4%2C700%2B-green)](https://clawhub.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -66,12 +66,12 @@ Over 50 turns in a day, that's the difference between burning your rate limit by
 
 The theoretical foundations behind this fork's memory system:
 
-| Paper                                                            | Codename    | Description                                                                                    |
-| ---------------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------- |
-| 📄 [Agent Memory v3](docs/papers/agent-memory-v3.md)             | **CORTEX**  | Persona-aware context engineering with SDT-based drift detection and Lyapunov stability bounds |
-| 📄 [Context Compaction v3](docs/papers/context-compaction-v3.md) | **ENGRAM**  | Task-conditioned retrieval and pointer-based compaction — why lossy summarization fails        |
-| 📄 [Humor Embeddings v2](docs/papers/humor-embeddings-v2.md)     | **LIMBIC**  | Bisociation in embedding space — computational humor via inverted semantic retrieval           |
-| 📄 [Multi-Model Debate v2](docs/papers/synapse-v2.md)            | **SYNAPSE** | Adversarial multi-model reasoning with cognitive diversity index and convergence protocols     |
+| Paper                                                      | Codename    | Description                                                                                    |
+| ---------------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------- |
+| 📄 [Agent Memory](docs/papers/agent-memory.md)             | **CORTEX**  | Persona-aware context engineering with SDT-based drift detection and Lyapunov stability bounds |
+| 📄 [Context Compaction](docs/papers/context-compaction.md) | **ENGRAM**  | Task-conditioned retrieval and pointer-based compaction — why lossy summarization fails        |
+| 📄 [Humor Embeddings](docs/papers/humor-embeddings.md)     | **LIMBIC**  | Bisociation in embedding space — computational humor via inverted semantic retrieval           |
+| 📄 [Multi-Model Debate](docs/papers/synapse.md)            | **SYNAPSE** | Adversarial multi-model reasoning with cognitive diversity index and convergence protocols     |
 
 ---
 
@@ -105,41 +105,42 @@ JARVIS-inspired metallic TTS via sherpa-onnx. Speaks through your speakers. Purp
 
 ---
 
-## 📦 Published Skills
+## 📦 Published Skills (13)
 
 All available on [ClawHub](https://clawhub.com). Install any skill with `clawhub install <name>`.
 
 ### Memory & Intelligence
 
-| Skill                                                                                    | Description                                                                                                    |
-| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| 🧠 [agent-memory-ultimate](https://clawhub.com/globalcaos/agent-memory-ultimate)         | Cognitive memory with vector search, knowledge graphs, RAPTOR hierarchy. The core of the 60-80% token savings. |
-| 🛡️ [agent-boundaries-ultimate](https://clawhub.com/globalcaos/agent-boundaries-ultimate) | AI safety, security boundaries, privacy, ethics, OPSEC. Beyond Asimov's Three Laws.                            |
-| 😄 [ai-humor-ultimate](https://clawhub.com/globalcaos/ai-humor-ultimate)                 | 12 humor patterns for AI agents based on embedding space bisociation theory.                                   |
+| Skill                                                                                    | Description                                                                                                                   |
+| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 🧠 [agent-memory-ultimate](https://clawhub.com/globalcaos/agent-memory-ultimate)         | Give your agent a memory system that actually works across sessions. Research-backed. Open source.                            |
+| 🛡️ [agent-boundaries-ultimate](https://clawhub.com/globalcaos/agent-boundaries-ultimate) | Instruction-level guardrails so your agent won't go rogue, overstep, or improvise ethics.                                     |
+| 😄 [ai-humor-ultimate](https://clawhub.com/globalcaos/ai-humor-ultimate)                 | Give your AI actual wit. Four humor patterns grounded in cognitive science. Funny when it should be, serious when it matters. |
+| 🧪 [memory-pioneer](https://clawhub.com/globalcaos/memory-pioneer)                       | Benchmark your agent's memory. Contribute anonymized scores to open research. Citizen science for AI memory.                  |
 
 ### Communication & Messaging
 
-| Skill                                                                    | Description                                                                         |
-| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| 💬 [whatsapp-ultimate](https://clawhub.com/globalcaos/whatsapp-ultimate) | Full WhatsApp: messages, media, polls, voice notes, reactions, FTS5 history search. |
-| 📧 [outlook-hack](https://clawhub.com/globalcaos/outlook-hack)           | Outlook email via browser session. Read, search, draft. Send blocked by code.       |
-| 💼 [linkedin-inbox](https://clawhub.com/globalcaos/linkedin-inbox)       | LinkedIn inbox monitoring, auto-draft responses, approval workflows.                |
+| Skill                                                                    | Description                                                                                                           |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| 💬 [whatsapp-ultimate](https://clawhub.com/globalcaos/whatsapp-ultimate) | WhatsApp with a 3-rule security gate. Your agent speaks only when spoken to — in the right chat, by the right person. |
+| 📧 [outlook-hack](https://clawhub.com/globalcaos/outlook-hack)           | Your agent reads Outlook email all day. Drafts replies for you. Won't send a single one. Not even if you ask nicely.  |
 
 ### Media & Content
 
-| Skill                                                                                    | Description                                                              |
-| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| 🎬 [youtube-ultimate](https://clawhub.com/globalcaos/youtube-ultimate)                   | FREE transcripts (zero API quota), 4K download, comments, batch details. |
-| 📤 [chatgpt-exporter-ultimate](https://clawhub.com/globalcaos/chatgpt-exporter-ultimate) | Export ALL ChatGPT conversations instantly, including Projects.          |
-| 🎙️ [jarvis-voice](https://clawhub.com/globalcaos/jarvis-voice)                           | JARVIS-style offline TTS. Metallic effects, purple transcripts.          |
+| Skill                                                                                    | Description                                                                                           |
+| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| 🎬 [youtube-ultimate](https://clawhub.com/globalcaos/youtube-ultimate)                   | Free transcripts, 4K downloads, and video exploration — zero API quotas burned.                       |
+| 📤 [chatgpt-exporter-ultimate](https://clawhub.com/globalcaos/chatgpt-exporter-ultimate) | Export all your ChatGPT conversations instantly — full context, timestamps, and metadata in seconds.  |
+| 🎙️ [jarvis-voice](https://clawhub.com/globalcaos/jarvis-voice)                           | Turn your AI into JARVIS. Real-time voice synthesis with the personality to match — dry wit included. |
 
 ### Operations & Security
 
-| Skill                                                                                | Description                                                       |
-| ------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| 🔒 [shell-security-ultimate](https://clawhub.com/globalcaos/shell-security-ultimate) | Command risk classification (SAFE → CRITICAL). Audit logging.     |
-| 📊 [token-panel-ultimate](https://clawhub.com/globalcaos/token-panel-ultimate)       | Track usage across Claude, ChatGPT, Gemini, Manus. One dashboard. |
-| 💊 [healthcheck](https://clawhub.com/globalcaos/healthcheck)                         | Track water intake and sleep with JSON storage.                   |
+| Skill                                                                                                | Description                                                                                                          |
+| ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 🔒 [shell-security-ultimate](https://clawhub.com/globalcaos/shell-security-ultimate)                 | Classify every shell command as SAFE, WARN, or CRIT before your agent runs it.                                       |
+| 📊 [token-panel-ultimate](https://clawhub.com/globalcaos/token-panel-ultimate)                       | Know exactly where your AI tokens go. Multi-provider tracking, budget alerts, and a REST API — all in one dashboard. |
+| 💡 [token-efficiency-guide](https://clawhub.com/globalcaos/token-efficiency-guide)                   | Go from weekly limit on Tuesday to weekly limit on Sunday. 10 steps, one afternoon.                                  |
+| 🔍 [fork-and-skill-scanner-ultimate](https://clawhub.com/globalcaos/fork-and-skill-scanner-ultimate) | Scan 1,000 GitHub forks per run. Surface the gold, skip the clones — fully automated.                                |
 
 ---
 
