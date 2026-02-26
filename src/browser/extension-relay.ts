@@ -268,40 +268,6 @@ export async function ensureChromeExtensionRelayServer(opts: {
     });
   };
 
-  /** Send a command to ALL extensions and merge results (used for target listing) */
-  const _sendToAllExtensions = async (
-    payload: Omit<ExtensionForwardCommandMessage, "id">,
-  ): Promise<unknown[]> => {
-    const results: unknown[] = [];
-    const promises: Promise<void>[] = [];
-    for (const ext of extensions.values()) {
-      if (ext.ws.readyState !== WebSocket.OPEN) {
-        continue;
-      }
-      const id = ext.nextId++;
-      const msg = { ...payload, id };
-      promises.push(
-        new Promise<void>((resolve) => {
-          ext.ws.send(JSON.stringify(msg));
-          const timer = setTimeout(() => {
-            ext.pending.delete(id);
-            resolve();
-          }, 30_000);
-          ext.pending.set(id, {
-            resolve: (v) => {
-              results.push(v);
-              resolve();
-            },
-            reject: () => resolve(),
-            timer,
-          });
-        }),
-      );
-    }
-    await Promise.all(promises);
-    return results;
-  };
-
   const broadcastToCdpClients = (evt: CdpEvent) => {
     const msg = JSON.stringify(evt);
     for (const ws of cdpClients) {
